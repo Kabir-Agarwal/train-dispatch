@@ -36,3 +36,14 @@ def test_index_served_with_all_demo_controls(base_url):
 def test_run_ui_is_one_command():
     src = open("run_ui.py").read()
     assert "make_server" in src and "webbrowser.open" in src
+
+
+def test_page_is_served_as_valid_utf8(base_url):
+    # cp1252 regression guard: the bullet and delta glyphs must arrive as
+    # real UTF-8 bytes, decodable, not mojibake.
+    with urllib.request.urlopen(base_url + "/", timeout=5) as r:
+        raw = r.read()
+    html = raw.decode("utf-8")  # raises if the server mangled the bytes
+    assert "Δ delay" in html
+    assert "•" in html or "•" in html
+    assert "â€" not in html  # the classic cp1252 mojibake signature

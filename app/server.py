@@ -44,7 +44,7 @@ def make_handler(state):
 
         def do_GET(self):
             if self.path in ("/", "/index.html"):
-                self._send_html((STATIC_DIR / "index.html").read_text())
+                self._send_html((STATIC_DIR / "index.html").read_text(encoding="utf-8"))
             elif self.path == "/api/state":
                 self._send_json(state.snapshot())
             elif self.path.startswith("/api/passenger/"):

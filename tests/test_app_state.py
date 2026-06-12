@@ -121,3 +121,17 @@ def test_parse_anomaly_bad_params():
     with pytest.raises(ValidationError, match="bad parameters"):
         parse_anomaly({"type": "train_delayed", "train": "T1"})  # minutes missing
     assert parse_anomaly({"type": "track_closed", "segment": "SEG-12"}) == TrackClosed("SEG-12")
+
+
+def test_duplicate_anomaly_injections_are_deduped():
+    s = fresh()
+    s.inject([{"type": "track_closed", "segment": "SEG-34"}])
+    s.inject([{"type": "track_closed", "segment": "SEG-34"}])  # same again
+    s.inject([
+        {"type": "track_closed", "segment": "SEG-34"},
+        {"type": "train_delayed", "train": "T4", "minutes": 5},
+    ])
+    snap = s.snapshot()
+    assert snap["anomalies"] == [
+        "track_closed(SEG-34)", "train_delayed(T4, 5 min)",
+    ]  # one closure, not three

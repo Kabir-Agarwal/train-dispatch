@@ -84,7 +84,11 @@ class AppState:
     def inject(self, payloads):
         """Admin injects one or more anomalies (the ONLY anomaly source).
         On any error the previous state is kept and the error re-raised."""
-        new_anomalies = self.anomalies + [parse_anomaly(p) for p in payloads]
+        new_anomalies = list(self.anomalies)
+        for p in payloads:
+            anomaly = parse_anomaly(p)
+            if anomaly not in new_anomalies:  # dedupe repeated injections
+                new_anomalies.append(anomaly)
         result = recompute_schedule(self.network, self.trains, new_anomalies)
         self.anomalies = new_anomalies
         self.result = result
