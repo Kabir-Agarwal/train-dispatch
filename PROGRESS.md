@@ -1,40 +1,55 @@
 # PROGRESS.md
 
-## Phase 1 — Network + baseline scheduler + collision checker: DONE
-Built 2026-06-12, LIGHT profile, per BUILDER WORKING RULES. Full suite: **37 passed** (`python3 -m pytest tests/ -q`).
+## Phase 2 — Anomaly injection + impact detection: DONE
+Built 2026-06-12, LIGHT profile. Full suite after Phase 2: **69 passed**.
 
-## What was built (commit per unit)
+### What was built (commit per unit)
+1. **model extension unit** — `Segment.speed_factor` (fraction of full speed, default 1.0, validated in (0,1]); `effective_travel_time() = ceil(travel_time / speed_factor)`; scheduler now travels at effective time (identical results at full speed, so all Phase 1 anchors still hold).
+2. **anomalies unit** (`engine/anomalies.py`) — the 5 admin-injected types from SPEC F2: `TrackClosed`, `TrackBlocked` (same routing effect, different label), `ReducedSpeed(segment, factor)`, `TrainCancelled`, `TrainDelayed(train, minutes)`; combinations = a list. `validate_anomalies` rejects unknown segment/train ids, factor outside (0,1), non-positive delay. `apply_anomalies` returns a NEW effective network; the original is untouched. Closed beats reduced on the same segment; multiple delays add; cancellation beats delay.
+3. **reachability unit** (`engine/impact.py: destination_reachable`) — BFS over non-closed segments; visits each station once, so it always terminates (the no-infinite-loop guarantee for stranded detection).
+4. **impact unit** (`engine/impact.py: assess_impact`) — classifies every train: `unaffected`, `times_shifted` (new arrivals computed on the effective network, reason includes +N min), `needs_reroute` (path hits a closed segment but an alternative exists — route NOT computed, that is Phase 3), `stranded` (no remaining route; nothing fabricated), `cancelled`. Builds the new occupancy table for still-running trains and reports `conflicts` (detected, NOT resolved — Phase 3). `no_impact` is True only when every train is unaffected and there are no conflicts.
+5. **scenario unit** — SPEC F2 adversarial cases on the real baseline. Added `SEG-36` (S3–S6, 11 min), used by NO baseline train, to host the no-impact case (also a future reroute option); the Phase 1 shape gate was updated for the 8th segment — no arrival/occupancy value changed.
+
+### What each new gate checks (hand-verified values)
+- `test_model.py` (+2): ceil(12/0.5)=24, ceil(20/0.8)=25, ceil(7/0.9)=8 (rounds up, never down); bad factors rejected.
+- `test_anomalies.py` (11): all 5 types validate; SEG-99/T9 rejected by name; factor 0/1/1.5/-0.3 and minutes 0/-5 rejected; SEG-34 closed in the effective network while the original stays open; SEG-56 at half speed takes 18 min; closed beats reduced; delays 5+7 sum to 12.
+- `test_reachability.py` (4): S1→S4 reachable; still reachable with SEG-34 closed (via S5); closing SEG-34+SEG-45 cuts S4 off in both directions while S1→S6 survives.
+- `test_impact.py` (10): T1+5 → arrivals {S1:5,S2:15,S3:23,S4:35}, others untouched, zero conflicts; T1+12 → conflict (SEG-34, T1, T5, 40, 42) detected, not resolved; T3 cancelled; cancellation beats delay; SEG-34 closure → exactly T1,T5 need reroute; blocked ≡ closed; SEG-34+SEG-45 → T1,T4,T5 stranded with no fabricated times; SEG-26 at 0.8 → T3 S6@37 (+5), no conflict; SEG-56 at 0.5 → T2 S6@38, T4 S6@48, conflict (SEG-56, T2, T4, 30, 38); combination closure+delay classified per train with T4 S6@44.
+- `test_scenarios.py` (5): SPEC F2-A1 no-impact (closed AND reduced on unused SEG-36) → `no_impact` True, arrivals equal baseline train by train; F2-A2 harmless +5 delay → no reroute/hold, only T1 shifts; F2-A3 unreachable → stranded + terminates; normal closure case identifies T1/T5.
+
+### Phase 2 done-conditions → status
+1. Each anomaly type works (incl. combinations) — PASS
+2. No-impact anomaly reports "no impact", changes nothing — PASS
+3. Harmless small delay → no reroute/hold, only that train shifts — PASS
+4. Unreachable destination → "stranded", no infinite loop, nothing fabricated — PASS
+
+### Decisions (mechanical, logged not asked)
+- reduced_speed factor = speed fraction in (0,1); time = ceil(time/factor) so times never round in the train's favour.
+- needs_reroute/stranded trains contribute NO occupancy in the impact report (their old path is unusable; Phase 3 assigns new occupancy when rerouting).
+- Conflicts created by delays/slowdowns are reported in `ImpactReport.conflicts` and deliberately left unresolved (Phase 3's job).
+- New-file writes are done via the sandbox shell after host-side file sync proved unreliable (truncated copies + stale bytecode masked by `__pycache__`; bytecode now redirected to /tmp during test runs).
+
+### Environment note
+The sandbox still cannot delete files in the project folder, so `.git\index.lock` exists again (created by a stray `git status`) plus `tmp_obj_*` files under `.git\objects`. Same cleanup as last time before using git on your machine: delete `.git\index.lock` and the `tmp_obj_*` files.
+
+### Next
+STOPPED at phase boundary. Phase 3 (recompute engine) awaits your review.
+
+---
+
+## Phase 1 — Network + baseline scheduler + collision checker: DONE (reviewed & approved)
+Built 2026-06-12, LIGHT profile. Suite at phase end: 37 passed (now 69 with Phase 2).
+
+### What was built (commit per unit)
 1. **model unit** (`engine/model.py`, `engine/errors.py`) — `Segment`, `Train`, `Network`. Stations are an appendable list (`add_station`); segments validated on add (known endpoints, positive integer travel time, valid status, no duplicates, no self-loops).
-2. **validation unit** (`engine/scheduler.py: validate_path`) — walks the path station by station; rejects nonexistent segments (`UnknownSegmentError`), gaps, wrong origin/destination (`DisconnectedPathError`), empty paths. Always a typed error with the offending id in the message, never a crash.
-3. **scheduler unit** (`engine/scheduler.py`) — `compute_train_schedule` returns per-station arrival minutes + per-segment `Occupancy(train, segment, start, end)`; `build_schedule` does all trains; `load_baseline` refuses a conflicting baseline (`BaselineConflictError`).
-4. **collision unit** (`engine/collision.py`) — occupancy windows are closed intervals; `windows_overlap` uses inclusive comparison (`a.start <= b.end and b.start <= a.end`), so exact boundary contact (one train exits at minute 10, another enters at 10) IS a conflict. `find_conflicts` checks every pair on every segment and reports the shared window.
-5. **data unit** (`data/baseline.py`) — 6 stations S1–S6, 7 segments, 5 trains, all arrival times and occupancy windows hand-computed in the file's docstring. Includes `conflicting_trains()`, a variant with a deliberate boundary conflict on SEG-56 at minute 29.
+2. **validation unit** (`engine/scheduler.py: validate_path`) — walks the path station by station; rejects nonexistent segments (`UnknownSegmentError`), gaps, wrong origin/destination (`DisconnectedPathError`), empty paths. Always a typed error naming the offender, never a crash.
+3. **scheduler unit** — `compute_train_schedule` returns per-station arrival minutes + `Occupancy(train, segment, start, end)` per segment; `build_schedule` for all trains; `load_baseline` refuses a conflicting baseline (`BaselineConflictError`).
+4. **collision unit** (`engine/collision.py`) — occupancy windows are closed intervals; inclusive overlap (`a.start <= b.end and b.start <= a.end`), so exact boundary contact IS a conflict. `find_conflicts` checks every pair on every segment.
+5. **data unit** (`data/baseline.py`) — 6 stations S1–S6, segments + 5 trains, all arrival times and occupancy windows hand-computed in the docstring; `conflicting_trains()` variant with a deliberate boundary conflict on SEG-56 at minute 29.
 
-## What each gate checks (all assert hand-verified values)
-- `test_model.py` (8): segment lookup returns travel_time 10/8; unknown id raises with the id named; bad endpoint/travel-time/status/duplicate rejected; stations appendable (add S7-style station, then a segment to it).
-- `test_validation.py` (7): valid path passes; `SEG-99` rejected naming it; gap path `[SEG-12, SEG-34]` rejected "breaks at 'S2'"; path ending short rejected "ends at 'S3'"; wrong-origin, empty-path, unknown-origin rejected.
-- `test_scheduler.py` (6): T1 dep 0 arrives S2@10, S3@18, S4@30; dep 7 → S4@37; occupancy windows exactly [0,10],[10,18],[18,30]; reverse run T5 dep 40 → S1@70; duplicate train ids rejected.
-- `test_collision.py` (9, tested hardest): overlap truth table incl. [0,10] vs [10,20] = conflict and [0,10] vs [11,20] = clean; boundary conflict reported as shared window [10,10]; partial overlap [5,10]; same window on different segments clean; opposite directions on one segment conflict; 3 overlapping trains → exactly 3 pairwise conflicts; `load_baseline` raises on the boundary case and accepts the clean one with exact schedule dict.
-- `test_baseline_data.py` (7): full 6-station load; zero conflicts; every train's full arrival dict asserted (e.g. T4: S4@23, S5@30, S6@39); all 11 occupancy windows asserted; tightest clean gap (T2 exits SEG-56 at 29, T4 enters at 30) proves no over-flagging; conflicting variant flagged at load with exactly `Conflict(SEG-56, T2, T4, 29, 29)`.
+### Phase 1 done-conditions: all 6 PASS (details in git history of this file; key anchors: T1 dep 0 → S4@30, dep 7 → S4@37; boundary case Conflict(SEG-56, T2, T4, 29, 29) flagged; clean 1-minute gap accepted).
 
-## Phase 1 done-conditions → status
-1. 6-station network + segments + 5 trains loads; stations appendable — PASS
-2. Per-station arrivals + segment-occupancy table computed — PASS
-3. Checker flags conflicting baseline, accepts clean one — PASS
-4. Nonexistent segment / disconnected path → typed error, no crash — PASS
-5. Same segment same minute = conflict, including exact boundary — PASS
-6. Every gate asserts hand-verified expected values — PASS (no "no-crash-only" tests)
-
-## Decisions made (mechanical, logged not asked)
-- Layout: `engine/` (model, scheduler, collision, errors), `data/baseline.py`, `tests/`, root `conftest.py` for imports. Python 3.10, stdlib + pytest only.
-- Segments are bidirectional single track: occupancy conflicts regardless of travel direction (matches "no two trains on the same segment at the same time").
-- Zero dwell at intermediate stations; integer minutes; occupancy window = closed interval [enter, exit].
-- Conflicts reported pairwise with the exact shared window, sorted deterministically.
-- `build_schedule` computes without the safety gate (needed later for reporting); `load_baseline` is the gated entry point.
-
-## Environment note (needs one manual step from you)
-The sandbox cannot delete files in the mounted folder, so git left stale lock files that block normal git use **inside the sandbox**; commits were made via plumbing (`commit-tree` + direct ref update) instead, and history is clean. On your machine, run in the repo:
-`del .git\HEAD.lock .git\index.lock .git\packed-refs.lock .git\refs\heads\main.lock` (plus any `.git\objects\**\tmp_obj_*` files), and delete the accidental `main` branch (`git branch -D main`) — it was created by a misfired ref update and just mirrors master. After that, normal `git status`/`git commit` work as usual.
-
-## Next
-STOPPED at phase boundary per PLAN.md. Phase 2 (anomaly injection + impact detection) awaits your review.
+### Decisions
+- Layout: `engine/` + `data/baseline.py` + `tests/`, root `conftest.py`; Python 3.10, stdlib + pytest only.
+- Bidirectional single-track segments; zero dwell; integer minutes; closed-interval occupancy; deterministic conflict ordering.
+- `build_schedule` computes without the safety gate (needed for reporting); `load_baseline` is the gated entry point.
