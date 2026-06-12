@@ -1,1 +1,180 @@
-<!-- placeholder, ui unit next -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Train Dispatch — Live Board</title>
+<style>
+  :root { --open:#1a7f37; --closed:#c62828; --reduced:#e6a700; --ink:#1c2330; }
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,Segoe UI,Arial,sans-serif; margin:0; background:#f3f5f8; color:var(--ink); }
+  header { background:#10243e; color:#fff; padding:14px 22px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { font-size:19px; margin:0; }
+  header .total { font-size:14px; opacity:.9; }
+  main { display:grid; grid-template-columns: 1.65fr 1fr; gap:16px; padding:16px 22px; }
+  section { background:#fff; border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(16,36,62,.12); margin-bottom:16px; }
+  h2 { font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:#5a6779; margin:0 0 10px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid #edf0f4; vertical-align:top; }
+  th { color:#5a6779; font-weight:600; font-size:12px; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:99px; color:#fff; font-size:11.5px; font-weight:600; }
+  .open { background:var(--open); } .closed { background:var(--closed); } .reduced-speed { background:var(--reduced); }
+  .unchanged { background:#5a6779; } .reroute { background:#7b1fa2; } .hold { background:#e6a700; }
+  .depart_delayed { background:#ef6c00; } .cancelled { background:#c62828; } .stranded { background:#37474f; }
+  .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .controls select, .controls input { padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; width:auto; }
+  .controls input[type=number] { width:74px; }
+  button { background:#10243e; color:#fff; border:0; border-radius:6px; padding:7px 12px; font-size:13px; cursor:pointer; }
+  button:hover { background:#1d3a5f; }
+  button.warn { background:#c62828; }
+  #error { color:#c62828; font-size:13px; min-height:18px; margin-top:6px; }
+  #log li { margin-bottom:7px; font-size:13.5px; line-height:1.45; }
+  #log .who { font-weight:700; }
+  #trigger { font-size:13.5px; font-weight:600; color:#7b1fa2; margin-bottom:8px; min-height:18px; }
+  .passenger-card { text-align:center; padding:18px 10px; }
+  .passenger-card .eta { font-size:44px; font-weight:800; margin:6px 0; }
+  .passenger-card .reason { font-size:14px; color:#3c4858; max-width:420px; margin:0 auto; line-height:1.5; }
+  .muted { color:#8a96a5; font-size:12.5px; }
+  td.num { font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Train Dispatch &amp; Anomaly Recovery</h1>
+  <div class="total" id="total-delay"></div>
+</header>
+<main>
+<div><!-- left column: ADMIN -->
+  <section>
+    <h2>Inject anomaly (admin only)</h2>
+    <div class="controls">
+      <select id="seg-pick"></select>
+      <button onclick="inject({type:'track_closed', segment: seg()})">Close track</button>
+      <button onclick="inject({type:'track_blocked', segment: seg()})">Block track</button>
+      <input type="number" id="factor" value="0.5" step="0.1" min="0.1" max="0.9"> 
+      <button onclick="inject({type:'reduced_speed', segment: seg(), factor: parseFloat(factorEl.value)})">Reduce speed</button>
+    </div>
+    <div class="controls" style="margin-top:8px">
+      <select id="train-pick"></select>
+      <input type="number" id="minutes" value="5" min="1">
+      <button onclick="inject({type:'train_delayed', train: trainPick(), minutes: parseInt(minutesEl.value)})">Delay train</button>
+      <button onclick="inject({type:'train_cancelled', train: trainPick()})">Cancel train</button>
+      <button class="warn" onclick="resetAll()">Reset to baseline</button>
+    </div>
+    <div id="error"></div>
+    <div class="muted" id="active-anomalies"></div>
+  </section>
+  <section>
+    <h2>Network — segment status</h2>
+    <table id="segments"><thead><tr>
+      <th>Segment</th><th>Connects</th><th>Status</th><th>Travel time</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+  <section>
+    <h2>Schedule board</h2>
+    <table id="board"><thead><tr>
+      <th>Train</th><th>Action</th><th>Departs</th><th>Arrivals</th><th>Δ delay</th><th>Why</th>
+    </tr></thead><tbody></tbody></table>
+  </section>
+  <section>
+    <h2>Decision log</h2>
+    <div id="trigger"></div>
+    <ul id="log"></ul>
+  </section>
+</div>
+<div><!-- right column: PASSENGER -->
+  <section>
+    <h2>Passenger view</h2>
+    <div class="controls"><label class="muted">Your train:&nbsp;</label><select id="pass-pick" onchange="refreshPassenger()"></select></div>
+    <div class="passenger-card">
+      <div class="muted" id="pass-train"></div>
+      <div class="eta" id="pass-eta">—</div>
+      <div class="reason" id="pass-text"></div>
+    </div>
+  </section>
+</div>
+</main>
+<script>
+const segPickEl = document.getElementById('seg-pick');
+const trainPickEl = document.getElementById('train-pick');
+const passPickEl = document.getElementById('pass-pick');
+const factorEl = document.getElementById('factor');
+const minutesEl = document.getElementById('minutes');
+const seg = () => segPickEl.value;
+const trainPick = () => trainPickEl.value;
+
+function fillOnce(sel, values) {
+  if (sel.options.length) return;
+  for (const v of values) { const o = document.createElement('option'); o.value = o.textContent = v; sel.appendChild(o); }
+}
+
+function render(snap) {
+  fillOnce(segPickEl, snap.segments.map(s => s.id));
+  fillOnce(trainPickEl, snap.trains.map(t => t.id));
+  fillOnce(passPickEl, snap.trains.map(t => t.id));
+
+  document.getElementById('total-delay').textContent =
+    'Total added delay: ' + snap.total_added_delay + ' min';
+  document.getElementById('active-anomalies').textContent =
+    snap.anomalies.length ? 'Active anomalies: ' + snap.anomalies.join('  •  ') : 'No active anomalies.';
+
+  const segBody = document.querySelector('#segments tbody'); segBody.innerHTML = '';
+  for (const s of snap.segments) {
+    const tt = s.effective_time === s.travel_time ? s.travel_time + ' min'
+      : s.effective_time + ' min (was ' + s.travel_time + ')';
+    segBody.insertAdjacentHTML('beforeend',
+      `<tr><td>${s.id}</td><td>${s.endpoints.join(' — ')}</td>` +
+      `<td><span class="pill ${s.status}">${s.status}</span></td><td class="num">${tt}</td></tr>`);
+  }
+
+  const board = document.querySelector('#board tbody'); board.innerHTML = '';
+  for (const t of snap.trains) {
+    const arr = t.arrivals
+      ? Object.entries(t.arrivals).map(([st, m]) => st + '@' + m).join('  ')
+      : '—';
+    const delay = t.added_delay === null ? '—'
+      : (t.added_delay > 0 ? '+' : '') + t.added_delay + ' min';
+    board.insertAdjacentHTML('beforeend',
+      `<tr><td><b>${t.id}</b></td><td><span class="pill ${t.action}">${t.action.replace('_',' ')}</span></td>` +
+      `<td class="num">${t.depart_at ?? '—'}</td><td class="num">${arr}</td>` +
+      `<td class="num">${delay}</td><td class="muted">${t.reason}</td></tr>`);
+  }
+
+  document.getElementById('trigger').textContent = snap.trigger_text || '';
+  const log = document.getElementById('log'); log.innerHTML = '';
+  for (const e of snap.decision_log) {
+    log.insertAdjacentHTML('beforeend',
+      `<li><span class="who">${e.train_id}</span> — ${e.text}</li>`);
+  }
+  refreshPassenger();
+}
+
+async function refreshState() {
+  const r = await fetch('/api/state'); render(await r.json());
+}
+async function refreshPassenger() {
+  if (!passPickEl.value) return;
+  const r = await fetch('/api/passenger/' + passPickEl.value);
+  const p = await r.json();
+  document.getElementById('pass-train').textContent = 'Train ' + p.train_id;
+  document.getElementById('pass-eta').textContent =
+    p.eta === null ? '—' : 'min ' + p.eta;
+  document.getElementById('pass-text').textContent = p.text;
+}
+async function inject(anomaly) {
+  document.getElementById('error').textContent = '';
+  const r = await fetch('/api/inject', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({anomalies: [anomaly]}),
+  });
+  const body = await r.json();
+  if (!r.ok) { document.getElementById('error').textContent = body.error; return; }
+  render(body);
+}
+async function resetAll() {
+  const r = await fetch('/api/reset', {method: 'POST'});
+  render(await r.json());
+}
+refreshState();
+</script>
+</body>
+</html>
