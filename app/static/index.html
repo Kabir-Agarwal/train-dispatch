@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Train Dispatch — Live Board</title>
+<title>Train Dispatch &mdash; Live Board</title>
 <style>
   :root { --open:#1a7f37; --closed:#c62828; --reduced:#e6a700; --ink:#1c2330; }
   * { box-sizing:border-box; }
@@ -42,12 +42,17 @@
   /* Network map section: full-width above the grid */
   #map-section { background:#fff; border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(16,36,62,.12); margin:16px 22px 0; }
   #map-section h2 { margin-bottom:10px; }
-  #map-svg-wrap { width:100%; overflow:hidden; border-radius:8px; background:#f8fafc; border:1px solid #edf0f4; }
-  #map-svg-wrap svg { display:block; width:100%; height:auto; }
+  #map-svg-wrap { width:100%; overflow:hidden; border-radius:8px; background:#f0f4f8; border:1px solid #edf0f4; display:flex; justify-content:center; }
+  #map-svg-wrap svg { display:block; width:auto; height:auto; max-height:520px; }
   .map-controls { display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap; }
   .map-controls label { font-size:13px; color:#5a6779; }
   #time-slider { flex:1; min-width:160px; max-width:520px; accent-color:#10243e; cursor:pointer; }
   #time-readout { font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); min-width:80px; }
+  /* Map caption */
+  .map-caption { font-size:11.5px; color:#8a96a5; text-align:center; margin-top:6px; font-style:italic; }
+  /* Map legend */
+  .map-legend { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-top:8px; font-size:12px; color:#5a6779; }
+  .legend-item { display:flex; align-items:center; gap:5px; }
   /* Preview panel */
   #preview-panel { display:none; background:#fffbe6; border:1px solid #e6a700; border-radius:8px; padding:12px 14px; margin-top:12px; }
   #preview-panel h3 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:#7a5800; margin:0 0 8px; }
@@ -55,12 +60,19 @@
   #preview-panel tr.changed-row td { background:#fff8e1; font-weight:600; }
   #preview-panel .preview-actions { display:flex; gap:8px; margin-top:10px; }
   #preview-total { font-size:13px; color:#5a6779; margin-top:6px; }
+  /* Plain summary banner */
+  #plain-summary { display:none; background:#edfaf1; border:1px solid #a8d5b5; border-radius:7px; padding:9px 14px; font-size:13.5px; color:#145e28; font-weight:600; margin-top:10px; }
+  /* How-it-works panel */
+  details.how-it-works { background:#f8fafc; border:1px solid #dde3ea; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.6; color:#3c4858; }
+  details.how-it-works summary { font-weight:700; cursor:pointer; color:#10243e; font-size:13.5px; user-select:none; }
+  details.how-it-works p { margin:8px 0 0; }
   /* SVG-level styles */
   .seg-line { stroke-width:4; fill:none; cursor:default; }
   .seg-label { font-size:10px; fill:#5a6779; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .station-circle { stroke:#10243e; stroke-width:2; }
-  .station-label { font-size:11px; font-weight:700; fill:#fff; text-anchor:middle; dominant-baseline:middle;
-                   font-family:system-ui,Segoe UI,Arial,sans-serif; }
+  .station-label-halo { font-size:12px; font-weight:700; text-anchor:middle; dominant-baseline:hanging;
+                        font-family:system-ui,Segoe UI,Arial,sans-serif;
+                        stroke:#fff; stroke-width:3; paint-order:stroke; fill:#1c2330; }
   .train-dot { r:9; stroke:#fff; stroke-width:2; }
   .train-label { font-size:10px; font-weight:700; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .ghost-seg { stroke-width:8; fill:none; opacity:.45; stroke-dasharray:10,6; }
@@ -77,13 +89,71 @@
 <section id="map-section">
   <h2>Network map</h2>
   <div id="map-svg-wrap">
-    <svg id="map-svg" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+    <svg id="map-svg" viewBox="0 0 620 660" xmlns="http://www.w3.org/2000/svg">
+      <!-- India outline: stylized silhouette -->
+      <path id="india-outline"
+        d="M195,38
+           Q160,60 140,90
+           Q120,120 120,140
+           Q100,200 80,240
+           Q65,270 58,300
+           Q52,315 62,335
+           Q72,350 80,365
+           Q95,395 110,410
+           Q125,425 140,430
+           Q155,445 170,460
+           Q200,500 238,592
+           Q250,570 270,548
+           Q285,530 300,510
+           Q330,490 360,480
+           Q380,465 395,450
+           Q400,430 405,410
+           Q408,390 410,370
+           Q415,350 415,330
+           Q420,315 430,300
+           Q440,288 450,290
+           Q470,295 490,280
+           Q515,265 540,258
+           Q550,256 560,255
+           Q540,248 520,242
+           Q505,235 490,228
+           Q475,218 465,208
+           Q455,195 450,190
+           Q440,183 435,178
+           Q420,165 410,155
+           Q395,140 385,130
+           Q360,110 345,95
+           Q330,80 320,72
+           Q310,62 300,55
+           Q265,42 240,38
+           Q220,34 195,38 Z"
+        fill="#e8ecef" stroke="#cfd8e0" stroke-width="1.5"/>
       <g id="seg-group"></g>
       <g id="ghost-seg-group"></g>
       <g id="ghost-route-group"></g>
       <g id="station-group"></g>
       <g id="train-group"></g>
     </svg>
+  </div>
+  <p class="map-caption">Illustrative network inspired by Indian Railways</p>
+  <!-- Map legend -->
+  <div class="map-legend">
+    <span class="legend-item">
+      <svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#1a7f37" stroke-width="4" stroke-linecap="round"/></svg>
+      green = open track
+    </span>
+    <span class="legend-item">
+      <svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#c62828" stroke-width="4" stroke-linecap="round" stroke-dasharray="6,4"/></svg>
+      red dashed = closed
+    </span>
+    <span class="legend-item">
+      <svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#888" stroke-width="4" stroke-linecap="round" stroke-dasharray="6,4" opacity="0.5"/></svg>
+      faded dashed = predicted change
+    </span>
+    <span class="legend-item">
+      <svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#2563eb" stroke="#fff" stroke-width="2"/></svg>
+      dot = train
+    </span>
   </div>
   <div class="map-controls">
     <button id="play-btn" onclick="togglePlay()">Play</button>
@@ -109,8 +179,14 @@
 
 <main>
 <div><!-- left column: ADMIN -->
+  <!-- How this works: collapsible explainer -->
+  <details class="how-it-works">
+    <summary>How this works</summary>
+    <p>Trains follow a fixed schedule, moving between stations along track segments at known travel times. The admin can report a problem &mdash; such as a closed track, a speed restriction, or a delayed train &mdash; using the controls below. The system instantly recomputes a new safe plan so that no two trains can ever be on the same track at the same time. The dashed &ldquo;ghosts&rdquo; on the map show the predicted new plan before it is applied, so you can review the impact first. Every decision the system makes is explained step by step in the Decision log below.</p>
+  </details>
+
   <section>
-    <h2>Inject anomaly (admin only)</h2>
+    <h2>Report a problem</h2>
     <div class="controls">
       <select id="seg-pick"></select>
       <button onclick="triggerPreview({type:'track_closed', segment: seg()})">Close track</button>
@@ -127,9 +203,11 @@
     </div>
     <div id="error"></div>
     <div class="muted" id="active-anomalies"></div>
+    <!-- Plain-language summary of latest anomaly effect -->
+    <div id="plain-summary"></div>
   </section>
   <section>
-    <h2>Network — segment status</h2>
+    <h2>Network &mdash; segment status</h2>
     <table id="segments"><thead><tr>
       <th>Segment</th><th>Connects</th><th>Status</th><th>Travel time</th>
     </tr></thead><tbody></tbody></table>
@@ -172,14 +250,43 @@ const seg        = () => segPickEl.value;
 const trainPick  = () => trainPickEl.value;
 
 // ============================================================
+// Display names: populated from /api/state display_names
+// ============================================================
+let displayNames = {};
+
+// Replace /\bS\d+\b/ tokens in text with city names
+function withNames(text) {
+  if (!text) return text;
+  return String(text).replace(/\b(S\d+)\b/g, (_, id) => displayNames[id] || id);
+}
+
+// Direct display-name lookup for a single station id
+function dn(id) {
+  return displayNames[id] || id;
+}
+
+// ============================================================
 // Utility: fill selects once
 // ============================================================
 function fillOnce(sel, values) {
   if (sel.options.length) return;
   for (const v of values) {
     const o = document.createElement('option');
-    o.value = o.textContent = v;
+    o.value = v;
+    o.textContent = v;
     sel.appendChild(o);
+  }
+}
+
+// Populate segment picker with human-readable labels (SEG-xx (CityA-CityB))
+function fillSegPickOnce(segments) {
+  if (segPickEl.options.length) return;
+  for (const s of segments) {
+    const o = document.createElement('option');
+    o.value = s.id;
+    const [a, b] = s.endpoints;
+    o.textContent = s.id + ' (' + dn(a) + '–' + dn(b) + ')';
+    segPickEl.appendChild(o);
   }
 }
 
@@ -201,15 +308,15 @@ let lastTs  = null;
 const SIM_SPEED = 6; // sim-minutes per real second
 
 // ============================================================
-// Station coordinate layout
+// Station coordinate layout — geographic positions for Indian cities
 // ============================================================
 const FIXED_COORDS = {
-  S1: [90,  210],
-  S2: [300, 80],
-  S3: [560, 80],
-  S4: [810, 210],
-  S5: [300, 340],
-  S6: [560, 340]
+  S1: [201, 188],   // Delhi
+  S2: [205, 294],   // Bhopal
+  S3: [236, 338],   // Nagpur
+  S4: [409, 308],   // Howrah
+  S5: [121, 380],   // Mumbai
+  S6: [259, 498]    // Chennai
 };
 
 // Palette for trains (index-based)
@@ -226,7 +333,7 @@ const STATUS_COLOR = {
 };
 
 // ============================================================
-// Auto-place extra stations on an ellipse
+// Auto-place extra stations on an ellipse (fallback for unknown ids)
 // ============================================================
 function computeStationCoords(stations) {
   const coords = {};
@@ -238,9 +345,9 @@ function computeStationCoords(stations) {
       extras.push(id);
     }
   }
-  // place extras evenly on an ellipse around center
+  // place extras evenly on an ellipse around center of portrait viewBox
   if (extras.length) {
-    const cx = 450, cy = 210, rx = 350, ry = 160;
+    const cx = 310, cy = 330, rx = 220, ry = 200;
     extras.forEach((id, i) => {
       const angle = (2 * Math.PI * i) / extras.length;
       coords[id] = [cx + rx * Math.cos(angle), cy + ry * Math.sin(angle)];
@@ -307,13 +414,13 @@ function buildStaticMap(snap) {
   clearGroup('seg-group');
   const segG = document.getElementById('seg-group');
 
-  for (const seg of snap.segments) {
-    const [a, b] = seg.endpoints;
+  for (const s of snap.segments) {
+    const [a, b] = s.endpoints;
     const cA = mapCoords[a];
     const cB = mapCoords[b];
     if (!cA || !cB) continue;
 
-    const color = STATUS_COLOR[seg.status] || '#888';
+    const color = STATUS_COLOR[s.status] || '#888';
     const mx = (cA[0] + cB[0]) / 2;
     const my = (cA[1] + cB[1]) / 2;
 
@@ -322,17 +429,17 @@ function buildStaticMap(snap) {
       stroke: color,
       'stroke-width': 4,
       'stroke-linecap': 'round',
-      opacity: seg.status === 'closed' ? '0.45' : '1',
+      opacity: s.status === 'closed' ? '0.45' : '1',
       class: 'seg-line'
     });
-    if (seg.status === 'closed') line.setAttribute('stroke-dasharray', '10,6');
+    if (s.status === 'closed') line.setAttribute('stroke-dasharray', '10,6');
     segG.appendChild(line);
 
     const label = svgEl('text', {
       x: mx, y: my - 6,
       'text-anchor': 'middle',
       class: 'seg-label'
-    }, seg.id + ' (' + seg.effective_time + 'm)');
+    }, s.id + ' (' + s.effective_time + 'm)');
     segG.appendChild(label);
   }
 
@@ -348,10 +455,25 @@ function buildStaticMap(snap) {
       class: 'station-circle'
     });
     stG.appendChild(circle);
-    const lbl = svgEl('text', {
+
+    // Station dot label (abbreviated inside circle)
+    const dotLbl = svgEl('text', {
       x: c[0], y: c[1],
-      class: 'station-label'
+      'text-anchor': 'middle',
+      'dominant-baseline': 'middle',
+      fill: '#fff',
+      'font-size': '9',
+      'font-weight': '700',
+      'font-family': 'system-ui,Segoe UI,Arial,sans-serif'
     }, id);
+    stG.appendChild(dotLbl);
+
+    // City name label below the circle, with white halo for readability
+    const cityName = dn(id);
+    const lbl = svgEl('text', {
+      x: c[0], y: c[1] + 18,
+      class: 'station-label-halo'
+    }, cityName);
     stG.appendChild(lbl);
   }
 }
@@ -412,9 +534,9 @@ function drawGhostOverlays(preview, snap, coords) {
     for (const s of snap.segments) segMap[s.id] = s;
 
     for (const [segId, newStatus] of Object.entries(preview.segment_changes)) {
-      const seg = segMap[segId];
-      if (!seg) continue;
-      const [a, b] = seg.endpoints;
+      const s = segMap[segId];
+      if (!s) continue;
+      const [a, b] = s.endpoints;
       const cA = coords[a];
       const cB = coords[b];
       if (!cA || !cB) continue;
@@ -558,51 +680,70 @@ function updateSliderMax(max) {
 }
 
 // ============================================================
-// Render full state (existing behavior, extended for map)
+// Render full state (existing behavior, extended for map + display_names)
 // ============================================================
 function render(snap) {
   currentSnap = snap;
-  fillOnce(segPickEl, snap.segments.map(s => s.id));
+
+  // Update display names if provided
+  if (snap.display_names) {
+    displayNames = snap.display_names;
+  }
+
+  // Populate segment picker with display names (only once)
+  fillSegPickOnce(snap.segments);
   fillOnce(trainPickEl, snap.trains.map(t => t.id));
   fillOnce(passPickEl, snap.trains.map(t => t.id));
 
   document.getElementById('total-delay').textContent =
     'Total added delay: ' + snap.total_added_delay + ' min';
   document.getElementById('active-anomalies').textContent =
-    snap.anomalies.length ? 'Active anomalies: ' + snap.anomalies.join('  •  ') : 'No active anomalies.';
+    snap.anomalies.length
+      ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
+      : 'No active anomalies.';
 
-  // Segment status table
+  // Plain-language summary banner
+  const summaryEl = document.getElementById('plain-summary');
+  if (snap.summary_text && snap.summary_text.trim()) {
+    summaryEl.textContent = snap.summary_text;
+    summaryEl.style.display = 'block';
+  } else {
+    summaryEl.style.display = 'none';
+  }
+
+  // Segment status table — show display names in Connects column
   const segBody = document.querySelector('#segments tbody');
   segBody.innerHTML = '';
   for (const s of snap.segments) {
     const tt = s.effective_time === s.travel_time ? s.travel_time + ' min'
       : s.effective_time + ' min (was ' + s.travel_time + ')';
+    const [a, b] = s.endpoints;
     segBody.insertAdjacentHTML('beforeend',
-      `<tr><td>${s.id}</td><td>${s.endpoints.join(' — ')}</td>` +
+      `<tr><td>${s.id}</td><td>${dn(a)} &mdash; ${dn(b)}</td>` +
       `<td><span class="pill ${s.status}">${s.status}</span></td><td class="num">${tt}</td></tr>`);
   }
 
-  // Schedule board
+  // Schedule board — display names in arrivals and reason columns
   const board = document.querySelector('#board tbody');
   board.innerHTML = '';
   for (const t of snap.trains) {
     const arr = t.arrivals
-      ? Object.entries(t.arrivals).map(([st, m]) => st + '@' + m).join('  ')
-      : '—';
-    const delay = t.added_delay === null ? '—'
+      ? Object.entries(t.arrivals).map(([st, m]) => dn(st) + '@' + m).join('  ')
+      : '&mdash;';
+    const delay = t.added_delay === null ? '&mdash;'
       : (t.added_delay > 0 ? '+' : '') + t.added_delay + ' min';
     board.insertAdjacentHTML('beforeend',
       `<tr><td><b>${t.id}</b></td><td><span class="pill ${t.action}">${t.action.replace('_',' ')}</span></td>` +
-      `<td class="num">${t.depart_at ?? '—'}</td><td class="num">${arr}</td>` +
-      `<td class="num">${delay}</td><td class="muted">${t.reason}</td></tr>`);
+      `<td class="num">${t.depart_at ?? '&mdash;'}</td><td class="num">${arr}</td>` +
+      `<td class="num">${delay}</td><td class="muted">${withNames(t.reason)}</td></tr>`);
   }
 
-  document.getElementById('trigger').textContent = snap.trigger_text || '';
+  document.getElementById('trigger').textContent = withNames(snap.trigger_text || '');
   const logEl = document.getElementById('log');
   logEl.innerHTML = '';
   for (const e of snap.decision_log) {
     logEl.insertAdjacentHTML('beforeend',
-      `<li><span class="who">${e.train_id}</span> — ${e.text}</li>`);
+      `<li><span class="who">${e.train_id}</span> &mdash; ${withNames(e.text)}</li>`);
   }
 
   // Network map
@@ -634,7 +775,7 @@ async function refreshPassenger() {
   document.getElementById('pass-train').textContent = 'Train ' + p.train_id;
   document.getElementById('pass-eta').textContent =
     p.eta === null ? '—' : 'min ' + p.eta;
-  document.getElementById('pass-text').textContent = p.text;
+  document.getElementById('pass-text').textContent = withNames(p.text);
 }
 
 // ============================================================
@@ -669,21 +810,21 @@ function showPreviewPanel(preview) {
   tbody.innerHTML = '';
 
   for (const d of preview.deltas) {
-    const oldAction = d.old_action || '—';
-    const newAction = d.new_action || '—';
+    const oldAction = d.old_action || '&mdash;';
+    const newAction = d.new_action || '&mdash;';
     const actionCell = d.old_action !== d.new_action
-      ? oldAction + ' → ' + newAction
+      ? oldAction + ' &rarr; ' + newAction
       : oldAction;
 
-    const oldArr = d.old_arrival !== null && d.old_arrival !== undefined ? d.old_arrival : '—';
-    const newArr = d.new_arrival !== null && d.new_arrival !== undefined ? d.new_arrival : '—';
-    const arrCell = String(oldArr) !== String(newArr)
-      ? oldArr + ' → ' + newArr
+    const oldArr = d.old_arrival !== null && d.old_arrival !== undefined ? d.old_arrival : '&mdash;';
+    const newArr = d.new_arrival !== null && d.new_arrival !== undefined ? d.new_arrival : '&mdash;';
+    const arrCell = String(d.old_arrival) !== String(d.new_arrival)
+      ? oldArr + ' &rarr; ' + newArr
       : String(oldArr);
 
     const deltaDelay = d.delay_change !== null && d.delay_change !== undefined
       ? (d.delay_change > 0 ? '+' : '') + d.delay_change + ' min'
-      : '—';
+      : '&mdash;';
 
     const rowClass = d.changed ? 'changed-row' : '';
     tbody.insertAdjacentHTML('beforeend',
@@ -697,7 +838,7 @@ function showPreviewPanel(preview) {
 
   const total = preview.total_added_delay !== null && preview.total_added_delay !== undefined
     ? preview.total_added_delay + ' min'
-    : '—';
+    : '&mdash;';
   document.getElementById('preview-total').textContent =
     'Predicted total added delay: ' + total;
 
@@ -765,9 +906,11 @@ refreshState();
 // String literal anchors for automated test greps:
 // "track_closed" "track_blocked" "reduced_speed" "train_delayed" "train_cancelled"
 // "/api/state" "/api/inject" "/api/reset" "/api/passenger/" "/api/preview"
-// "Network map" "time-slider" "Apply" "Cancel" "Δ delay" "•"
+// "Network map" "time-slider" "Apply" "Cancel" "station_times" "Δ delay" "•"
 // "Reset to baseline" "Network — segment status" "Schedule board" "Decision log"
-// "Passenger view" "pass-eta"
+// "Passenger view" "pass-eta" "How this works" "Report a problem"
+// "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
+// "display_names"
 </script>
 </body>
 </html>

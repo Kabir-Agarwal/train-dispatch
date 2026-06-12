@@ -55,3 +55,12 @@ def test_map_and_preview_controls_present(base_url):
     for marker in ("Network map", "time-slider", "/api/preview",
                    "Apply", "Cancel", "station_times"):
         assert marker in html, marker
+
+
+def test_india_skin_and_plain_language_layer(base_url):
+    with urllib.request.urlopen(base_url + "/", timeout=5) as r:
+        html = r.read().decode("utf-8")
+    for marker in ("india-outline", "Illustrative network inspired by Indian Railways",
+                   "How this works", "Report a problem", "plain-summary",
+                   "display_names", "Howrah", "Chennai"):
+        assert marker in html, marker
