@@ -26,6 +26,8 @@ from engine.phrasing import (
     safe_phrase_trigger,
 )
 from engine.recompute import Action, RecomputeResult, recompute_schedule
+
+from .display import DISPLAY_NAMES, safe_summary
 from engine.scheduler import load_baseline
 
 _ANOMALY_TYPES = {
@@ -154,6 +156,9 @@ class AppState:
                 })
         return {
             "stations": list(self.network.stations),
+            "display_names": dict(DISPLAY_NAMES),
+            "summary_text": safe_summary(self.result.actions)
+            if self.anomalies else "",
             "segments": self._effective_segments(),
             "anomalies": [describe_anomaly(a) for a in self.anomalies],
             "trigger_text": trigger_text,
