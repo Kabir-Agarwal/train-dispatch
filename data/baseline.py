@@ -27,6 +27,7 @@ SEGMENTS = [
     Segment("SEG-56", ("S5", "S6"), 9),
     Segment("SEG-15", ("S1", "S5"), 15),
     Segment("SEG-26", ("S2", "S6"), 20),
+    Segment("SEG-36", ("S3", "S6"), 11),  # used by NO baseline train (no-impact tests, reroute option)
 ]
 
 TRAINS = [

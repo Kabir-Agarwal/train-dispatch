@@ -15,7 +15,7 @@ def test_network_shape():
     net = build_network()
     assert net.stations == ["S1", "S2", "S3", "S4", "S5", "S6"]
     assert sorted(net.segment_ids()) == [
-        "SEG-12", "SEG-15", "SEG-23", "SEG-26", "SEG-34", "SEG-45", "SEG-56",
+        "SEG-12", "SEG-15", "SEG-23", "SEG-26", "SEG-34", "SEG-36", "SEG-45", "SEG-56",
     ]
     assert net.segment("SEG-34").travel_time == 12
     assert 4 <= len(build_trains()) <= 6
