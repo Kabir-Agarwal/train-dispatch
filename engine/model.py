@@ -6,7 +6,8 @@ Decisions (see PROGRESS.md):
 - Times are integer minutes.
 """
 
-from dataclasses import dataclass, field
+import math
+from dataclasses import dataclass
 
 OPEN = "open"
 CLOSED = "closed"
@@ -20,8 +21,13 @@ from .errors import UnknownSegmentError, ValidationError
 class Segment:
     id: str
     endpoints: tuple  # (station_a, station_b)
-    travel_time: int  # minutes
+    travel_time: int  # minutes at full speed
     status: str = OPEN
+    speed_factor: float = 1.0  # fraction of full speed; 0.5 = half speed
+
+    def effective_travel_time(self):
+        """Minutes to traverse at current speed (rounded up to whole minutes)."""
+        return math.ceil(self.travel_time / self.speed_factor)
 
 
 @dataclass(frozen=True)
@@ -65,6 +71,10 @@ class Network:
         if seg.status not in SEGMENT_STATUSES:
             raise ValidationError(
                 f"segment '{seg.id}' status '{seg.status}' not in {SEGMENT_STATUSES}"
+            )
+        if not (0 < seg.speed_factor <= 1):
+            raise ValidationError(
+                f"segment '{seg.id}' speed_factor must be in (0, 1], got {seg.speed_factor}"
             )
         self._segments[seg.id] = seg
 

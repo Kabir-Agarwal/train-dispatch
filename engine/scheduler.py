@@ -4,6 +4,7 @@ Decisions (see PROGRESS.md):
 - Zero dwell time at intermediate stations: a train exits one segment and
   enters the next at the same minute.
 - An occupancy window is the closed interval [enter_minute, exit_minute].
+- Travel uses each segment's effective_travel_time (accounts for reduced speed).
 """
 
 from dataclasses import dataclass
@@ -58,7 +59,7 @@ def compute_train_schedule(network, train):
     for seg_id in train.path:
         seg = network.segment(seg_id)
         enter = clock
-        clock += seg.travel_time
+        clock += seg.effective_travel_time()
         at = Network.other_end(seg, at)
         arrivals[at] = clock
         occupancies.append(Occupancy(train.id, seg_id, enter, clock))
