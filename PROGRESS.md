@@ -1,5 +1,35 @@
 # PROGRESS.md
 
+## Phase 6 — Map view + ghost preview (stretch): DONE
+Built 2026-06-12, LIGHT profile. Full suite after Phase 6: **132 passed** (all 124 prior tests still green).
+
+### What was built (commit per unit)
+1. **docs** — README (overview, run command, 5-line architecture summary); .gitignore already covered `__pycache__`/`*.pyc` since Phase 1.
+2. **fix unit** — encoding bug root-caused: the server read index.html with the platform-default encoding, which is cp1252 on Windows → "â€¢"/"Î”" mojibake; now `read_text(encoding="utf-8")`. Anomaly list deduped on inject (exact-duplicate anomalies ignored; frozen dataclasses compare by value).
+3. **preview unit** (`app/state.py: preview`, `POST /api/preview`) — GHOST PREVIEW runs the SAME `recompute_schedule` as inject on (active + pending) anomalies but mutates nothing; returns predicted trains/log/segment-status changes plus a delta table (per train: old→new action, old→new arrival, delay change, changed flag) computed against the CURRENT state. Apply = the existing `/api/inject` path; Cancel = client-side discard. Also added `station_times` (ordered station/minute pairs) to every train view for the map.
+4. **map unit** (`app/static/index.html`) — full-width SVG "Network map" above the tables: fixed coordinates for S1–S6 with automatic ellipse placement for any appended station; segments color-coded by live status (closed = dashed/faded red); trains as labeled dots interpolated piecewise-linearly along their station_times; Play/Pause + time slider (0..max arrival, ~6 sim-min/s); ghost overlays render predicted segment changes and changed train routes as faded dashed shapes, with the Predicted-changes delta panel + Apply/Cancel beneath.
+
+### Delegation note (model-usage steer)
+The map/ghost UI page (routine, well-specified front-end work) was written by a **Sonnet subagent** against a fixed API contract and hard marker list; integration, all engine/state/server code, and all gates were done in the main session. Subagent output was size- and tail-verified before install, then run through the full suite.
+
+### What each gate checks (hand-verified values)
+- `test_ui_page.py` (+2): served bytes decode as UTF-8 with real "Δ delay" and "•" glyphs and NO "â€" mojibake signature; map/preview controls present (Network map, time-slider, /api/preview, Apply, Cancel, station_times).
+- `test_app_state.py` (+1): injecting track_closed(SEG-34) three times + once in a combo yields ONE closure in the active list.
+- `test_preview.py` (4): **preview == apply** — predicted trains, totals and phrased log lines are identical to the snapshot after injecting the same payload (same engine recompute, gate-proven); delta table hand-verified (T1 30→22, −8, changed; T3 32→32 unchanged; segment_changes exactly {SEG-34: closed}); preview stacks on active anomalies (post-closure T4 39→44, +5, no new segment change) without touching state; station_times exact for T1.
+- `test_http_end_to_end.py` (+1): preview over real HTTP applies nothing, then inject returns byte-identical train views and total.
+- Boot smoke: served page 200; live /api/preview returned {SEG-34: closed} and T1→22.
+
+### GitHub status (Task 1)
+Repo verified public at https://github.com/Kabir-Agarwal/train-dispatch. default_branch is "main", NOT "master" — fix: Settings → General → Default branch → switch to master → Update. The remote currently shows only the auto-generated README commit on main, so the earlier master push likely did not land; one `git push -u origin master` from this folder ships full history + README + .gitignore + Phase 6.
+
+### Environment note
+Unchanged: stale `.git\index.lock` + `tmp_obj_*` under `.git\objects` need manual cleanup on your machine before local git use.
+
+### Next
+Stopped after Phase 6 as instructed.
+
+---
+
 ## Phase 5 — Admin view + passenger view (the demo moment): DONE
 Built 2026-06-12, LIGHT profile. Full suite after Phase 5: **124 passed**.
 
