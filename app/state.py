@@ -48,6 +48,23 @@ def parse_anomaly(payload):
         raise ValidationError(f"bad parameters for {kind}: {exc}") from exc
 
 
+def _train_view(a):
+    """One train as both views' JSON shape; station_times is the ordered
+    (station, minute) walk the map animates along."""
+    return {
+        "id": a.train_id,
+        "action": a.action,
+        "path": list(a.path) if a.path else None,
+        "depart_at": a.depart_at,
+        "arrivals": a.arrivals,
+        "added_delay": a.added_delay,
+        "reason": a.reason,
+        "station_times": (
+            [[st, m] for st, m in a.arrivals.items()] if a.arrivals else None
+        ),
+    }
+
+
 def _baseline_result(network, trains):
     """Shape the untouched baseline like a RecomputeResult so both views
     always render from the same structure."""
@@ -122,15 +139,7 @@ class AppState:
         trains = []
         for tid in sorted(self.result.actions):
             a = self.result.actions[tid]
-            trains.append({
-                "id": tid,
-                "action": a.action,
-                "path": list(a.path) if a.path else None,
-                "depart_at": a.depart_at,
-                "arrivals": a.arrivals,
-                "added_delay": a.added_delay,
-                "reason": a.reason,
-            })
+            trains.append(_train_view(a))
         log_lines = []
         trigger_text = ""
         if self.log is not None:
@@ -166,4 +175,64 @@ class AppState:
             "status": entry.change,
             "text": text,
             "violations": violations,
+        }
+
+
+    def preview(self, payloads):
+        """GHOST PREVIEW: what WOULD happen if these anomalies were injected
+        on top of the active ones. Runs the SAME engine recompute as inject()
+        but mutates nothing. Returns predicted segments/trains/log + a delta
+        table against the current state."""
+        candidate = list(self.anomalies)
+        for p in payloads:
+            anomaly = parse_anomaly(p)
+            if anomaly not in candidate:
+                candidate.append(anomaly)
+        result = recompute_schedule(self.network, self.trains, candidate)
+        log = build_decision_log(self.network, self.trains, candidate, result)
+        current = self.result
+        deltas = []
+        seg_changes = {}
+        from engine.anomalies import apply_anomalies as _apply
+        eff = _apply(self.network, candidate)
+        cur_eff = _apply(self.network, self.anomalies) if self.anomalies \
+            else self.network
+        for seg_id in sorted(eff.segment_ids()):
+            new_seg = eff.segment(seg_id)
+            if new_seg.status != cur_eff.segment(seg_id).status:
+                seg_changes[seg_id] = new_seg.status
+        for tid in sorted(result.actions):
+            new = result.actions[tid]
+            old = current.actions[tid]
+            old_arr = None if old.arrivals is None \
+                else old.arrivals[ [t for t in self.trains if t.id == tid][0].destination ]
+            new_arr = None if new.arrivals is None \
+                else new.arrivals[ [t for t in self.trains if t.id == tid][0].destination ]
+            changed = (new.action != old.action or new.path != old.path
+                       or new.arrivals != old.arrivals)
+            deltas.append({
+                "id": tid,
+                "old_action": old.action,
+                "new_action": new.action,
+                "old_arrival": old_arr,
+                "new_arrival": new_arr,
+                "delay_change": (
+                    None if old_arr is None or new_arr is None
+                    else new_arr - old_arr
+                ),
+                "changed": changed,
+            })
+        return {
+            "preview": True,
+            "anomalies": [describe_anomaly(a) for a in candidate],
+            "segment_changes": seg_changes,
+            "trains": [_train_view(result.actions[tid])
+                       for tid in sorted(result.actions)],
+            "deltas": deltas,
+            "decision_log": [
+                {"train_id": e.train_id, "change": e.change,
+                 "text": safe_phrase_log_entry(self.phraser, e)[0]}
+                for e in log.entries
+            ],
+            "total_added_delay": result.total_added_delay,
         }

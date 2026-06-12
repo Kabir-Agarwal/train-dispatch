@@ -4,6 +4,7 @@ Routes:
   GET  /                     -> the UI (app/static/index.html)
   GET  /api/state            -> admin snapshot
   GET  /api/passenger/<tid>  -> passenger view for one train
+  POST /api/preview          -> body like inject; PREDICTS, applies nothing
   POST /api/inject           -> body: {"anomalies": [ {...}, ... ]}
   POST /api/reset            -> back to baseline
 Bad input -> HTTP 400 with {"error": ...}; never a crash.
@@ -59,7 +60,15 @@ def make_handler(state):
         def do_POST(self):
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length) if length else b"{}"
-            if self.path == "/api/inject":
+            if self.path == "/api/preview":
+                try:
+                    payload = json.loads(raw)
+                    self._send_json(state.preview(payload.get("anomalies", [])))
+                except DispatchError as exc:
+                    self._send_json({"error": str(exc)}, 400)
+                except (json.JSONDecodeError, AttributeError) as exc:
+                    self._send_json({"error": f"bad request: {exc}"}, 400)
+            elif self.path == "/api/inject":
                 try:
                     payload = json.loads(raw)
                     state.inject(payload.get("anomalies", []))

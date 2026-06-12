@@ -104,3 +104,16 @@ def test_unknown_route_404(base_url):
     with pytest.raises(urllib.error.HTTPError) as exc:
         get(f"{base_url}/api/nope")
     assert exc.value.code == 404
+
+
+def test_preview_over_http_matches_apply(base_url):
+    payload = {"anomalies": [{"type": "track_closed", "segment": "SEG-34"}]}
+    code, predicted = post(f"{base_url}/api/preview", payload)
+    assert code == 200 and predicted["preview"] is True
+    # nothing applied yet
+    code, snap = get(f"{base_url}/api/state")
+    assert snap["anomalies"] == []
+    # apply through the existing path; engine output identical
+    code, applied = post(f"{base_url}/api/inject", payload)
+    assert predicted["trains"] == applied["trains"]
+    assert predicted["total_added_delay"] == applied["total_added_delay"]
