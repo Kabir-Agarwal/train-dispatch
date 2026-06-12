@@ -1,5 +1,44 @@
 # PROGRESS.md
 
+## Phase 5 — Admin view + passenger view (the demo moment): DONE
+Built 2026-06-12, LIGHT profile. Full suite after Phase 5: **124 passed**.
+
+### How to run the demo
+`python3 run_ui.py` — starts the local server on port 8000 and opens the browser (options: `--port`, `--no-browser`). No frameworks, no API key, stdlib only.
+
+### What was built (commit per unit)
+1. **facts unit** — `fact_entries_for_all_trains`: fact packs (with drift-guard allow-lists) for EVERY train, changed or not, so the passenger view always has an engine-sourced ETA.
+2. **state unit** (`app/state.py`) — `AppState`, the single source of truth for both views: baseline shaped as a `RecomputeResult`; `inject()` parses admin JSON anomalies (the only anomaly source), accumulates them, recomputes, rebuilds the log and fact packs atomically — on any error the previous state is kept; `snapshot()` (admin board: segment statuses with effective times, per-train action/departure/arrivals/delay/reason, phrased decision log, total added delay) and `passenger(tid)` (ETA minute from the SAME result + short guard-checked reason only).
+3. **server unit** (`app/server.py`) — stdlib `ThreadingHTTPServer`, four JSON routes + the page; engine errors → HTTP 400 with the message, never a crash; `serve_in_thread()` for tests on an ephemeral port.
+4. **ui unit** (`app/static/index.html`, `run_ui.py`) — one static page, vanilla JS: admin column (anomaly buttons for all 5 types with segment/train pickers + factor/minutes inputs, reset, color-coded segment status table, schedule board with action pills and reasons, decision log with trigger line) and passenger column (train picker, big ETA, one-line reason). One-command launcher opens the browser.
+
+### What each gate checks (hand-verified values)
+- `test_decision_log.py` (+1): unchanged T4 fact pack still carries S6@39 with allow-lists.
+- `test_app_state.py` (7): baseline board (T1 S4@30, T3 S6@32 before any anomaly); closure inject → board (T1 reroute S4@22), segment SEG-34 shown closed, log = [T1,T2,T5], total −11, passenger T2 = "minute 34" guard-clean; **the consistency gate**: across 8 scenarios × every train, passenger ETA == the admin board's destination arrival (and None==None for cancelled/stranded — nothing fabricated); second anomaly accumulates (T4 dep 28 → S6@44, the Phase 2 value); reset restores baseline; bad injections (unknown type, factor 2) raise and leave state byte-identical.
+- `test_http_end_to_end.py` (3): THE DEMO SEQUENCE over real HTTP — baseline (T2@29) → admin injects track_closed(SEG-34) → board shows T1 rerouted S4@22 → decision log visible, T2's line names T1 and 34 → passenger T2 updates to 34 == board value → second anomaly accumulates (T4 S6@44) → reset → T2@29 again. Bad input over HTTP → 400 with the offending id in the message, server stays alive; unknown route → 404.
+- `test_ui_page.py` (2): served page contains all five anomaly controls + reset, the three admin sections, the passenger pane, and the exact API endpoints the end-to-end gate proved.
+- Manual smoke: `python3 run_ui.py --no-browser` booted; `/api/state` returned the 6 stations and 5 trains; `/` returned 200.
+
+### Phase 5 done-conditions → status
+1. Admin view shows network, schedule, anomaly, decision log, updating on injection — PASS (state + HTTP gates; UI renders those exact API fields)
+2. Passenger view shows only the chosen train's ETA + short reason — PASS
+3. Passenger ETA equals engine's computed arrival — PASS (consistency gate across all scenarios and trains)
+4. Full sequence inject → recompute → reasoning shown → passenger update runs cleanly end to end — PASS (automated over real HTTP, plus manual boot smoke)
+
+### Decisions (mechanical, logged not asked)
+- Anomalies ACCUMULATE across injections (recompute always = baseline + all active anomalies); explicit Reset button. This gives the stretch "second simultaneous anomaly" demo step for free.
+- Stdlib `http.server` (ThreadingHTTPServer) + one static HTML file with vanilla JS — no framework, no build step, no dependency beyond pytest for tests.
+- Failed injections are transactional: parse+recompute happen before any state mutation.
+- Passenger ETA rendered as "min N" (abstract minutes — the whole model is minute-based, honest to SPEC).
+
+### Environment note
+Unchanged: stale `.git\index.lock` + `tmp_obj_*` under `.git\objects` need manual cleanup on your machine.
+
+### Next
+STOPPED at phase boundary. Phases 1–5 complete: the demo is runnable end to end. Phase 6 (stretch: live 7th station, map animation, confidence layer, second anomaly already works) only on your go.
+
+---
+
 ## Phase 4 — Decision log + LLM phrasing (drift guard): DONE
 Built 2026-06-12, LIGHT profile. Full suite after Phase 4: **111 passed**.
 
