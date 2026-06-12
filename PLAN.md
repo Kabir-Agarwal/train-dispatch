@@ -36,3 +36,9 @@ Add a 7th station live; map animation; floating confidence layer on ETAs; a seco
 - Fix bugs with the smallest change; check git diff; revert anything unrelated.
 - Mechanical decisions (file names, structure, libraries): decide yourself, log in PROGRESS.md. Ask me ONLY for conceptual decisions that change product behavior.
 - At each phase end: commit, update PROGRESS.md, STOP and wait for my review before the next phase.
+
+### Loop limits (runaway guard)
+- Hard cap: 5 fix attempts per gate (unit tests, mutation testing, verifier findings, any retry loop). Count attempts explicitly in output: "Attempt N of 5".
+- If 2 consecutive attempts fail with the same root cause, the approach is wrong — stop early; do not retry variations.
+- On hitting a cap or stopping early: HALT all work and produce a short escalation report: (a) what was attempted per try, one line each; (b) the persistent failure and best hypothesis why; (c) 2–3 alternative approaches with a recommendation. Then wait for my decision. Never bypass a cap.
+- Builder↔verifier cycles: max 3 rounds. If the verifier still flags issues after round 3, escalate instead of continuing.
