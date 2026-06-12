@@ -117,3 +117,13 @@ def build_decision_log(network, trains, anomalies, result):
         trigger_numbers=frozenset(numbers_in(trigger)),
         trigger_entities=frozenset(ids_in(trigger)),
     )
+
+
+def fact_entries_for_all_trains(network, trains, anomalies, result):
+    """Fact packs (LogEntry) for EVERY train, changed or not — the passenger
+    view needs an ETA for every train, with the same allow-list guarantees."""
+    admin_delays = delay_minutes(anomalies)
+    return {
+        t.id: _entry(network, t, result.actions[t.id], admin_delays)
+        for t in trains
+    }

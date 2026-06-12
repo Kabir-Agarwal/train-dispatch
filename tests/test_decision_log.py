@@ -59,3 +59,20 @@ def test_trigger_allowlists():
     log = make_log([TrainDelayed("T1", 12)])
     assert log.trigger_entities == frozenset({"T1"})
     assert log.trigger_numbers == frozenset({12.0})
+
+
+def test_fact_entries_cover_unchanged_trains_too():
+    from engine.decision_log import fact_entries_for_all_trains
+    from engine.recompute import recompute_schedule
+
+    net, trains = build_network(), build_trains()
+    anomalies = [TrackClosed("SEG-34")]
+    result = recompute_schedule(net, trains, anomalies)
+    packs = fact_entries_for_all_trains(net, trains, anomalies, result)
+    assert set(packs) == {"T1", "T2", "T3", "T4", "T5"}
+    # unchanged T4 still has full engine facts: S6@39, zero added delay
+    t4 = packs["T4"]
+    assert t4.change == "unchanged"
+    assert t4.arrival == 39
+    assert t4.added_delay == 0
+    assert 39.0 in t4.numbers and "S6" in t4.entities
