@@ -47,3 +47,11 @@ def test_page_is_served_as_valid_utf8(base_url):
     assert "Δ delay" in html
     assert "•" in html or "•" in html
     assert "â€" not in html  # the classic cp1252 mojibake signature
+
+
+def test_map_and_preview_controls_present(base_url):
+    with urllib.request.urlopen(base_url + "/", timeout=5) as r:
+        html = r.read().decode("utf-8")
+    for marker in ("Network map", "time-slider", "/api/preview",
+                   "Apply", "Cancel", "station_times"):
+        assert marker in html, marker

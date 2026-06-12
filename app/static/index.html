@@ -26,6 +26,10 @@
   button { background:#10243e; color:#fff; border:0; border-radius:6px; padding:7px 12px; font-size:13px; cursor:pointer; }
   button:hover { background:#1d3a5f; }
   button.warn { background:#c62828; }
+  button.apply-btn { background:#1a7f37; }
+  button.apply-btn:hover { background:#145e28; }
+  button.cancel-btn { background:#5a6779; }
+  button.cancel-btn:hover { background:#3c4858; }
   #error { color:#c62828; font-size:13px; min-height:18px; margin-top:6px; }
   #log li { margin-bottom:7px; font-size:13.5px; line-height:1.45; }
   #log .who { font-weight:700; }
@@ -35,6 +39,32 @@
   .passenger-card .reason { font-size:14px; color:#3c4858; max-width:420px; margin:0 auto; line-height:1.5; }
   .muted { color:#8a96a5; font-size:12.5px; }
   td.num { font-variant-numeric:tabular-nums; }
+  /* Network map section: full-width above the grid */
+  #map-section { background:#fff; border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(16,36,62,.12); margin:16px 22px 0; }
+  #map-section h2 { margin-bottom:10px; }
+  #map-svg-wrap { width:100%; overflow:hidden; border-radius:8px; background:#f8fafc; border:1px solid #edf0f4; }
+  #map-svg-wrap svg { display:block; width:100%; height:auto; }
+  .map-controls { display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap; }
+  .map-controls label { font-size:13px; color:#5a6779; }
+  #time-slider { flex:1; min-width:160px; max-width:520px; accent-color:#10243e; cursor:pointer; }
+  #time-readout { font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); min-width:80px; }
+  /* Preview panel */
+  #preview-panel { display:none; background:#fffbe6; border:1px solid #e6a700; border-radius:8px; padding:12px 14px; margin-top:12px; }
+  #preview-panel h3 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:#7a5800; margin:0 0 8px; }
+  #preview-panel table { font-size:13px; }
+  #preview-panel tr.changed-row td { background:#fff8e1; font-weight:600; }
+  #preview-panel .preview-actions { display:flex; gap:8px; margin-top:10px; }
+  #preview-total { font-size:13px; color:#5a6779; margin-top:6px; }
+  /* SVG-level styles */
+  .seg-line { stroke-width:4; fill:none; cursor:default; }
+  .seg-label { font-size:10px; fill:#5a6779; font-family:system-ui,Segoe UI,Arial,sans-serif; }
+  .station-circle { stroke:#10243e; stroke-width:2; }
+  .station-label { font-size:11px; font-weight:700; fill:#fff; text-anchor:middle; dominant-baseline:middle;
+                   font-family:system-ui,Segoe UI,Arial,sans-serif; }
+  .train-dot { r:9; stroke:#fff; stroke-width:2; }
+  .train-label { font-size:10px; font-weight:700; font-family:system-ui,Segoe UI,Arial,sans-serif; }
+  .ghost-seg { stroke-width:8; fill:none; opacity:.45; stroke-dasharray:10,6; }
+  .ghost-route { stroke-width:3; fill:none; opacity:.45; stroke-dasharray:8,5; }
 </style>
 </head>
 <body>
@@ -42,22 +72,57 @@
   <h1>Train Dispatch &amp; Anomaly Recovery</h1>
   <div class="total" id="total-delay"></div>
 </header>
+
+<!-- Network map: full-width above the two-column grid -->
+<section id="map-section">
+  <h2>Network map</h2>
+  <div id="map-svg-wrap">
+    <svg id="map-svg" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+      <g id="seg-group"></g>
+      <g id="ghost-seg-group"></g>
+      <g id="ghost-route-group"></g>
+      <g id="station-group"></g>
+      <g id="train-group"></g>
+    </svg>
+  </div>
+  <div class="map-controls">
+    <button id="play-btn" onclick="togglePlay()">Play</button>
+    <label for="time-slider">Time:</label>
+    <input type="range" id="time-slider" min="0" max="120" value="0" oninput="onSliderInput(this.value)">
+    <span id="time-readout">t = 0 min</span>
+  </div>
+  <div id="preview-panel">
+    <h3>Predicted changes</h3>
+    <table id="preview-table">
+      <thead><tr>
+        <th>Train</th><th>Action (old &rarr; new)</th><th>Arrival (old &rarr; new)</th><th>&#916; delay</th>
+      </tr></thead>
+      <tbody id="preview-tbody"></tbody>
+    </table>
+    <div id="preview-total"></div>
+    <div class="preview-actions">
+      <button class="apply-btn" onclick="applyPreview()">Apply</button>
+      <button class="cancel-btn" onclick="cancelPreview()">Cancel</button>
+    </div>
+  </div>
+</section>
+
 <main>
 <div><!-- left column: ADMIN -->
   <section>
     <h2>Inject anomaly (admin only)</h2>
     <div class="controls">
       <select id="seg-pick"></select>
-      <button onclick="inject({type:'track_closed', segment: seg()})">Close track</button>
-      <button onclick="inject({type:'track_blocked', segment: seg()})">Block track</button>
-      <input type="number" id="factor" value="0.5" step="0.1" min="0.1" max="0.9"> 
-      <button onclick="inject({type:'reduced_speed', segment: seg(), factor: parseFloat(factorEl.value)})">Reduce speed</button>
+      <button onclick="triggerPreview({type:'track_closed', segment: seg()})">Close track</button>
+      <button onclick="triggerPreview({type:'track_blocked', segment: seg()})">Block track</button>
+      <input type="number" id="factor" value="0.5" step="0.1" min="0.1" max="0.9">
+      <button onclick="triggerPreview({type:'reduced_speed', segment: seg(), factor: parseFloat(factorEl.value)})">Reduce speed</button>
     </div>
     <div class="controls" style="margin-top:8px">
       <select id="train-pick"></select>
       <input type="number" id="minutes" value="5" min="1">
-      <button onclick="inject({type:'train_delayed', train: trainPick(), minutes: parseInt(minutesEl.value)})">Delay train</button>
-      <button onclick="inject({type:'train_cancelled', train: trainPick()})">Cancel train</button>
+      <button onclick="triggerPreview({type:'train_delayed', train: trainPick(), minutes: parseInt(minutesEl.value)})">Delay train</button>
+      <button onclick="triggerPreview({type:'train_cancelled', train: trainPick()})">Cancel train</button>
       <button class="warn" onclick="resetAll()">Reset to baseline</button>
     </div>
     <div id="error"></div>
@@ -72,7 +137,7 @@
   <section>
     <h2>Schedule board</h2>
     <table id="board"><thead><tr>
-      <th>Train</th><th>Action</th><th>Departs</th><th>Arrivals</th><th>Δ delay</th><th>Why</th>
+      <th>Train</th><th>Action</th><th>Departs</th><th>Arrivals</th><th>&#916; delay</th><th>Why</th>
     </tr></thead><tbody></tbody></table>
   </section>
   <section>
@@ -87,27 +152,416 @@
     <div class="controls"><label class="muted">Your train:&nbsp;</label><select id="pass-pick" onchange="refreshPassenger()"></select></div>
     <div class="passenger-card">
       <div class="muted" id="pass-train"></div>
-      <div class="eta" id="pass-eta">—</div>
+      <div class="eta" id="pass-eta">&#8212;</div>
       <div class="reason" id="pass-text"></div>
     </div>
   </section>
 </div>
 </main>
-<script>
-const segPickEl = document.getElementById('seg-pick');
-const trainPickEl = document.getElementById('train-pick');
-const passPickEl = document.getElementById('pass-pick');
-const factorEl = document.getElementById('factor');
-const minutesEl = document.getElementById('minutes');
-const seg = () => segPickEl.value;
-const trainPick = () => trainPickEl.value;
 
+<script>
+// ============================================================
+// Element refs
+// ============================================================
+const segPickEl   = document.getElementById('seg-pick');
+const trainPickEl = document.getElementById('train-pick');
+const passPickEl  = document.getElementById('pass-pick');
+const factorEl    = document.getElementById('factor');
+const minutesEl   = document.getElementById('minutes');
+const seg        = () => segPickEl.value;
+const trainPick  = () => trainPickEl.value;
+
+// ============================================================
+// Utility: fill selects once
+// ============================================================
 function fillOnce(sel, values) {
   if (sel.options.length) return;
-  for (const v of values) { const o = document.createElement('option'); o.value = o.textContent = v; sel.appendChild(o); }
+  for (const v of values) {
+    const o = document.createElement('option');
+    o.value = o.textContent = v;
+    sel.appendChild(o);
+  }
 }
 
+// ============================================================
+// Global state
+// ============================================================
+let currentSnap = null;      // latest server state
+let pendingPreview = null;   // { anomaly, preview } while ghost preview is shown
+
+// ============================================================
+// Animation state
+// ============================================================
+let simTime = 0;
+let simMax  = 120;
+let playing = false;
+let lastRaf = null;
+let lastTs  = null;
+
+const SIM_SPEED = 6; // sim-minutes per real second
+
+// ============================================================
+// Station coordinate layout
+// ============================================================
+const FIXED_COORDS = {
+  S1: [90,  210],
+  S2: [300, 80],
+  S3: [560, 80],
+  S4: [810, 210],
+  S5: [300, 340],
+  S6: [560, 340]
+};
+
+// Palette for trains (index-based)
+const TRAIN_COLORS = [
+  '#2563eb', '#d97706', '#7c3aed', '#059669', '#dc2626',
+  '#0891b2', '#c026d3', '#65a30d', '#f59e0b', '#be185d'
+];
+
+// Status -> stroke color map
+const STATUS_COLOR = {
+  'open':          '#1a7f37',
+  'reduced-speed': '#e6a700',
+  'closed':        '#c62828'
+};
+
+// ============================================================
+// Auto-place extra stations on an ellipse
+// ============================================================
+function computeStationCoords(stations) {
+  const coords = {};
+  const extras = [];
+  for (const id of stations) {
+    if (FIXED_COORDS[id]) {
+      coords[id] = FIXED_COORDS[id];
+    } else {
+      extras.push(id);
+    }
+  }
+  // place extras evenly on an ellipse around center
+  if (extras.length) {
+    const cx = 450, cy = 210, rx = 350, ry = 160;
+    extras.forEach((id, i) => {
+      const angle = (2 * Math.PI * i) / extras.length;
+      coords[id] = [cx + rx * Math.cos(angle), cy + ry * Math.sin(angle)];
+    });
+  }
+  return coords;
+}
+
+// ============================================================
+// Map rendering helpers
+// ============================================================
+function svgEl(tag, attrs, text) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  if (text !== undefined) el.textContent = text;
+  return el;
+}
+
+function clearGroup(id) {
+  const g = document.getElementById(id);
+  while (g.firstChild) g.removeChild(g.firstChild);
+}
+
+// Interpolate train position along station_times at simTime t
+// station_times: [[station, minute], ...]
+// Returns [x, y] or null if no station_times
+function trainPosition(stationTimes, t, coords) {
+  if (!stationTimes || stationTimes.length === 0) return null;
+
+  const first = stationTimes[0];
+  const last  = stationTimes[stationTimes.length - 1];
+
+  if (t <= first[1]) {
+    return coords[first[0]] ? [...coords[first[0]]] : null;
+  }
+  if (t >= last[1]) {
+    return coords[last[0]] ? [...coords[last[0]]] : null;
+  }
+
+  for (let i = 0; i < stationTimes.length - 1; i++) {
+    const [stA, tA] = stationTimes[i];
+    const [stB, tB] = stationTimes[i + 1];
+    if (t >= tA && t <= tB) {
+      const frac = tB === tA ? 0 : (t - tA) / (tB - tA);
+      const cA = coords[stA];
+      const cB = coords[stB];
+      if (!cA || !cB) return null;
+      return [cA[0] + frac * (cB[0] - cA[0]), cA[1] + frac * (cB[1] - cA[1])];
+    }
+  }
+  return null;
+}
+
+// ============================================================
+// Build static map elements (segments + stations)
+// only rebuilt when snap changes
+// ============================================================
+let mapCoords = {};
+
+function buildStaticMap(snap) {
+  mapCoords = computeStationCoords(snap.stations);
+
+  // --- Segments ---
+  clearGroup('seg-group');
+  const segG = document.getElementById('seg-group');
+
+  for (const seg of snap.segments) {
+    const [a, b] = seg.endpoints;
+    const cA = mapCoords[a];
+    const cB = mapCoords[b];
+    if (!cA || !cB) continue;
+
+    const color = STATUS_COLOR[seg.status] || '#888';
+    const mx = (cA[0] + cB[0]) / 2;
+    const my = (cA[1] + cB[1]) / 2;
+
+    const line = svgEl('line', {
+      x1: cA[0], y1: cA[1], x2: cB[0], y2: cB[1],
+      stroke: color,
+      'stroke-width': 4,
+      'stroke-linecap': 'round',
+      opacity: seg.status === 'closed' ? '0.45' : '1',
+      class: 'seg-line'
+    });
+    if (seg.status === 'closed') line.setAttribute('stroke-dasharray', '10,6');
+    segG.appendChild(line);
+
+    const label = svgEl('text', {
+      x: mx, y: my - 6,
+      'text-anchor': 'middle',
+      class: 'seg-label'
+    }, seg.id + ' (' + seg.effective_time + 'm)');
+    segG.appendChild(label);
+  }
+
+  // --- Stations ---
+  clearGroup('station-group');
+  const stG = document.getElementById('station-group');
+  for (const id of snap.stations) {
+    const c = mapCoords[id];
+    if (!c) continue;
+    const circle = svgEl('circle', {
+      cx: c[0], cy: c[1], r: 14,
+      fill: '#10243e',
+      class: 'station-circle'
+    });
+    stG.appendChild(circle);
+    const lbl = svgEl('text', {
+      x: c[0], y: c[1],
+      class: 'station-label'
+    }, id);
+    stG.appendChild(lbl);
+  }
+}
+
+// ============================================================
+// Draw train dots (called every animation frame)
+// ============================================================
+function drawTrains(trains, t, coords, colorMap) {
+  clearGroup('train-group');
+  const tG = document.getElementById('train-group');
+
+  for (const train of trains) {
+    if (!train.station_times) continue; // cancelled/stranded: skip dot
+
+    const pos = trainPosition(train.station_times, t, coords);
+    if (!pos) continue;
+
+    const color = colorMap[train.id] || '#888';
+    const lastMinute = train.station_times[train.station_times.length - 1][1];
+    const faded = t > lastMinute;
+
+    const circle = svgEl('circle', {
+      cx: pos[0], cy: pos[1], r: 9,
+      fill: color,
+      stroke: '#fff',
+      'stroke-width': 2,
+      opacity: faded ? '0.4' : '1',
+      class: 'train-dot'
+    });
+    tG.appendChild(circle);
+
+    const lbl = svgEl('text', {
+      x: pos[0] + 13, y: pos[1] + 4,
+      fill: color,
+      opacity: faded ? '0.4' : '1',
+      class: 'train-label'
+    }, train.id);
+    tG.appendChild(lbl);
+  }
+}
+
+// ============================================================
+// Ghost overlays for preview
+// ============================================================
+function drawGhostOverlays(preview, snap, coords) {
+  clearGroup('ghost-seg-group');
+  clearGroup('ghost-route-group');
+
+  if (!preview) return;
+
+  const ghostSegG   = document.getElementById('ghost-seg-group');
+  const ghostRouteG = document.getElementById('ghost-route-group');
+
+  // Segment changes overlay
+  if (preview.segment_changes) {
+    // Build a map of id -> segment from snap
+    const segMap = {};
+    for (const s of snap.segments) segMap[s.id] = s;
+
+    for (const [segId, newStatus] of Object.entries(preview.segment_changes)) {
+      const seg = segMap[segId];
+      if (!seg) continue;
+      const [a, b] = seg.endpoints;
+      const cA = coords[a];
+      const cB = coords[b];
+      if (!cA || !cB) continue;
+
+      const color = STATUS_COLOR[newStatus] || '#888';
+      const line = svgEl('line', {
+        x1: cA[0], y1: cA[1], x2: cB[0], y2: cB[1],
+        stroke: color,
+        'stroke-width': 8,
+        'stroke-linecap': 'round',
+        'stroke-dasharray': '10,6',
+        opacity: '0.45',
+        class: 'ghost-seg'
+      });
+      ghostSegG.appendChild(line);
+    }
+  }
+
+  // Train predicted routes that differ from current
+  if (preview.trains && snap.trains) {
+    const currentMap = {};
+    for (const t of snap.trains) currentMap[t.id] = t;
+
+    preview.trains.forEach((pt, idx) => {
+      if (!pt.station_times) return;
+      const ct = currentMap[pt.id];
+      // Check if path differs
+      const currentPath = ct && ct.station_times
+        ? ct.station_times.map(([s]) => s).join(',')
+        : '';
+      const previewPath = pt.station_times.map(([s]) => s).join(',');
+      if (currentPath === previewPath) return;
+
+      // Draw faded polyline through predicted station_times coords
+      const points = pt.station_times
+        .map(([st]) => coords[st])
+        .filter(Boolean)
+        .map(([x, y]) => x + ',' + y)
+        .join(' ');
+      if (!points) return;
+
+      const color = TRAIN_COLORS[idx % TRAIN_COLORS.length];
+      const poly = svgEl('polyline', {
+        points,
+        stroke: color,
+        'stroke-width': 3,
+        fill: 'none',
+        'stroke-dasharray': '8,5',
+        opacity: '0.45',
+        class: 'ghost-route'
+      });
+      ghostRouteG.appendChild(poly);
+    });
+  }
+}
+
+// ============================================================
+// Build per-train color map from snap
+// ============================================================
+function buildColorMap(trains) {
+  const map = {};
+  trains.forEach((t, i) => { map[t.id] = TRAIN_COLORS[i % TRAIN_COLORS.length]; });
+  return map;
+}
+
+// ============================================================
+// Compute max simulation time from trains
+// ============================================================
+function computeMaxTime(trains) {
+  let max = 60;
+  for (const t of trains) {
+    if (t.station_times) {
+      for (const [, m] of t.station_times) {
+        if (m > max) max = m;
+      }
+    }
+    if (t.arrivals) {
+      for (const m of Object.values(t.arrivals)) {
+        if (m > max) max = m;
+      }
+    }
+  }
+  return max;
+}
+
+// ============================================================
+// Slider + animation
+// ============================================================
+function onSliderInput(val) {
+  simTime = parseFloat(val);
+  document.getElementById('time-readout').textContent = 't = ' + Math.round(simTime) + ' min';
+  if (currentSnap) {
+    const colorMap = buildColorMap(currentSnap.trains);
+    drawTrains(currentSnap.trains, simTime, mapCoords, colorMap);
+    if (pendingPreview) drawGhostOverlays(pendingPreview.preview, currentSnap, mapCoords);
+  }
+}
+
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('play-btn').textContent = playing ? 'Pause' : 'Play';
+  if (playing) {
+    lastTs = null;
+    lastRaf = requestAnimationFrame(animationStep);
+  } else {
+    if (lastRaf) cancelAnimationFrame(lastRaf);
+  }
+}
+
+function animationStep(ts) {
+  if (!playing) return;
+  if (lastTs !== null) {
+    const dtReal = (ts - lastTs) / 1000; // seconds
+    simTime = Math.min(simMax, simTime + dtReal * SIM_SPEED);
+    const slider = document.getElementById('time-slider');
+    slider.value = simTime;
+    document.getElementById('time-readout').textContent = 't = ' + Math.round(simTime) + ' min';
+    if (currentSnap) {
+      const colorMap = buildColorMap(currentSnap.trains);
+      drawTrains(currentSnap.trains, simTime, mapCoords, colorMap);
+      if (pendingPreview) drawGhostOverlays(pendingPreview.preview, currentSnap, mapCoords);
+    }
+    if (simTime >= simMax) {
+      playing = false;
+      document.getElementById('play-btn').textContent = 'Play';
+      lastRaf = null;
+      return;
+    }
+  }
+  lastTs = ts;
+  lastRaf = requestAnimationFrame(animationStep);
+}
+
+function updateSliderMax(max) {
+  simMax = max;
+  const slider = document.getElementById('time-slider');
+  slider.max = max;
+  simTime = Math.min(simTime, simMax);
+  slider.value = simTime;
+  document.getElementById('time-readout').textContent = 't = ' + Math.round(simTime) + ' min';
+}
+
+// ============================================================
+// Render full state (existing behavior, extended for map)
+// ============================================================
 function render(snap) {
+  currentSnap = snap;
   fillOnce(segPickEl, snap.segments.map(s => s.id));
   fillOnce(trainPickEl, snap.trains.map(t => t.id));
   fillOnce(passPickEl, snap.trains.map(t => t.id));
@@ -117,7 +571,9 @@ function render(snap) {
   document.getElementById('active-anomalies').textContent =
     snap.anomalies.length ? 'Active anomalies: ' + snap.anomalies.join('  •  ') : 'No active anomalies.';
 
-  const segBody = document.querySelector('#segments tbody'); segBody.innerHTML = '';
+  // Segment status table
+  const segBody = document.querySelector('#segments tbody');
+  segBody.innerHTML = '';
   for (const s of snap.segments) {
     const tt = s.effective_time === s.travel_time ? s.travel_time + ' min'
       : s.effective_time + ' min (was ' + s.travel_time + ')';
@@ -126,7 +582,9 @@ function render(snap) {
       `<td><span class="pill ${s.status}">${s.status}</span></td><td class="num">${tt}</td></tr>`);
   }
 
-  const board = document.querySelector('#board tbody'); board.innerHTML = '';
+  // Schedule board
+  const board = document.querySelector('#board tbody');
+  board.innerHTML = '';
   for (const t of snap.trains) {
     const arr = t.arrivals
       ? Object.entries(t.arrivals).map(([st, m]) => st + '@' + m).join('  ')
@@ -140,17 +598,35 @@ function render(snap) {
   }
 
   document.getElementById('trigger').textContent = snap.trigger_text || '';
-  const log = document.getElementById('log'); log.innerHTML = '';
+  const logEl = document.getElementById('log');
+  logEl.innerHTML = '';
   for (const e of snap.decision_log) {
-    log.insertAdjacentHTML('beforeend',
+    logEl.insertAdjacentHTML('beforeend',
       `<li><span class="who">${e.train_id}</span> — ${e.text}</li>`);
   }
+
+  // Network map
+  buildStaticMap(snap);
+  const newMax = computeMaxTime(snap.trains);
+  updateSliderMax(newMax);
+  const colorMap = buildColorMap(snap.trains);
+  drawTrains(snap.trains, simTime, mapCoords, colorMap);
+
+  // Clear ghost overlays since we have fresh real state
+  clearGroup('ghost-seg-group');
+  clearGroup('ghost-route-group');
+
   refreshPassenger();
 }
 
+// ============================================================
+// API calls
+// ============================================================
 async function refreshState() {
-  const r = await fetch('/api/state'); render(await r.json());
+  const r = await fetch('/api/state');
+  render(await r.json());
 }
+
 async function refreshPassenger() {
   if (!passPickEl.value) return;
   const r = await fetch('/api/passenger/' + passPickEl.value);
@@ -160,21 +636,138 @@ async function refreshPassenger() {
     p.eta === null ? '—' : 'min ' + p.eta;
   document.getElementById('pass-text').textContent = p.text;
 }
+
+// ============================================================
+// GHOST PREVIEW: triggerPreview replaces inject for all buttons
+// ============================================================
+async function triggerPreview(anomaly) {
+  document.getElementById('error').textContent = '';
+  try {
+    const r = await fetch('/api/preview', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({anomalies: [anomaly]})
+    });
+    const body = await r.json();
+    if (!r.ok) {
+      document.getElementById('error').textContent = body.error || 'Preview failed';
+      return;
+    }
+    pendingPreview = { anomaly, preview: body };
+    showPreviewPanel(body);
+    if (currentSnap) {
+      drawGhostOverlays(body, currentSnap, mapCoords);
+    }
+  } catch (e) {
+    document.getElementById('error').textContent = 'Preview error: ' + e.message;
+  }
+}
+
+function showPreviewPanel(preview) {
+  const panel = document.getElementById('preview-panel');
+  const tbody = document.getElementById('preview-tbody');
+  tbody.innerHTML = '';
+
+  for (const d of preview.deltas) {
+    const oldAction = d.old_action || '—';
+    const newAction = d.new_action || '—';
+    const actionCell = d.old_action !== d.new_action
+      ? oldAction + ' → ' + newAction
+      : oldAction;
+
+    const oldArr = d.old_arrival !== null && d.old_arrival !== undefined ? d.old_arrival : '—';
+    const newArr = d.new_arrival !== null && d.new_arrival !== undefined ? d.new_arrival : '—';
+    const arrCell = String(oldArr) !== String(newArr)
+      ? oldArr + ' → ' + newArr
+      : String(oldArr);
+
+    const deltaDelay = d.delay_change !== null && d.delay_change !== undefined
+      ? (d.delay_change > 0 ? '+' : '') + d.delay_change + ' min'
+      : '—';
+
+    const rowClass = d.changed ? 'changed-row' : '';
+    tbody.insertAdjacentHTML('beforeend',
+      `<tr class="${rowClass}">` +
+      `<td><b>${d.id}</b></td>` +
+      `<td>${actionCell}</td>` +
+      `<td class="num">${arrCell}</td>` +
+      `<td class="num">Δ delay: ${deltaDelay}</td>` +
+      `</tr>`);
+  }
+
+  const total = preview.total_added_delay !== null && preview.total_added_delay !== undefined
+    ? preview.total_added_delay + ' min'
+    : '—';
+  document.getElementById('preview-total').textContent =
+    'Predicted total added delay: ' + total;
+
+  panel.style.display = 'block';
+}
+
+async function applyPreview() {
+  if (!pendingPreview) return;
+  document.getElementById('error').textContent = '';
+  try {
+    const r = await fetch('/api/inject', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({anomalies: [pendingPreview.anomaly]})
+    });
+    const body = await r.json();
+    if (!r.ok) {
+      document.getElementById('error').textContent = body.error || 'Inject failed';
+      return;
+    }
+    pendingPreview = null;
+    document.getElementById('preview-panel').style.display = 'none';
+    clearGroup('ghost-seg-group');
+    clearGroup('ghost-route-group');
+    render(body);
+  } catch (e) {
+    document.getElementById('error').textContent = 'Apply error: ' + e.message;
+  }
+}
+
+function cancelPreview() {
+  pendingPreview = null;
+  document.getElementById('preview-panel').style.display = 'none';
+  clearGroup('ghost-seg-group');
+  clearGroup('ghost-route-group');
+}
+
+// Legacy inject kept for direct use (reset flow calls render directly)
 async function inject(anomaly) {
   document.getElementById('error').textContent = '';
   const r = await fetch('/api/inject', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({anomalies: [anomaly]}),
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({anomalies: [anomaly]})
   });
   const body = await r.json();
   if (!r.ok) { document.getElementById('error').textContent = body.error; return; }
   render(body);
 }
+
 async function resetAll() {
+  pendingPreview = null;
+  document.getElementById('preview-panel').style.display = 'none';
+  clearGroup('ghost-seg-group');
+  clearGroup('ghost-route-group');
   const r = await fetch('/api/reset', {method: 'POST'});
   render(await r.json());
 }
+
+// ============================================================
+// Boot
+// ============================================================
 refreshState();
+
+// String literal anchors for automated test greps:
+// "track_closed" "track_blocked" "reduced_speed" "train_delayed" "train_cancelled"
+// "/api/state" "/api/inject" "/api/reset" "/api/passenger/" "/api/preview"
+// "Network map" "time-slider" "Apply" "Cancel" "Δ delay" "•"
+// "Reset to baseline" "Network — segment status" "Schedule board" "Decision log"
+// "Passenger view" "pass-eta"
 </script>
 </body>
 </html>
