@@ -1,5 +1,49 @@
 # PROGRESS.md
 
+## Phase 3 — Recompute engine: DONE
+Built 2026-06-12, LIGHT profile. Full suite after Phase 3: **89 passed**.
+
+### What was built (commit per unit)
+1. **routes unit** (`engine/routes.py`) — exact enumeration of all simple paths between two stations over open segments (network is tiny), sorted fastest-first by effective travel time; `path_stations` for human-readable "via" strings.
+2. **slot unit** (`engine/recompute.py`: `try_schedule`, `min_hold_schedule`, `blocking_trains`) — smallest origin-hold that makes a path conflict-free against the growing occupancy table. Inclusive boundary is enforced here too (hold 1 leaving a shared minute is rejected; gate proves hold must be 2). Hold search is bounded by the table's last exit minute, so it always terminates. `blocking_trains` answers "who is in the way" for reasons.
+3. **recompute unit** (`engine/recompute.py`: `recompute_schedule`) — greedy, deterministic: trains placed in baseline-departure order against the full table-so-far (so second-order conflicts are structurally impossible to miss). A train whose original path+timing is conflict-free keeps it untouched (no churn, no over-reaction). Otherwise every open path is tried with its minimal hold and the earliest arrival wins (ties: original path, then less hold). Collision-free is a hard constraint of the search — a colliding "optimal" move is unrepresentable, so safety beats delay by construction. Final whole-table re-check raises if a conflict ever survived (it cannot). Output per train: `unchanged` / `depart_delayed` / `hold until minute X` / `reroute via [path]` / `cancelled` / `stranded`, each with arrivals, added delay vs baseline, and an engine-sourced reason naming blockers or closed segments. `total_added_delay` is the net sum over running trains.
+4. **scenario unit** (`tests/test_f3_scenarios.py`) — the SPEC F3 normal + all three adversarial cases on the real baseline, every minute hand-computed.
+
+### What each gate checks (hand-verified values)
+- `test_routes.py` (5): S1→S4 has exactly 7 simple paths, fastest [SEG-15,SEG-45]=22 min; S4→S6 has 6, fastest 16 min; SEG-34 closure leaves exactly 3; unreachable → empty list.
+- `test_slots.py` (4): vs T2 on SEG-56[22,31], T4's minimal hold is exactly 2 (hold 1 → shared minute 31 → rejected); empty table → hold 0; blockers named.
+- `test_recompute.py` (5): no-impact closure (SEG-36) → all `unchanged`, schedule identical to baseline, total 0; cancelled T3 excluded from table, others untouched; SEG-34+SEG-45 → T1/T4/T5 `stranded` honestly, T2/T3 run; T1+5 → `depart_delayed`, S4@35, total +5; unknown segment/train → typed errors.
+- `test_f3_scenarios.py` (6), each ending in a full-table zero-conflict assert:
+  - **F3 normal + adversarial 2** (SEG-34 closed): T1 reroutes S1-S5-S4, S4@22 (−8); that steals SEG-15 from T2 → second-order conflict resolved by T2 rerouting S1-S2-S3-S6, S6@34 (+5), reason names T1; T3/T4 untouched; T5 reroutes S4-S5-S1, S1@62 (−8); net −11; SEG-15 and SEG-45 windows strictly sequenced.
+  - **F3 adversarial 1** (SEG-15 closed): SEG-12 is S1's only exit; T1 [0,10] then T2 [11,21] — never both; T2 departs 11, S6@40 (+11); everyone else unchanged.
+  - **F3 adversarial 3** (safety beats delay): T2's delay-optimal move (depart 5, S6@34) is PROVEN to collide with T1 on SEG-12 via `try_schedule` → None; engine's chosen schedule is the slower safe one (S6@40).
+  - **Pure hold**: T2+2 → T4 holds until 25 on its own path (boundary minute 31 forces hold 2, not 1), S6@41 (+2); T5 stays unchanged at 70 even though a "faster" detour exists — no over-reaction.
+  - **Delayed leader**: T1+12 keeps its path (S4@42); follower T5 reroutes (S1@62) because holding would cost 73 vs 62; total +4.
+  - **Reduced-speed cascade** (SEG-56 at 0.5): T2 slowed in place S6@38 (+9); T4 reroutes S4-S3-S6 departing 31 after T1 clears SEG-34, S6@54 (+15); T4's new SEG-34 window pushes T5 onto the S4-S5-S1 detour (−8); net +16; SEG-34 windows sequenced [18,30]/[31,43].
+
+### Phase 3 done-conditions → status
+1. Closure reroutes affected train via valid alternative; others untouched unless needed — PASS
+2. Two trains needing one track are sequenced, never both on it — PASS
+3. Second-order conflicts from a reroute are resolved (whole table re-checked) — PASS
+4. Delay-optimal-but-colliding move rejected for the slower safe option — PASS (proven collision vs chosen schedule)
+5. Clear per-train action + total added delay — PASS
+6. Gates assert collision-free AND hand-verified expected actions — PASS
+
+### Decisions (mechanical, logged not asked)
+- Priority order = baseline departure (then id); admin delay does not change priority.
+- Holds are origin-holds only (no mid-route station holds) — sufficient for the demo model where the schedule is recomputed from departure.
+- "Unchanged-if-feasible" rule: a conflict-free original plan is never churned onto a faster detour; optimization happens only for trains that are blocked, delayed, slowed, or closed-out. (This is what SPEC's "others adjusted only if needed" / "don't over-react" requires; it also means added delay can be negative for rerouted trains when the detour is shorter — `total_added_delay` is reported net.)
+- `total_added_delay` excludes cancelled/stranded trains (they have no arrival).
+- Gate-fix loop note (Loop limits): scenario gate attempt 1 of 5 failed — root cause was my own incomplete hand expectation (forgot T5's later SEG-12 window in one assert), not engine behaviour; fixed in attempt 2, green. No engine code changed after its first gate run.
+
+### Environment note
+Unchanged from Phase 2: stale `.git\index.lock` + `tmp_obj_*` files under `.git\objects` need manual deletion on your machine (sandbox cannot delete in the mount).
+
+### Next
+STOPPED at phase boundary. Phase 4 (decision log + LLM phrasing with drift guard) awaits your review.
+
+---
+
 ## Phase 2 — Anomaly injection + impact detection: DONE
 Built 2026-06-12, LIGHT profile. Full suite after Phase 2: **69 passed**.
 
