@@ -21,4 +21,4 @@ no frameworks, no API key required. Tests: `python -m pytest tests/`.
 2. The LLM layer only phrases engine facts (pluggable; deterministic templates by default).
 3. A drift guard blocks any phrased number or id the engine did not produce, with template fallback.
 4. Collision-free is enforced by construction: a colliding schedule is unrepresentable in the search, and the whole occupancy table is re-checked after every recompute.
-5. Every behavior is pinned by value-asserting tests with hand-verified expected minutes (132 passing as of Phase 6).
+5. Every behavior is pinned by value-asserting tests with hand-verified expected minutes (140 passing at feature freeze).

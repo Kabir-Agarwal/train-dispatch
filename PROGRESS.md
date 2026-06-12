@@ -1,5 +1,25 @@
 # PROGRESS.md
 
+## Freeze round — Indian map skin + plain-language layer (display only): DONE
+Built 2026-06-12. Full suite: **140 passed** (all 132 prior tests green). ZERO engine/scheduler/anomaly changes — `engine/` untouched this round (verifiable in the two commit diffs).
+
+### What was built (commit per unit)
+1. **display unit** (`app/display.py`) — city-name mapping with internal ids unchanged everywhere in engine and tests: S1=Delhi, S2=Bhopal, S3=Nagpur, S4=Howrah, S5=Mumbai, S6=Chennai (adjusted from the suggested order so the S1-S2-S3 chain matches the real Delhi–Bhopal–Nagpur trunk and S1-S5 / S5-S6 the Delhi–Mumbai / Mumbai–Chennai corridors — fewer crossing lines); unmapped ids fall back to the raw id (a 7th station can never break the UI). Plus `safe_summary`: a one-line plain-language result ("3 trains rerouted — largest extra delay 5 min.") computed ONLY from engine actions (counts + max positive added delay) and verified by the same drift guard as all phrased text. Served via snapshot as `display_names` and `summary_text`.
+2. **skin unit** (`app/static/index.html`, Sonnet subagent per the model steer; integration + gates in main session) — portrait map with a single-path stylized India outline (light grey), stations at rough geographic positions labeled with city names; ALL rendered station ids (board, reasons, log, passenger, deltas, segment picker "SEG-34 (Nagpur–Howrah)") display as city names via one client-side transform; caption "Illustrative network inspired by Indian Railways"; collapsible "How this works" panel (5 plain sentences); map legend (green=open, red dashed=closed, faded dashed=predicted, dot=train); anomaly section retitled "Report a problem"; `#plain-summary` band shows the post-Apply summary.
+
+### Gates
+- `test_display.py` (7): mapping is a bijection covering exactly the network's stations, round-trips id→name→id, falls back safely; summary hand-verified per scenario (closure → "3 trains rerouted — largest extra delay 5 min."; T2+2 → "1 train held, 1 departing late — largest extra delay 2 min."; double closure → "3 trains stranded — no extra delay."; no-impact → "No changes needed…"; baseline → empty); summary passes the drift guard and a tampered "7 min" is caught as an invented number; display_names served in snapshot.
+- `test_ui_page.py` (+1): served page contains india-outline, the exact caption, How this works, Report a problem, plain-summary, display_names, Howrah, Chennai — alongside every previous marker (all still asserted).
+- Boot smoke over HTTP: display_names served (Delhi/Howrah), baseline summary empty, post-apply summary exactly "3 trains rerouted — largest extra delay 5 min."
+
+### Decisions
+- City mapping adjusted (permitted by the instruction) for geometric fit; logged above.
+- Summary counts derive deterministically from engine actions in the display layer; its allow-list is {its own counts, max delay}, so the guard genuinely binds it.
+
+FEATURE FREEZE: no further build rounds; next step is the user's demo recording.
+
+---
+
 ## Phase 6 — Map view + ghost preview (stretch): DONE
 Built 2026-06-12, LIGHT profile. Full suite after Phase 6: **132 passed** (all 124 prior tests still green).
 
