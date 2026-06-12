@@ -27,3 +27,7 @@ class BaselineConflictError(DispatchError):
             for c in conflicts
         )
         super().__init__(f"baseline schedule has {len(conflicts)} conflict(s): {lines}")
+
+
+class UnknownTrainError(ValidationError):
+    """An anomaly references a train id that does not exist."""
