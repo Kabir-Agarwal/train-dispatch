@@ -1,5 +1,37 @@
 # PROGRESS.md
 
+## Phase 4 — Decision log + LLM phrasing (drift guard): DONE
+Built 2026-06-12, LIGHT profile. Full suite after Phase 4: **111 passed**.
+
+### What was built (commit per unit)
+1. **log unit** (`engine/decision_log.py`) — `build_decision_log(network, trains, anomalies, result)` produces a structured `DecisionLog`: a trigger string (e.g. `track_closed(SEG-34) + train_delayed(T4, 5 min)`) and one `LogEntry` per train the engine changed — change, engine reason verbatim, destination, arrival, added delay. Crucially, each entry carries fact ALLOW-LISTS (`numbers`, `entities`) enumerating every numeric value and every T*/S*/SEG-* id the engine actually produced for that change; the trigger carries its own. These allow-lists are the contract the phrasing layer is checked against.
+2. **guard unit** (`engine/drift_guard.py`) — `verify_text(text, entities, numbers)`: every id mentioned must be engine-produced; ids are stripped first so SEG-12/T2/S6 never leak digits into the number check; every remaining number (incl. decimals like 0.5, signed/suffixed forms like "+5 min") must be an engine value. Returns a violations list; empty = faithful.
+3. **phrasing unit** (`engine/phrasing.py`) — per the review note, an interface with two implementations: `TemplatePhraser` (deterministic, zero dependencies — the system is fully functional without any API key) and `LLMPhraser`, which wraps ANY `complete(prompt) -> str` callable via constructor injection, so a real Anthropic client plugs in later with no code changes (`get_phraser(complete)`). `safe_phrase_trigger / _log_entry / _passenger_eta` run EVERY phrased string — from either phraser — through the drift guard; on any violation the text is discarded for the deterministic template and the violations are reported. The LLM can only re-word; it can never introduce a number, and it never computes.
+
+### What each gate checks (hand-verified values)
+- `test_decision_log.py` (5): SEG-34 closure logs exactly T1, T2, T5 (T3/T4 untouched), trigger string exact, total −11; T2 entry: reroute, S6@34, +5, allow-lists contain {34, 5} and {T2, T1, S6, SEG-12, SEG-23, SEG-36}; hold scenario logs T2+T4 with {25, 41, 2} and the blocker T2 citable; stranded entries have arrival None (nothing fabricated); trigger allow-lists exact ({T1}, {12}).
+- `test_drift_guard.py` (8): faithful text passes; invented number 99 / train T9 / segment SEG-99 / station S8 each caught by name; allowed ids' embedded digits (12, 2, 6) cause no false positives; decimals checked (0.5 ok, 0.7 caught); multiple violations all reported; "+5 min" passes while "+6 min" is caught.
+- `test_phrasing.py` (9): exact template strings hand-verified (dispatcher hold line for T4; passenger lines for delayed T4 "41 (2 min later)", early T5 "62 (8 min earlier)", cancelled T3, stranded T1 with "No arrival time"); faithful fake-LLM text accepted verbatim; fake LLM inventing minute 35 / train T8 / "15 minutes" each → violation reported AND output replaced by the exact template fallback; `get_phraser()` → template, `get_phraser(callable)` → LLM; meta gate: across 8 scenarios, every trigger, dispatcher and passenger template line passes the guard (15+ entries exercised).
+
+### Phase 4 done-conditions → status
+1. Every engine change produces a log entry (trigger, change, reason, numbers) — PASS
+2. LLM-phrased text verified against engine values; no number/claim the engine didn't produce; the guard is a real test — PASS (guard rejects and safely replaces drifting text from a live phraser object, and the same check runs in production via `safe_*`)
+
+### Decisions (mechanical, logged not asked)
+- Allow-lists are built from the action's structured fields PLUS ids/numbers appearing in the engine's own reason string (the reason is engine output, so citing it is faithful).
+- "Changed" for logging purposes = any action other than a zero-delay `unchanged` (slowed-in-place trains are changes; their times moved).
+- Drift guard semantics: ids checked as exact tokens (T\d+ / S\d+ / SEG-\d+), then ids stripped, then all remaining numerals (with decimals) must be engine values. abs(added_delay) is included so "8 min earlier" phrasing of −8 passes.
+- On violation `safe_*` falls back to the template rather than raising — the demo must keep running; violations are returned for display/logging.
+- `LogEntry`/`_entry` is generic over any action, so Phase 5's passenger view can build fact packs for UNCHANGED trains too (passenger ETA must exist for every train, not just changed ones).
+
+### Environment note
+Unchanged: stale `.git\index.lock` + `tmp_obj_*` under `.git\objects` need manual cleanup on your machine.
+
+### Next
+STOPPED at phase boundary. Phase 5 (admin view + passenger view, the demo moment) awaits your review.
+
+---
+
 ## Phase 3 — Recompute engine: DONE
 Built 2026-06-12, LIGHT profile. Full suite after Phase 3: **89 passed**.
 
