@@ -5,7 +5,8 @@ RecomputeResult — they cannot disagree (and a gate proves it).
 The admin is the only anomaly source; anomalies accumulate until reset.
 """
 
-from data.baseline import build_network, build_trains
+import data.baseline
+import data.real_corridor
 from engine.anomalies import (
     ReducedSpeed,
     TrackBlocked,
@@ -86,9 +87,21 @@ def _baseline_result(network, trains):
 
 
 class AppState:
-    def __init__(self, phraser=None):
-        self.network = build_network()
-        self.trains = build_trains()
+    def __init__(self, phraser=None, dataset="baseline"):
+        if dataset == "real":
+            module = data.real_corridor
+            self.display_names = dict(module.DISPLAY_NAMES)
+            self.train_attrs = {k: dict(v) for k, v in module.TRAIN_ATTRS.items()}
+        elif dataset == "baseline":
+            module = data.baseline
+            self.display_names = dict(DISPLAY_NAMES)
+            self.train_attrs = {}
+        else:
+            from engine.errors import ValidationError
+            raise ValidationError(f"unknown dataset '{dataset}'")
+        self.dataset = dataset
+        self.network = module.build_network()
+        self.trains = module.build_trains()
         self.phraser = phraser or get_phraser()
         self.reset()
 
@@ -156,7 +169,8 @@ class AppState:
                 })
         return {
             "stations": list(self.network.stations),
-            "display_names": dict(DISPLAY_NAMES),
+            "display_names": dict(self.display_names),
+            "train_attrs": {k: dict(v) for k, v in self.train_attrs.items()},
             "summary_text": safe_summary(self.result.actions)
             if self.anomalies else "",
             "segments": self._effective_segments(),

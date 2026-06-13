@@ -96,28 +96,28 @@ def _path(origin, destination):
 
 
 # 5 trains, hand-verified collision-free (see tests for the tight cases):
-# R1 full southbound; R2 southbound to Bhopal with 160-min headway (longest
+# T101 full southbound; T102 southbound to Bhopal with 160-min headway (longest
 # segment is 153 min, so the closest approach is 7 min and never a shared
-# minute); R3 short southbound Bhopal->Nagpur ahead of R1; R4 short
+# minute); T103 short southbound Bhopal->Nagpur ahead of T101; T104 short
 # northbound Nagpur->Betul long before southbound traffic arrives there;
-# R5 northbound Bhopal->New Delhi departing after R2 has cleared into Bhopal.
-# R6 NDLS->JBP via the loop, dep 320 (same 7-min closest approach behind R2
-# on VGLJ-BINA; leaves the trunk at BINA before R5's northbound crossing
-# point at km ~625). R7 ET->BINA via the loop, dep 100 (Vindhyachal
-# pattern). R8 JBP->ET, dep 700. Pairwise hand-verified in the gates.
+# T105 northbound Bhopal->New Delhi departing after T102 has cleared into Bhopal.
+# T106 NDLS->JBP via the loop, dep 320 (same 7-min closest approach behind T102
+# on VGLJ-BINA; leaves the trunk at BINA before T105's northbound crossing
+# point at km ~625). T107 ET->BINA via the loop, dep 100 (Vindhyachal
+# pattern). T108 JBP->ET, dep 700. Pairwise hand-verified in the gates.
 TRAINS = [
-    Train("R1", "NDLS", "NGP", _path("NDLS", "NGP"), 0),
-    Train("R2", "NDLS", "BPL", _path("NDLS", "BPL"), 160),
-    Train("R3", "BPL", "NGP", _path("BPL", "NGP"), 30),
-    Train("R4", "NGP", "BZU", _path("NGP", "BZU"), 5),
-    Train("R5", "BPL", "NDLS", _path("BPL", "NDLS"), 870),
-    Train("R6", "NDLS", "JBP",
+    Train("T101", "NDLS", "NGP", _path("NDLS", "NGP"), 0),
+    Train("T102", "NDLS", "BPL", _path("NDLS", "BPL"), 160),
+    Train("T103", "BPL", "NGP", _path("BPL", "NGP"), 30),
+    Train("T104", "NGP", "BZU", _path("NGP", "BZU"), 5),
+    Train("T105", "BPL", "NDLS", _path("BPL", "NDLS"), 870),
+    Train("T106", "NDLS", "JBP",
           _path("NDLS", "BINA") + ("BINA-SGO", "SGO-DMO", "DMO-KMZ", "KMZ-JBP"),
           320),
-    Train("R7", "ET", "BINA",
+    Train("T107", "ET", "BINA",
           ("PPI-ET", "NU-PPI", "JBP-NU", "KMZ-JBP", "DMO-KMZ", "SGO-DMO", "BINA-SGO"),
           100),
-    Train("R8", "JBP", "ET", ("JBP-NU", "NU-PPI", "PPI-ET"), 700),
+    Train("T108", "JBP", "ET", ("JBP-NU", "NU-PPI", "PPI-ET"), 700),
 ]
 
 # DISPLAY-ONLY train attributes (never on the engine Train object; scheduling
@@ -125,14 +125,14 @@ TRAINS = [
 # loco_class values are real Indian Railways classes (GT Express runs behind
 # a WAP-7; loop services typically WAP-4/WDM-3A). Display-only flavor.
 TRAIN_ATTRS = {
-    "R1": {"driver_employee_no": "DRV-4102", "loco_class": "WAP-7"},
-    "R2": {"driver_employee_no": "DRV-2218", "loco_class": "WAP-7"},
-    "R3": {"driver_employee_no": "DRV-3870", "loco_class": "WAP-4"},
-    "R4": {"driver_employee_no": "DRV-1956", "loco_class": "WAG-9"},
-    "R5": {"driver_employee_no": "DRV-2741", "loco_class": "WAP-4"},
-    "R6": {"driver_employee_no": "DRV-5519", "loco_class": "WAP-4"},
-    "R7": {"driver_employee_no": "DRV-6034", "loco_class": "WAP-4"},
-    "R8": {"driver_employee_no": "DRV-7178", "loco_class": "WDM-3A"},
+    "T101": {"driver_employee_no": "DRV-4102", "loco_class": "WAP-7"},
+    "T102": {"driver_employee_no": "DRV-2218", "loco_class": "WAP-7"},
+    "T103": {"driver_employee_no": "DRV-3870", "loco_class": "WAP-4"},
+    "T104": {"driver_employee_no": "DRV-1956", "loco_class": "WAG-9"},
+    "T105": {"driver_employee_no": "DRV-2741", "loco_class": "WAP-4"},
+    "T106": {"driver_employee_no": "DRV-5519", "loco_class": "WAP-4"},
+    "T107": {"driver_employee_no": "DRV-6034", "loco_class": "WAP-4"},
+    "T108": {"driver_employee_no": "DRV-7178", "loco_class": "WDM-3A"},
 }
 
 

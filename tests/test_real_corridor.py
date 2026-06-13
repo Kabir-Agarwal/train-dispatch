@@ -48,22 +48,22 @@ def test_network_is_one_connected_component():
 
 def test_arrivals_hand_verified():
     schedule, _ = load_baseline(build_network(), build_trains())
-    assert schedule["R1"]["BPL"] == 701      # cumulative km == minutes at 60 km/h
-    assert schedule["R1"]["NGP"] == 1090
-    assert schedule["R2"]["BPL"] == 861      # 160 + 701
-    assert schedule["R3"]["NGP"] == 419      # 30 + (1090 - 701)
-    assert schedule["R4"]["BZU"] == 195      # 5 + (1090 - 900)
-    assert schedule["R5"]["NDLS"] == 1571    # 870 + 701
+    assert schedule["T101"]["BPL"] == 701      # cumulative km == minutes at 60 km/h
+    assert schedule["T101"]["NGP"] == 1090
+    assert schedule["T102"]["BPL"] == 861      # 160 + 701
+    assert schedule["T103"]["NGP"] == 419      # 30 + (1090 - 701)
+    assert schedule["T104"]["BZU"] == 195      # 5 + (1090 - 900)
+    assert schedule["T105"]["NDLS"] == 1571    # 870 + 701
 
 
 def test_tightest_headway_is_seven_minutes_not_a_conflict():
-    # R1 occupies VGLJ-BINA [410,563]; R2 (dep 160) occupies [570,723].
+    # T101 occupies VGLJ-BINA [410,563]; T102 (dep 160) occupies [570,723].
     _, table = load_baseline(build_network(), build_trains())
     windows = sorted(
         (o.start, o.end) for o in table if o.segment_id == "VGLJ-BINA"
     )
-    # R1 [410,563], R2 [570,723] (7 clear min), R6 [730,883] (7 clear min
-    # behind R2), R5 northbound [1008,1161] (= 870 + (701-563) entry).
+    # T101 [410,563], T102 [570,723] (7 clear min), T106 [730,883] (7 clear min
+    # behind T102), T105 northbound [1008,1161] (= 870 + (701-563) entry).
     assert windows == [(410, 563), (570, 723), (730, 883), (1008, 1161)]
 
 
@@ -87,14 +87,14 @@ def test_collision_checker_and_recompute_are_fast_at_this_size():
         find_conflicts(table)
     check_s = (time.perf_counter() - t0) / 100
 
-    # the expensive path: a delay that forces R2 into a hold search
+    # the expensive path: a delay that forces T102 into a hold search
     t0 = time.perf_counter()
-    result = recompute_schedule(net, trains, [TrainDelayed("R1", 30)])
+    result = recompute_schedule(net, trains, [TrainDelayed("T101", 30)])
     recompute_s = time.perf_counter() - t0
     assert find_conflicts(list(result.occupancy_table)) == []
-    # R1 +30 shrinks the VGLJ-BINA gap to -23 -> R2 must hold 24 min
-    assert result.actions["R2"].action == "hold"
-    assert result.actions["R2"].depart_at == 184
+    # T101 +30 shrinks the VGLJ-BINA gap to -23 -> T102 must hold 24 min
+    assert result.actions["T102"].action == "hold"
+    assert result.actions["T102"].depart_at == 184
 
     assert load_s < 0.5, load_s
     assert check_s < 0.05, check_s
@@ -131,16 +131,16 @@ def test_bina_et_is_a_real_diamond():
 
 def test_new_train_arrivals_hand_verified():
     schedule, _ = load_baseline(build_network(), build_trains())
-    assert schedule["R6"]["BINA"] == 883     # 320 + 563
-    assert schedule["R6"]["JBP"] == 1235     # 883 + 75+77+109+91
-    assert schedule["R7"]["JBP"] == 346      # 100 + 68+94+84
-    assert schedule["R7"]["BINA"] == 698     # 100 + 598
-    assert schedule["R8"]["ET"] == 946       # 700 + 84+94+68
+    assert schedule["T106"]["BINA"] == 883     # 320 + 563
+    assert schedule["T106"]["JBP"] == 1235     # 883 + 75+77+109+91
+    assert schedule["T107"]["JBP"] == 346      # 100 + 68+94+84
+    assert schedule["T107"]["BINA"] == 698     # 100 + 598
+    assert schedule["T108"]["ET"] == 946       # 700 + 84+94+68
 
 
 def test_loop_attrs_and_loco_classes():
     for tid, attrs in TRAIN_ATTRS.items():
         assert attrs["loco_class"].startswith(("WAP", "WAG", "WDM")), tid
         assert attrs["driver_employee_no"].startswith("DRV-"), tid
-    assert TRAIN_ATTRS["R1"]["loco_class"] == "WAP-7"
+    assert TRAIN_ATTRS["T101"]["loco_class"] == "WAP-7"
     assert len(TRAIN_ATTRS) == 8
