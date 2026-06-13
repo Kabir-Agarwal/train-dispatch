@@ -110,8 +110,9 @@
   .leader { stroke:#aab6c2; stroke-width:1; fill:none; }
   .station-label-halo { font-size:12px; font-weight:700; text-anchor:middle; dominant-baseline:hanging;
                         font-family:system-ui,Segoe UI,Arial,sans-serif;
-                        stroke:#fff; stroke-width:3; paint-order:stroke; fill:#16263d; }
-  .station-label-minor { fill:#64748b; font-weight:600; }
+                        stroke:#fff; stroke-width:3.6; stroke-linejoin:round;
+                        paint-order:stroke; fill:#142235; }
+  .station-label-minor { fill:#4a5b6d; font-weight:600; }
   .train-dot { stroke:#fff; stroke-width:2; }
   .train-label { font-size:10px; font-weight:700; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .ghost-seg { stroke-width:8; fill:none; opacity:.5; stroke-dasharray:10,6; }
@@ -563,15 +564,6 @@ const WB_SECONDARY = new Set([
 ]);
 const WB_MAJOR = new Set([...WB_PRIMARY, ...WB_SECONDARY]);  // anything labeled by default
 
-// Leader-line label offsets (SCREEN px) for the packed Kolkata/Howrah cluster,
-// so its labels fan out and never overlap. A thin leader connects dot -> label.
-const WB_LABEL_OFFSET = {
-  HWH:  [-36, 46], SDAH: [46, 40],  SRC: [-74, 12], DKAE: [-60, -16],
-  NH:   [-48, -34], BDC: [40, -12], BWN: [-54, -4],
-  RHA:  [42, 8],   DGR: [-36, 20],  UDL: [36, -16], PKU: [-6, 30],
-  KGP:  [-44, -14],
-};
-
 // One lookup across datasets; the code namespaces never collide.
 function fixedCoord(id) {
   return FIXED_COORDS[id] || REAL_COORDS[id] || WB_COORDS[id] || null;
@@ -786,13 +778,14 @@ function buildStaticMap(snap) {
     }
   }
 
-  // --- Stations (3-tier hierarchy on WB; leader lines for the dense cluster) ---
+  // --- Stations (3-tier hierarchy; WB labels placed collision-free below) ---
   clearGroup('station-group');
   clearGroup('leader-group');
   const stG = document.getElementById('station-group');
   const ldG = document.getElementById('leader-group');
   const wbCenterX = 250;   // WB viewBox is 500 wide
-  snap.stations.forEach((id, i) => {
+  const wbLabels = [];     // labels deferred to the WB auto-placer
+  snap.stations.forEach((id) => {
     const c = mapCoords[id];
     if (!c) return;
     const cityName = dn(id);   // ALWAYS the real name — never a raw code
@@ -813,52 +806,139 @@ function buildStaticMap(snap) {
     circle.appendChild(svgEl('title', {}, cityName));  // hover tooltip
     stG.appendChild(circle);
 
-    // Label hubs always; on WB label minors only once zoomed in. Dense-cluster
-    // stations get an offset label + a thin leader line so nothing overlaps.
     const showLabel = mapCompact && (labeledByDefault || (mapWB && viewK >= 2.6));
-    if (showLabel) {
-      const off = mapWB ? WB_LABEL_OFFSET[id] : null;
-      let lx, ly, anchor;
-      if (off) {
-        lx = c[0] + off[0]; ly = c[1] + off[1];
-        anchor = off[0] >= 0 ? 'start' : 'end';
-        ldG.appendChild(svgEl('line', {
-          x1: c[0], y1: c[1], x2: lx + (off[0] >= 0 ? -2 : 2), y2: ly - 3,
-          class: 'leader'
-        }));
-      } else {
-        const right = mapWB ? (c[0] >= wbCenterX) : (c[0] > (TRUNK_X + LOOP_X) / 2);
-        lx = c[0] + (right ? r + 6 : -(r + 6)); ly = c[1] + 3;
-        anchor = right ? 'start' : 'end';
-      }
-      const minorCls = (mapWB && tier !== 'primary') ? ' station-label-minor' : '';
-      const lbl = svgEl('text', { x: lx, y: ly, class: 'station-label-halo' + minorCls },
-        cityName);
-      lbl.style.textAnchor = anchor;
-      lbl.style.fontSize = !mapWB ? '10.5px'
-        : tier === 'primary' ? '11px' : tier === 'secondary' ? '9px' : '8px';
+    if (mapWB) {
+      // Defer: a single pass places every WB label clear of dots, lines and
+      // other labels, with uniform short leaders (see placeWbLabels).
+      if (showLabel) wbLabels.push({ id, name: cityName, c, r, tier });
+    } else if (showLabel) {
+      // Real-corridor schematic: label to the outward side (unchanged).
+      const right = c[0] > (TRUNK_X + LOOP_X) / 2;
+      const lbl = svgEl('text', {
+        x: c[0] + (right ? r + 6 : -(r + 6)), y: c[1] + 3,
+        class: 'station-label-halo'
+      }, cityName);
+      lbl.style.textAnchor = right ? 'start' : 'end';
+      lbl.style.fontSize = '10.5px';
       lbl.style.dominantBaseline = 'auto';
       stG.appendChild(lbl);
     } else if (!mapCompact) {
-      // Sparse map: abbreviated id inside the dot + name below it.
-      const dotLbl = svgEl('text', {
-        x: c[0], y: c[1],
-        'text-anchor': 'middle',
-        'dominant-baseline': 'middle',
-        fill: '#fff',
-        'font-size': '9',
-        'font-weight': '700',
+      // Sparse 6-city map: abbreviated id inside the dot + name below (unchanged).
+      stG.appendChild(svgEl('text', {
+        x: c[0], y: c[1], 'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        fill: '#fff', 'font-size': '9', 'font-weight': '700',
         'font-family': 'system-ui,Segoe UI,Arial,sans-serif'
-      }, id);
-      stG.appendChild(dotLbl);
-
-      const lbl = svgEl('text', {
-        x: c[0], y: c[1] + 18,
-        class: 'station-label-halo'
-      }, cityName);
-      stG.appendChild(lbl);
+      }, id));
+      stG.appendChild(svgEl('text', {
+        x: c[0], y: c[1] + 18, class: 'station-label-halo'
+      }, cityName));
     }
   });
+  if (mapWB) placeWbLabels(wbLabels, snap, stG, ldG);
+}
+
+// ============================================================
+// WB label auto-placer: every label gets clear space — no overlap with any dot,
+// any track line, or another label — using uniform short leader lines. Greedy
+// over candidate directions (horizontal first, then diagonal, then vertical) at
+// quantized distances, so leaders stay consistent rather than a cramped/loose mix.
+// ============================================================
+function _rectsOverlap(a, b) {
+  return a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+}
+function _segSeg(x1, y1, x2, y2, x3, y3, x4, y4) {
+  const d = (x2 - x1) * (y4 - y3) - (y2 - y1) * (x4 - x3);
+  if (!d) return false;
+  const t = ((x3 - x1) * (y4 - y3) - (y3 - y1) * (x4 - x3)) / d;
+  const u = ((x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1)) / d;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+function _segRect(s, r) {
+  const inside = (x, y) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
+  if (inside(s.x1, s.y1) || inside(s.x2, s.y2)) return true;
+  const edges = [
+    [r.x0, r.y0, r.x1, r.y0], [r.x1, r.y0, r.x1, r.y1],
+    [r.x1, r.y1, r.x0, r.y1], [r.x0, r.y1, r.x0, r.y0],
+  ];
+  return edges.some(e => _segSeg(s.x1, s.y1, s.x2, s.y2, e[0], e[1], e[2], e[3]));
+}
+
+function placeWbLabels(labels, snap, stG, ldG) {
+  const PAD = 2.5;
+  // Obstacles: every station dot (so labels never sit on a dot)...
+  const dotObs = [];
+  for (const id in mapCoords) {
+    const c = mapCoords[id];
+    const r = WB_PRIMARY.has(id) ? 6.5 : WB_SECONDARY.has(id) ? 4.5 : 3;
+    dotObs.push({ x0: c[0] - r - PAD, y0: c[1] - r - PAD,
+                  x1: c[0] + r + PAD, y1: c[1] + r + PAD });
+  }
+  // ...and every track line (so labels never sit on a line).
+  const segObs = [];
+  for (const s of snap.segments) {
+    const a = mapCoords[s.endpoints[0]], b = mapCoords[s.endpoints[1]];
+    if (a && b) segObs.push({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
+  }
+  // Candidate directions: horizontal first (cleanest), then diagonal, then
+  // vertical. [unitX, unitY, textAnchor].
+  const DIRS = [
+    [1, 0, 'start'], [-1, 0, 'end'],
+    [0.72, -0.69, 'start'], [0.72, 0.69, 'start'],
+    [-0.72, -0.69, 'end'], [-0.72, 0.69, 'end'],
+    [0, -1, 'middle'], [0, 1, 'middle'],
+  ];
+  const rank = t => (t === 'primary' ? 0 : t === 'secondary' ? 1 : 2);
+  labels.sort((p, q) => rank(p.tier) - rank(q.tier));   // hubs claim prime spots
+  const placed = [];
+  for (const L of labels) {
+    const fs = L.tier === 'primary' ? 11 : L.tier === 'secondary' ? 9.5 : 8.5;
+    const minorCls = L.tier !== 'primary' ? ' station-label-minor' : '';
+    const t = svgEl('text', { x: 0, y: 0, class: 'station-label-halo' + minorCls },
+      L.name);
+    t.style.fontSize = fs + 'px';
+    t.style.dominantBaseline = 'auto';
+    stG.appendChild(t);
+    const w = t.getComputedTextLength();
+    const h = fs;
+    const STEPS = [L.r + 9, L.r + 22, L.r + 36, L.r + 54];  // uniform-ish leaders
+    let best = null;
+    for (const D of STEPS) {
+      for (const [ux, uy, anchor] of DIRS) {
+        const ax = L.c[0] + ux * D, ay = L.c[1] + uy * D;
+        let x0, x1;
+        if (anchor === 'start') { x0 = ax; x1 = ax + w; }
+        else if (anchor === 'end') { x0 = ax - w; x1 = ax; }
+        else { x0 = ax - w / 2; x1 = ax + w / 2; }
+        const box = { x0: x0 - PAD, y0: ay - h * 0.82 - PAD,
+                      x1: x1 + PAD, y1: ay + h * 0.28 + PAD };
+        if (dotObs.some(o => _rectsOverlap(box, o))) continue;
+        if (placed.some(o => _rectsOverlap(box, o))) continue;
+        if (segObs.some(s => _segRect(s, box))) continue;
+        best = { ax, ay, anchor, box, D }; break;
+      }
+      if (best) break;
+    }
+    if (!best) {  // last resort: farthest east, accept (rare)
+      const D = STEPS[STEPS.length - 1];
+      const ax = L.c[0] + D, ay = L.c[1];
+      best = { ax, ay, anchor: 'start', D,
+               box: { x0: ax, y0: ay - h, x1: ax + w, y1: ay } };
+    }
+    t.setAttribute('x', best.ax);
+    t.setAttribute('y', best.ay);
+    t.style.textAnchor = best.anchor;
+    placed.push(best.box);
+    // Leader only when the label is actually pushed away from its dot; adjacent
+    // labels sit beside the dot with no line (avoids fussy little stubs).
+    if (best.D - L.r > 12) {
+      const dx = best.ax - L.c[0], dy = best.ay - L.c[1];
+      const len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+      ldG.appendChild(svgEl('line', {
+        x1: L.c[0] + ux * (L.r + 1.5), y1: L.c[1] + uy * (L.r + 1.5),
+        x2: best.ax - ux * 3, y2: best.ay - uy * 3, class: 'leader'
+      }));
+    }
+  }
 }
 
 // ============================================================
@@ -1410,6 +1490,7 @@ refreshState();
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"
 // "added_train_ids" "added-tag" "WB_COORDS" "WB_GEO" "WB_MAJOR" "mapWB"
 // "wb-graticule" "zoom-controls" "Reset view" "train-legend" "WB_PRIMARY"
+// "placeWbLabels" "leader-group"
 </script>
 </body>
 </html>

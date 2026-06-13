@@ -1,6 +1,15 @@
 # PROGRESS.md
 
-## West Bengal map — presentation-grade redesign (frontend-design pass): DONE, awaiting visual pass
+## West Bengal map — station-label cleanup: DONE, awaiting visual pass
+Built 2026-06-13. Display layer ONLY (labels only — everything else unchanged); `engine/` byte-identical to e87dc10; `data/west_bengal.py` unchanged; master at cd37586. Suite: **196 passed**. Only `app/static/index.html` changed. Verified in-browser via DOM bounding-box geometry (preview screenshot tool again unresponsive this session).
+
+Replaced the hand-tuned per-station offset table with a **collision-free label auto-placer** (`placeWbLabels`): for every WB label it tries candidate positions (horizontal first, then diagonal, then vertical) at quantized distances and picks the first that clears **every dot, every track line, and every already-placed label**. Verified **0 label↔label, 0 label↔dot, 0 label↔line** overlaps at the default view (24 labels) AND at 3× zoom (all 50). Leaders are uniform short lines drawn only when a label is actually pushed out (17 adjacent labels have none; the pushed ones are mostly ~17–18px, with 2 longer for the two hardest Kolkata-core terminals) — no cramped/loose mix. Label contrast strengthened (white halo 3.0→3.6px, darker fills). The 6-city and real-corridor label paths are untouched.
+
+### STOPPED — label cleanup built + DOM-verified; user's visual pass next.
+
+---
+
+## West Bengal map — presentation-grade redesign (frontend-design pass): label cleanup applied above
 Built 2026-06-13. Display layer ONLY — `engine/` byte-identical to e87dc10 (verified empty diff); `data/west_bengal.py` UNCHANGED; master at cd37586. Suite: **196 passed** (190 + 6 WB UI gates). Only `app/static/index.html` changed (+ the WB gate adjusted). Geometry-verified in-browser via DOM (the preview screenshot tool was unresponsive this session, so polish was checked by measuring rendered bounding boxes/counts rather than by image).
 
 NOTE: the requested skill `/mnt/skills/public/frontend-design/SKILL.md` is **not present anywhere on this machine** (searched /mnt, /c, ~/.claude/skills, recursive glob; not in the available-skills list). Applied frontend-design principles from expertise instead: restrained palette, clear type hierarchy, intentional negative space, leader-lined labels, a side legend to remove collisions, and filling the canvas.
