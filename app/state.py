@@ -21,6 +21,7 @@ from engine.anomalies import (
     apply_anomalies,
 )
 from engine.maintenance import flagged_segments, segment_load
+from engine import pricing
 from engine.decision_log import (
     build_decision_log,
     describe_anomaly,
@@ -324,19 +325,39 @@ class AppState:
         }
 
     def passenger(self, train_id):
-        """Passenger view: ONLY the chosen train's ETA + a short reason.
-        The minute comes from the same engine result the admin board uses."""
+        """Passenger view: the chosen train's ETA (engine value) AND a rule-based
+        dynamic fare estimate. Both stay consistent with the live engine result —
+        the fare is recomputed from the train's CURRENT path (so a reroute changes
+        distance) and CURRENT departure (so a delay changes the time premium)."""
         if train_id not in self._facts:
             raise ValidationError(f"train '{train_id}' does not exist")
         entry = self._facts[train_id]
         text, violations = safe_phrase_passenger_eta(self.phraser, entry)
-        return {
+        out = {
             "train_id": train_id,
             "eta": entry.arrival,  # engine value, None if cancelled/stranded
             "status": entry.change,
             "text": text,
             "violations": violations,
+            "fare": None,
+            "fare_reason": "",
+            "occupancy": None,
+            "synthetic_occupancy": True,  # demo data — production = real bookings
         }
+        action = self.result.actions.get(train_id)
+        if action is not None and action.path:   # only running trains have a fare
+            occ = pricing.synthetic_occupancy(train_id)
+            dist = pricing.route_distance(self.network, action.path)
+            est = pricing.fare_estimate(dist, occ, action.depart_at)
+            out["fare"] = est
+            out["fare_reason"] = pricing.fare_reason(est)
+            out["occupancy"] = occ
+            # stretch: a REAL moving-average forecast on openly-synthetic demand
+            series = pricing.synthetic_demand_series(train_id)
+            out["demand_series"] = series
+            out["demand_forecast"] = pricing.moving_average(series, 3)
+            out["demand_next"] = pricing.forecast_next(series, 3)
+        return out
 
 
     def preview(self, payloads, new_trains=None):

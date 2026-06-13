@@ -1,6 +1,32 @@
 # PROGRESS.md
 
-## Feature 1 — PREDICTIVE MAINTENANCE (engine + display): DONE, awaiting review
+## Feature 2 — DYNAMIC PRICING (passenger fare estimate): DONE, awaiting visual pass
+Built 2026-06-13. master untouched at cd37586. Suite: **215 passed** (206 prior + 9 pricing gates). Additive — no scheduling/engine-behavior change; the byte-identical recompute golden gate still passes. Determinism gated (5 runs).
+
+### Pricing engine (`engine/pricing.py`) — rule-based, NOT ML
+A clear, inspectable formula, pure + deterministic:
+`fare = base(distance) × occupancy_mult × time_mult`, where
+`base = 20 + 0.5·route_km`, `occupancy_mult = 1 + 0.6·occupancy`, `time_mult = 1 + 0.4·surge`, and `surge` ramps 0→1 over the last 120 min before departure. `route_distance` sums the train's CURRENT path km (so a reroute changes it). Occupancy is `synthetic_occupancy(train_id)` — deterministic, in [0.35,0.95], **clearly labeled synthetic demo data (production would use real bookings)**. Hand-verified: distance 100, occ 0.5, ttd 0 → base 70 ×1.3 ×1.4 = ₹127.
+
+### Passenger view — ETA + fare in one panel
+`AppState.passenger()` now returns the engine ETA AND the fare estimate + a one-line plain reason ("Higher fare — 48% full, departs soon (rule-based dynamic pricing)"). Both stay consistent with the live engine: the fare is recomputed from the train's CURRENT path (reroute → distance changes) and CURRENT departure (delay → time premium changes). Live-verified on the real corridor: delaying T101 +100 min moved ETA 1090→1190 AND fare ₹1,019→₹776; a cancelled train shows "No fare". The fare reason is a deterministic template (engine-sourced numbers), not LLM-phrased, so it can't drift; the ETA text stays drift-guarded as before.
+
+### Honesty
+UI says "rule-based dynamic pricing"; occupancy note reads "synthetic demo data; production would use real bookings"; no ML/AI claim anywhere (gated: page has no "machine learning").
+
+### Stretch (done) — real forecast on synthetic data
+`synthetic_demand_series(id)` builds 14 days of OPENLY-SYNTHETIC daily demand; `moving_average` is a REAL trailing SMA (hand-verified: MA([10,20,30],2)=[10,15,25]); the passenger panel draws a small sparkline (synthetic demand + 3-day MA + next-point projection), labeled synthetic.
+
+### Gates (`tests/test_pricing.py`, 9)
+Formula hand-verified; fare rises with occupancy / distance / imminence; synthetic occupancy deterministic + bounded; real moving average; passenger returns ETA+fare together with the honest synthetic flag and route km; fare follows the engine on reroute (distance 30→22) and delay; cancelled train has no fare; deterministic over 5 runs; page carries the panel + honest labels and no ML claim.
+
+### NOTE: preview screenshot tool unresponsive again — verified via DOM (fare ₹1,019 with ETA min 1090; delay → both update; cancelled → no fare; 2-line demand sparkline; honest labels present). No console errors.
+
+### STOPPED at the Feature-2 boundary — committed; awaiting your visual pass.
+
+---
+
+## Feature 1 — PREDICTIVE MAINTENANCE (engine + display): DONE, reviewed & approved
 Built 2026-06-13. master untouched at cd37586. Suite: **206 passed** (196 prior + 10 new maintenance gates). The byte-identical recompute golden gate still passes — scheduling behavior is unchanged; this is purely additive. Determinism preserved (gated). Engine changed intentionally (this feature is engine+display).
 
 ### The heuristic — honest framing

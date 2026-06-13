@@ -50,7 +50,15 @@
   #trigger { font-size:13.5px; font-weight:600; color:#7b1fa2; margin-bottom:8px; min-height:18px; }
   .passenger-card { text-align:center; padding:18px 10px; }
   .passenger-card .eta { font-size:44px; font-weight:800; margin:6px 0; }
-  .passenger-card .reason { font-size:14px; color:#3c4858; max-width:420px; margin:0 auto; line-height:1.5; }
+  .passenger-card .reason { font-size:14px; color:#3c4858; max-width:420px; margin:0 auto 4px; line-height:1.5; }
+  .fare-block { margin-top:16px; padding-top:14px; border-top:1px solid #edf0f4; }
+  .fare-label { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#8a96a5; font-weight:700; }
+  .fare-label .muted { text-transform:none; letter-spacing:0; font-weight:600; }
+  .fare-amount { font-size:34px; font-weight:800; color:#0d7a5f; margin:2px 0; font-variant-numeric:tabular-nums; }
+  .fare-reason { font-size:13px; color:#3c4858; max-width:420px; margin:0 auto 8px; line-height:1.45; }
+  .fare-demand { margin:8px auto 4px; max-width:220px; }
+  .fare-demand svg { display:block; margin:0 auto; }
+  .synthetic-note { font-size:11.5px; font-style:italic; max-width:420px; margin:4px auto 0; }
   .muted { color:#8a96a5; font-size:12.5px; }
   .train-attr { display:block; font-size:11px; color:#7b8794; font-weight:600;
                 margin-top:2px; letter-spacing:.02em; }
@@ -387,6 +395,16 @@
       <div class="muted" id="pass-train"></div>
       <div class="eta" id="pass-eta">&#8212;</div>
       <div class="reason" id="pass-text"></div>
+      <div class="fare-block" id="pass-fare-block">
+        <div class="fare-label">Estimated fare <span class="muted">&middot; rule-based dynamic pricing</span></div>
+        <div class="fare-amount" id="pass-fare">&#8212;</div>
+        <div class="fare-reason" id="pass-fare-reason"></div>
+        <div class="fare-demand">
+          <svg id="pass-demand" viewBox="0 0 200 46" width="200" height="46"></svg>
+          <div class="muted" id="pass-demand-label"></div>
+        </div>
+        <div class="muted synthetic-note" id="pass-occ"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -1415,6 +1433,54 @@ async function refreshPassenger() {
   document.getElementById('pass-eta').textContent =
     p.eta === null ? '—' : 'min ' + p.eta;
   document.getElementById('pass-text').textContent = withNames(p.text);
+
+  // Rule-based dynamic fare (consistent with the engine: same path & departure)
+  const fareEl = document.getElementById('pass-fare');
+  const reasonEl = document.getElementById('pass-fare-reason');
+  const occEl = document.getElementById('pass-occ');
+  const demandLabel = document.getElementById('pass-demand-label');
+  const demandSvg = document.getElementById('pass-demand');
+  if (p.fare) {
+    fareEl.textContent = p.fare.currency + p.fare.fare.toLocaleString();
+    reasonEl.textContent = p.fare_reason;
+    const occPct = Math.round((p.occupancy || 0) * 100);
+    occEl.textContent = 'Occupancy ' + occPct + '% — synthetic demo data; '
+      + 'production would use real bookings.';
+    drawDemandSparkline(demandSvg, p.demand_series || [], p.demand_forecast || []);
+    demandLabel.textContent = (p.demand_series && p.demand_series.length)
+      ? 'Synthetic demand, last ' + p.demand_series.length
+        + ' days + 3-day moving average (next ≈ ' + p.demand_next + '%)'
+      : '';
+  } else {
+    fareEl.textContent = '—';
+    reasonEl.textContent = p.status === 'cancelled'
+      ? 'No fare — this train is cancelled.'
+      : 'No fare — this train cannot run.';
+    occEl.textContent = '';
+    demandLabel.textContent = '';
+    while (demandSvg.firstChild) demandSvg.removeChild(demandSvg.firstChild);
+  }
+}
+
+// Tiny sparkline: synthetic demand series (grey) + its real moving average
+// (green). Purely a chart of openly-synthetic demo data.
+function drawDemandSparkline(svg, series, ma) {
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (!series.length) return;
+  const W = 200, H = 46, pad = 3;
+  const lo = Math.min(...series, ...ma), hi = Math.max(...series, ...ma);
+  const span = (hi - lo) || 1;
+  const x = i => pad + i * (W - 2 * pad) / Math.max(1, series.length - 1);
+  const y = v => H - pad - (v - lo) / span * (H - 2 * pad);
+  const poly = (vals, stroke, w, dash) => {
+    const pts = vals.map((v, i) => x(i) + ',' + y(v)).join(' ');
+    const el = svgEl('polyline', { points: pts, fill: 'none', stroke: stroke,
+      'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    if (dash) el.setAttribute('stroke-dasharray', dash);
+    svg.appendChild(el);
+  };
+  poly(series, '#aab6c2', 1.5, '3,2');   // synthetic demand
+  poly(ma, '#0d7a5f', 2, null);          // real moving average
 }
 
 // ============================================================
@@ -1556,6 +1622,7 @@ refreshState();
 // "wb-graticule" "zoom-controls" "Reset view" "train-legend" "WB_PRIMARY"
 // "placeWbLabels" "leader-group" "maintenance_closure" "Predictive maintenance"
 // "Schedule maintenance" "maint-group" "cumulative-load heuristic"
+// "rule-based dynamic pricing" "pass-fare" "synthetic" "production would use real bookings"
 </script>
 </body>
 </html>
