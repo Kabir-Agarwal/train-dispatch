@@ -1,6 +1,35 @@
 # PROGRESS.md
 
-## West Bengal UI — REAL GEOGRAPHIC layout (supersedes the schematic): DONE, awaiting visual pass
+## West Bengal map — presentation-grade redesign (frontend-design pass): DONE, awaiting visual pass
+Built 2026-06-13. Display layer ONLY — `engine/` byte-identical to e87dc10 (verified empty diff); `data/west_bengal.py` UNCHANGED; master at cd37586. Suite: **196 passed** (190 + 6 WB UI gates). Only `app/static/index.html` changed (+ the WB gate adjusted). Geometry-verified in-browser via DOM (the preview screenshot tool was unresponsive this session, so polish was checked by measuring rendered bounding boxes/counts rather than by image).
+
+NOTE: the requested skill `/mnt/skills/public/frontend-design/SKILL.md` is **not present anywhere on this machine** (searched /mnt, /c, ~/.claude/skills, recursive glob; not in the available-skills list). Applied frontend-design principles from expertise instead: restrained palette, clear type hierarchy, intentional negative space, leader-lined labels, a side legend to remove collisions, and filling the canvas.
+
+### 1. Kolkata cluster (was the worst area) — now legible
+- **Leader lines + fanned offset labels** (`WB_LABEL_OFFSET`, screen-space) for the packed terminals (Howrah, Sealdah, Santragachi, Dankuni, Naihati, Bandel, Barddhaman, Ranaghat, Durgapur, Andal, Panskura, Kharagpur): each label is offset and joined to its dot by a thin leader, so nothing overlaps. Verified **0 label overlaps at the default view**; at 3.7× zoom all 50 are labeled with only 2 overlaps in the absolute densest core.
+- **Default view frames the populated south** (Kolkata–Barddhaman–Asansol/Kharagpur) at ~1.24×, filling the canvas instead of floating a small map with an empty north. `Reset view` returns to this framing; the sparse north is reachable by zoom-out/pan.
+
+### 2. Outline — no amateur blob
+Dropped the grey blob. Replaced with a **faint lat/long graticule** (22–27°N, 86–90°E, very light) for geographic context, over a clean subtle gradient panel. Reads as a real geographic plot.
+
+### 3. Visual hierarchy + refined palette
+- **3 tiers**: PRIMARY hubs (Howrah, Sealdah, Barddhaman, Asansol, Kharagpur, NJP) r6.5 deep-navy + bold 11px labels; SECONDARY junctions (18) r4.5 mid-navy + 9px; MINOR (26) r3 light-slate, named on hover / when zoomed in. (verified 6 / 18 / 26).
+- Restrained palette: track = soft slate `#8fa3b5` (not flat green), closed = `#d23b32` dashed, reduced = `#d9962b` dashed, predicted reroute = distinct purple `#6d4bd1`. Trains = a 12-colour refined categorical set.
+
+### 4. Train markers — no label collisions
+Removed all on-map train text labels; added a **side legend** (`#train-legend`) mapping colour → train → route, with affected trains highlighted. Verified **0 train text labels** on the map; 12 distinct legend swatches with routes (e.g. "T1 Howrah Jn → New Jalpaiguri"), 7 flagged as changed by the money-shot.
+
+### 5. Use the canvas
+Map + legend sit in a flex `#map-stage` filling the section width (svg ~970×660); taller map (max-height 660). Responsive: legend drops below the map under 880px.
+
+### 6. Behavior preserved (gated)
+Reroute money-shot (Memari–Barddhaman closed → Howrah trains onto the Dankuni chord), ghost preview, zoom/pan, the 7 control rows, "How this works", legend, plain summary, real names — all intact. The 6-city and real-corridor maps inherit the refined palette + side legend (no on-map train labels) and are otherwise unchanged.
+
+### STOPPED at the boundary — redesign built + gated + DOM-verified; user's visual pass decides demo-readiness.
+
+---
+
+## West Bengal UI — REAL GEOGRAPHIC layout (supersedes the schematic): superseded by the redesign above
 Built 2026-06-13. Display layer ONLY — `engine/` byte-identical to the optimization commit e87dc10 (`git diff e87dc10 -- engine/` empty); `data/west_bengal.py` UNCHANGED; master untouched at cd37586. Suite: **196 passed** (190 + 6 WB UI gates). The only changed file this round is `app/static/index.html` (geographic layout + zoom/pan), plus the WB gate updated. Browser-verified: 50 stations geo-placed inside the WB outline (0 outside), zoom makes the Kolkata cluster legible, money-shot reroute drawn.
 
 ### Geographic layout (replaces the metro/schematic WB layout)

@@ -31,9 +31,10 @@ def test_page_geo_positions_all_50_wb_stations(wb_url):
     """Every WB station has a real lat/long baked into the page, projected onto
     the WB state outline; the map is zoomable/pannable."""
     html = _get(wb_url, "/")
-    assert "WB_GEO" in html and "WB_MAJOR" in html and "mapWB" in html
-    assert "wb-outline" in html               # the WB state outline is present
+    assert "WB_GEO" in html and "WB_PRIMARY" in html and "mapWB" in html
+    assert "wb-graticule" in html             # geographic graticule (no blob)
     assert "zoom-controls" in html and "Reset view" in html  # zoom/pan UI
+    assert "train-legend" in html             # colour->train side legend
     assert len(STATIONS) == 50
     for code in STATIONS:
         assert f"{code}:" in html, f"no WB lat/long for {code}"
