@@ -130,8 +130,8 @@
   .seg-line { stroke-width:4; fill:none; cursor:default; }
   .seg-label { font-size:10px; fill:#5a6779; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .station-circle { stroke:#fff; stroke-width:1.6; }
-  .station-glyph { stroke:#fff; stroke-width:1.4; }   /* square railway-station node */
-  .train-arrow { stroke-linejoin:round; }             /* directional train marker */
+  .station-ring { stroke:#fff; stroke-width:1.4; }    /* transit-stop station symbol */
+  .train-car rect { stroke-linejoin:round; }          /* small train-car glyph */
   .graticule { stroke:#dde4ec; stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
   .graticule-label { font-size:8.5px; fill:#b3bdc9; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .leader { stroke:#aab6c2; stroke-width:1; fill:none; }
@@ -234,12 +234,12 @@
       predicted reroute
     </span>
     <span class="legend-item">
-      <svg width="24" height="14"><rect x="1" y="2" width="10" height="10" rx="1.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.4"/><rect x="16" y="4" width="6" height="6" rx="1.2" fill="#5a6f86" stroke="#fff" stroke-width="1.2"/></svg>
+      <svg width="26" height="14"><circle cx="6" cy="7" r="5.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.4"/><circle cx="6" cy="7" r="2.3" fill="#fff"/><circle cx="19" cy="7" r="3.6" fill="#5a6f86" stroke="#fff" stroke-width="1.2"/><circle cx="19" cy="7" r="1.5" fill="#fff"/></svg>
       station (major / minor)
     </span>
     <span class="legend-item">
-      <svg width="20" height="14"><path d="M 14 7 L 5 11 L 8 7 L 5 3 Z" fill="#2563eb" stroke="#fff" stroke-width="1.2"/></svg>
-      train (arrow = direction of travel)
+      <svg width="22" height="14"><rect x="3" y="4" width="16" height="6.5" rx="2.2" fill="#2563eb" stroke="#fff" stroke-width="1.2"/><rect x="15.5" y="5.4" width="2.4" height="3.7" rx="0.6" fill="#fff" opacity="0.8"/></svg>
+      train (glides along its track)
     </span>
     <span class="legend-item">
       <svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#e0972a" stroke-width="8" stroke-linecap="round" opacity="0.5"/></svg>
@@ -869,23 +869,24 @@ function buildStaticMap(snap) {
       : WB_PRIMARY.has(id) ? 'primary'
       : WB_SECONDARY.has(id) ? 'secondary' : 'minor';
     const labeledByDefault = !mapWB || tier !== 'minor';
-    // Dot size + fill by tier (major junctions read as hubs).
-    // Tier sizing/fill. Minor stations are kept clearly visible (a real marker,
-    // not a faint dot) and the gap to majors is modest so nothing looks "blank".
+    // Tier outer radius + fill. Minors stay clearly visible; modest gap to majors.
     let r, fill;
     if (!mapWB)                    { r = dotR; fill = '#1f3a5f'; }   // real:6 / 6-city:14
-    else if (tier === 'primary')   { r = 6;    fill = '#1f3a5f'; }
-    else if (tier === 'secondary') { r = 4.5;  fill = '#3f5c7d'; }
-    else                           { r = 3.5;  fill = '#5a6f86'; }  // minor: clear, not washed
-    // Railway iconography: a small rounded-SQUARE station node on the dense maps
-    // (reads as a transit station); the 6-city geographic map keeps round dots.
+    else if (tier === 'primary')   { r = 6.5;  fill = '#1f3a5f'; }
+    else if (tier === 'secondary') { r = 5;    fill = '#3f5c7d'; }
+    else                           { r = 4;    fill = '#5a6f86'; }  // minor: clear, not washed
+    // Station SYMBOL: a transit-stop "ring" — a filled circle with a white
+    // centre — on the dense maps; the 6-city geographic map keeps its round
+    // dots (which carry the S1.. code inside, drawn below).
     let marker;
     if (mapCompact) {
-      marker = svgEl('rect', {
-        x: c[0] - r, y: c[1] - r, width: r * 2, height: r * 2,
-        rx: 1.5, ry: 1.5, fill: fill, class: 'station-glyph'
-      });
-      if (tier === 'primary') marker.setAttribute('stroke-width', '2.2');
+      marker = svgEl('g', { class: 'station-stop' });
+      const ring = svgEl('circle', { cx: c[0], cy: c[1], r: r, fill: fill,
+        class: 'station-ring' });
+      if (tier === 'primary') ring.setAttribute('stroke-width', '2');
+      marker.appendChild(ring);
+      marker.appendChild(svgEl('circle', { cx: c[0], cy: c[1],
+        r: Math.max(1.5, r * 0.42), fill: '#fff' }));   // white centre dot
     } else {
       marker = svgEl('circle', { cx: c[0], cy: c[1], r: r, fill: fill,
         class: 'station-circle' });
@@ -956,7 +957,7 @@ function placeWbLabels(labels, snap, stG, ldG) {
   const dotObs = [];
   for (const id in mapCoords) {
     const c = mapCoords[id];
-    const r = WB_PRIMARY.has(id) ? 6 : WB_SECONDARY.has(id) ? 4.5 : 3.5;
+    const r = WB_PRIMARY.has(id) ? 6.5 : WB_SECONDARY.has(id) ? 5 : 4;
     dotObs.push({ x0: c[0] - r - PAD, y0: c[1] - r - PAD,
                   x1: c[0] + r + PAD, y1: c[1] + r + PAD });
   }
@@ -1046,23 +1047,29 @@ function drawTrains(trains, t, coords, colorMap) {
     const tr = mapWB ? 5.5 : mapCompact ? 6 : 9;
 
     // Train markers carry NO on-map text label (the side legend maps colour ->
-    // train), so they never collide with station names.
+    // train), so they never collide with station names. The same little TRAIN-CAR
+    // glyph is used whether moving or parked (no shape swap -> no flicker); the
+    // rAF loop advances `t` continuously, so the car GLIDES along its segment and
+    // visibly travels station to station, then rests at its destination.
     let marker;
-    if (mapCompact && place.moving && place.dir) {
-      // Moving: a small ARROW lying ALONG the exact segment it is on, pointing
-      // the way it travels. (Heading is the current segment's own direction, so
-      // it always sits on the line — never angled off it.)
-      const ang = Math.atan2(place.dir[1], place.dir[0]) * 180 / Math.PI;
-      const s = tr + 1.5;
-      marker = svgEl('path', {
-        d: `M ${s} 0 L ${-s * 0.8} ${s * 0.72} L ${-s * 0.4} 0 L ${-s * 0.8} ${-s * 0.72} Z`,
-        fill: color, stroke: '#fff', 'stroke-width': 1.4,
-        class: 'train-arrow',
+    if (mapCompact) {
+      // Orient along the current segment when moving; sit level when parked.
+      const ang = (place.moving && place.dir)
+        ? Math.atan2(place.dir[1], place.dir[0]) * 180 / Math.PI : 0;
+      const L = tr * 2.0, H = tr * 1.35;   // small train car (length x height)
+      marker = svgEl('g', {
+        class: 'train-car',
         transform: `translate(${px} ${py}) rotate(${ang})`
       });
+      marker.appendChild(svgEl('rect', {     // car body
+        x: -L / 2, y: -H / 2, width: L, height: H, rx: H * 0.34, ry: H * 0.34,
+        fill: color, stroke: '#fff', 'stroke-width': 1.3
+      }));
+      marker.appendChild(svgEl('rect', {     // cab window at the leading (+x) end
+        x: L / 2 - L * 0.24, y: -H / 2 + H * 0.24, width: L * 0.15, height: H * 0.52,
+        rx: 1, ry: 1, fill: '#ffffff', opacity: '0.8'
+      }));
     } else {
-      // Parked: at its origin (not yet departed) or rest at its destination
-      // (arrived -> STOPPED). A clean resting dot sitting on the station.
       marker = svgEl('circle', {
         cx: px, cy: py, r: tr, fill: color, stroke: '#fff', 'stroke-width': 2,
         class: 'train-dot'
@@ -1665,7 +1672,7 @@ refreshState();
 // "placeWbLabels" "leader-group" "maintenance_closure" "Predictive maintenance"
 // "Schedule maintenance" "maint-group" "cumulative-load heuristic"
 // "rule-based dynamic pricing" "pass-fare" "synthetic" "production would use real bookings"
-// "station-glyph" "train-arrow" "zoom-btn" "Zoom in to see all station names"
+// "station-ring" "station-stop" "train-car" "zoom-btn" "Zoom in to see all station names"
 </script>
 </body>
 </html>

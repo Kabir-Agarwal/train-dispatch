@@ -1,6 +1,18 @@
 # PROGRESS.md
 
-## WB train animation fix — on-track + stop-at-arrival: DONE, awaiting visual pass
+## Train-car glide + station-stop glyphs: DONE, awaiting visual pass
+Built 2026-06-14. Display layer ONLY (`app/static/index.html`); engine + data untouched; master at cd37586. Suite: **215 passed** (unchanged). Verified by reasoning through the rendering math (screenshot tool down); no console errors.
+
+1. **Smooth gliding trains** — the rAF loop already advances `simTime` continuously; the breakage was that the marker SHAPE swapped (parked dot ⇄ moving arrow) at departure/arrival, which flickered. Now ONE consistent **train-car glyph** (a small rounded-rect car body + a white cab-window at the leading end, colored per train, white outline) is used whether moving or parked — no shape swap. It glides along its segment (verified: ~0.083 px per rAF frame, constant) and rests at its destination. Orientation follows the current segment's exact direction when moving, level when parked. The 6-city map keeps round dots.
+2. **Station-stop glyphs** — replaced the squares with a transit-stop **ring**: a filled circle with a white centre dot. Primary 6.5 / secondary 5 / minor 4 px outer radius (minors clearly visible). The 6-city map keeps its coded round dots. (Resolves held item 3 — switched to the station symbol.) Legend swatches updated.
+
+Rendering-math verification: across 279 sample points on every segment of T4/T1/T8 the position's max cross-product vs the segment line is ~6e-12 (exactly on track); at `t ≥ arrival` the position equals the destination exactly with `moving:false` (stops). WB label overlaps remain 0 (placer obstacle radii updated to the new ring sizes).
+
+### STOPPED — awaiting your visual pass.
+
+---
+
+## WB train animation fix — on-track + stop-at-arrival: DONE, reviewed & approved
 Built 2026-06-14. Display layer ONLY (`app/static/index.html`); engine + data untouched; master at cd37586. Suite: **215 passed** (unchanged). Station markers deliberately NOT changed (item 3 on hold per Kabir). Verified by reasoning through the coordinate math for two trains (not DOM measurement; screenshot tool down).
 
 Root cause (from the last commit's arrow change, not the position lerp — the data invariants hold: every consecutive `station_times` pair is adjacent and minutes are monotonic, verified): the arrow's heading was sampled from `trainPosition(t+0.5)`, which near a junction points along the NEXT segment (arrow angled OFF the line), and a stopped train had `dx=dy=0 → ang=0` so its arrow pointed EAST (looked adrift, "never stops").
