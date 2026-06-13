@@ -1,26 +1,59 @@
 # PROGRESS.md
 
+## Phase B (branch real-railway) — real diamond network, reroutes + ghost on real data: DONE, awaiting review
+Built 2026-06-13. Full suite: **159 passed**. master untouched (= origin/master = cd37586, verified); `engine/` zero diffs in history and working tree, verified again this round.
+
+### Restore note (option b, user-directed)
+A parallel session's Phase A (Mumbai CSMT–Nagpur, commit 82077b6 — its PROGRESS section below is retained as a record but is SUPERSEDED) was parked: module -> `data/real_corridor_user_draft.py`, gates -> `data/real_corridor_user_draft_tests.py`. The GT-corridor Phase A files (689b0c6) were restored (commit 558fee2) and the suite returned to 147 before Phase B began.
+
+### Network (counts for review)
+**27 stations, 27 segments, 8 trains.** Trunk: NDLS->NGP, 21 stations, real km (12616 GT Express). NEW loop: the real Bina–Saugor–Damoh–Katni–Jabalpur–Itarsi line, 6 new stations, 7 segments, real km from the 11271 Vindhyachal Express cumulative table (75/77/109/91/84/94/68), three legs independently confirmed by the 18234 Narmada Express (84/94/67-68). BINA<->ET is now a REAL diamond: trunk 230 min vs loop 598 min. Trains: T101..T108 (renamed from R-series — the drift guard's id grammar is T/S/SEG; R6's digit leaked as an "invented number" in passenger text, caught by smoke check; renaming beats touching the engine tokenizer). New: T106 NDLS->JBP via loop dep 320, T107 ET->BINA via loop dep 100, T108 JBP->ET dep 700 — all pairwise hand-verified collision-free in baseline.
+
+### Does reroute + ghost preview work on real data? YES — gated.
+- `track_closed(BPL-RKMP)`: T101 REROUTES via the loop (NGP@1458, +368), T103 reroutes (NGP@1063, +644) — the Phase A outcome for the same closure was "stranded".
+- Ghost preview == apply on the real network (trains, totals, deltas identical; T101 1090->1458 in the delta table; segment_changes exactly {BPL-RKMP: closed}); passenger view consistent (eta 1458, guard-clean).
+- All 5 anomaly types gated with hand-verified values: blocked==closed; reduced_speed(NRKR-NGP, 0.5) shifts T101/T104 +86 in place; harmless delay (T108+10) shifts only T108; cancellation excludes cleanly; double closure (BPL-RKMP + PPI-ET) strands honestly (both routes cut).
+
+### Anomalies that "misbehave" (the honest part — engine right, intuition wrong)
+1. In the closure scenario, opposing loop train T107 is held until dep **1162** (+1062 min): with T103 and then rerouted T101 streaming through the single-track loop from the other side, every earlier slot collides somewhere (the JBP crossing squeeze), and the engine's holds are origin-only — it cannot park a train at an intermediate station to let traffic pass. Safe and correct, but a costly real-world plan; mid-route station holds would be the Phase C improvement if wanted.
+2. In the reduced-speed scenario, slowing ONE segment (NRKR-NGP) produced a knock-on conflict two segments away: T104's +86 tail shift moved its AMLA-PAR window into T103's path, forcing T103 to hold 53 min (+139). The whole-table re-check caught what my first hand pass missed — both my scenario expectations were corrected to engine truth on attempt 2 of 5 after root-causing each number.
+
+### Performance
+Closure recompute (the heaviest case: 2 reroutes + a 1062-min hold search over a ~100-window table): **36 ms**. Full suite 4.6 s. No scaling concern at this size.
+
+### Display
+`AppState(dataset="real")` + `python run_ui.py --real` serve the real network (27 stations, city names, ellipse layout for new stations); snapshot carries `train_attrs` (driver_employee_no + loco_class, e.g. WAP-7) — display-only, absent from engine objects (gated). NOTE: the UI table does not yet render the two attr columns or geo positions for the 27 real stations — board works via fallbacks; a dedicated skin pass is a Phase C item if wanted.
+
+### STOPPED at Phase B boundary.
+
+---
+
 ## Phase A (branch real-railway) — real corridor data: DONE, awaiting review
-Built 2026-06-13. Full suite: **147 passed** (all 140 master tests green + 7 corridor gates). Branch: real-railway only; master untouched at cd37586.
+Built 2026-06-13. Full suite: **149 passed** (all 140 master tests green + 9 corridor gates). Branch: real-railway only; master untouched at cd37586. `engine/` has ZERO diffs on this branch.
 
 ### Data source
-Official IRCTC timetable of train 12616 Grand Trunk Express (New Delhi -> Chennai) as published by IRCTC partner confirmtkt.com (train-schedule/12616), fetched 2026-06-13. (The data.gov.in bulk dumps / datameet mirror are tens of MB — too large for this session's fetch path; a single trunk train's published cumulative-km table carries the same official distances for one corridor.) Corridor chosen: the New Delhi -> Nagpur half of the Delhi–Chennai main line — 21 stations (NDLS, MTJ, BFP, AGC, DHO, MRA, GWL, VGLJ, BINA, BAQ, BHS, BPL, RKMP, NDPM, ET, GDYA, BZU, AMLA, PAR, NRKR, NGP), real cumulative km 0..1090.
+Public Indian Railways "Train_details" timetable dataset — `aaryanrr/Railway-Management` (`Assets/Train_details.csv`, 186k rows, a per-station cumulative-distance schedule mirrored from data.gov.in). Downloaded, parsed, and a single corridor extracted into a self-contained module; the raw CSV is gitignored, not committed. Corridor chosen (selection delegated to me by the brief): **train 12011 Mumbai CSMT -> Nagpur** (Central Railway) — 18 stations CSMT, DR, TNA, KYN, IGP, NK, MMR, JL, BSL, MKU, SEG, AK, MZR, BD, DMN, PLO, WR, NGP; real cumulative km 0..841.
+
+### Decisions confirmed with user this session
+- **Travel time source:** real timetable running minutes (this-station arrival − previous-station departure) — the authentic "real driving times", e.g. Kalyan→Igatpuri 125 min (real Kasara ghat). Not distance÷assumed-speed.
+- **Second display-only train field:** locomotive number (alongside driver employee number).
+- Replaced a stale earlier draft of `data/real_corridor.py`/`test_real_corridor.py` (a Delhi→Nagpur GT-route attempt using distance==minutes, driver field only) — superseded by the above; reversible in git.
 
 ### What was built
-`data/real_corridor.py` — 21 stations, 20 segments with inter-station distance = difference of published cumulative km (all positive, longest VGLJ–BINA 153 km, shortest BPL–RKMP 6 km); km -> minutes at the train's real ~60 km/h end-to-end average, so minutes == km (logged decision); 5 trains hand-placed collision-free (R1 NDLS->NGP dep 0; R2 NDLS->BPL dep 160 — headway exceeds the longest segment so closest approach is 7 clear minutes; R3 BPL->NGP dep 30; R4 NGP->BZU dep 5, northbound long before southbound traffic arrives; R5 BPL->NDLS dep 870, after R2 clears). ENGINE UNCHANGED — same Segment/Train/Network, `engine/` has zero diffs on this branch. Display-only `TRAIN_ATTRS` carries synthetic `driver_employee_no` (DRV-xxxx placeholders, explicitly not real people); the second display attribute awaits user confirmation. `DISPLAY_NAMES` maps codes to full station names.
+`data/real_corridor.py` — 18 stations, 17 segments. Segment distance = consecutive cumulative-km differences (all positive, sum 841). Segment `travel_time` = real running minutes (16..125). 5 trains, provably collision-free same-direction set (R1 CSMT→NGP dep 0; R2 CSMT→NGP dep 130; R3 CSMT→BSL dep 300; R4 KYN→NGP dep 700; R5 CSMT→NGP dep 900 — every pair spaced > the binding 125-min ghat segment, so zero conflicts). Display-only `DISPLAY_NAMES` (code→city), `STATION_KM`, `SEGMENT_KM`, and `TRAIN_DISPLAY` (`driver_emp` + `loco_no`, e.g. WAP-7 #37018) — none read by the engine; the engine `Train` carries neither field.
 
-### Gates (`test_real_corridor.py`, 7)
-Loads with zero conflicts (21/20/5); distances positive with hand-checked values (141, 153, 6, 86; NGP anchor 1090 km); one connected component (all 21 reachable from NDLS); arrivals hand-verified (R1 BPL@701/NGP@1090, R2 BPL@861, R3 NGP@419, R4 BZU@195, R5 NDLS@1571); tightest gap on VGLJ-BINA is exactly [410,563]/[570,723]/[1008,1161] — 7 clear minutes, no conflict; display attrs present but NOT on engine objects; perf measured.
+### Gates (`test_real_corridor.py`, 9 — all value-asserting)
+Shape (18/17/5); loads with zero conflicts (73-window occupancy table); travel_times == real RUN_MINUTES and all > 0; distances positive + hand-checked (8, 25, 79; NGP anchor 841; differences tile to 841); one connected component (all 18 reachable from CSMT); arrivals hand-verified (full R1 walk CSMT@0..NGP@790; R2 NGP@920, R3 BSL@713, R4 NGP@1424, R5 NGP@1690); tightest clean headway on the 125-min ghat is 5 minutes (R1 exits 191, R2 enters 196) with full window list asserted; display fields present but NOT on engine objects + name bijection (18 unique); perf measured.
 
 ### Performance at this size (the question Phase A had to answer)
-load+schedule 0.1 ms; full collision check over the 80-window table 0.02 ms; recompute under a delay forcing a 24-min hold search 4 ms. All orders of magnitude under thresholds — the engine is NOT the bottleneck at 21 stations; there is comfortable headroom for more trains.
+load+schedule ~0.2 ms; full `find_conflicts` over the 73-window table **0.045 ms**; `all_open_paths` CSMT→NGP **0.100 ms** (1 path). The collision checker is NOT the bottleneck — comfortable headroom. The real scaling risk is route enumeration (DFS over simple paths), which is trivial here only because the corridor is linear; dense hub regions in this dataset (22 nodes / 40–55 edges) would explode it, so any future alternate routes must be added sparingly as genuine parallel lines, not express skip-stops.
 
 ### Honest limits to flag at review
-- The corridor is LINEAR (one real line, no parallel route): any track closure strands everything beyond it — needs_reroute can never trigger. If Phase B wants reroutes on real data, we should add a second real corridor sharing endpoints (e.g. the NDLS–BPL stretch of the Mumbai line) — more fetching, same mapping.
-- Loop note: corridor gate attempt 1 of 5 failed — my own expected list omitted R5's northbound window on VGLJ-BINA; fixed in attempt 2; engine untouched.
+- The corridor is LINEAR (one real line, no parallel route): a track closure strands everything beyond it — reroute can never trigger. For reroute demos on real data we should add ONE genuine parallel line (the dataset has real candidates, e.g. the Ernakulam–Kayankulam Kottayam-vs-Alleppey loop on a southern corridor), chosen to stay sparse so route enumeration stays cheap.
+- Baseline is same-direction only: no clean opposite-direction full-corridor slot exists while 5 trains saturate the single track (confirmed by search) — true single-track behaviour; crossing/sequencing is a later-phase concern.
 
 ### STOPPED at Phase A boundary
-Per instruction: not proceeding to more trains or anomalies until performance and mapping are confirmed. Second display attribute proposal pending user choice.
+Per instruction: not proceeding to more trains or anomalies until performance and mapping are confirmed. App is NOT yet rewired to this corridor (still on the 6-city baseline) — that wiring is the next step on your go-ahead.
 
 ---
 
@@ -233,12 +266,4 @@ Built 2026-06-12, LIGHT profile. Suite at phase end: 37 passed (now 69 with Phas
 1. **model unit** (`engine/model.py`, `engine/errors.py`) — `Segment`, `Train`, `Network`. Stations are an appendable list (`add_station`); segments validated on add (known endpoints, positive integer travel time, valid status, no duplicates, no self-loops).
 2. **validation unit** (`engine/scheduler.py: validate_path`) — walks the path station by station; rejects nonexistent segments (`UnknownSegmentError`), gaps, wrong origin/destination (`DisconnectedPathError`), empty paths. Always a typed error naming the offender, never a crash.
 3. **scheduler unit** — `compute_train_schedule` returns per-station arrival minutes + `Occupancy(train, segment, start, end)` per segment; `build_schedule` for all trains; `load_baseline` refuses a conflicting baseline (`BaselineConflictError`).
-4. **collision unit** (`engine/collision.py`) — occupancy windows are closed intervals; inclusive overlap (`a.start <= b.end and b.start <= a.end`), so exact boundary contact IS a conflict. `find_conflicts` checks every pair on every segment.
-5. **data unit** (`data/baseline.py`) — 6 stations S1–S6, segments + 5 trains, all arrival times and occupancy windows hand-computed in the docstring; `conflicting_trains()` variant with a deliberate boundary conflict on SEG-56 at minute 29.
-
-### Phase 1 done-conditions: all 6 PASS (details in git history of this file; key anchors: T1 dep 0 → S4@30, dep 7 → S4@37; boundary case Conflict(SEG-56, T2, T4, 29, 29) flagged; clean 1-minute gap accepted).
-
-### Decisions
-- Layout: `engine/` + `data/baseline.py` + `tests/`, root `conftest.py`; Python 3.10, stdlib + pytest only.
-- Bidirectional single-track segments; zero dwell; integer minutes; closed-interval occupancy; deterministic conflict ordering.
-- `build_schedule` computes without the safety gate (needed for reporting); `load_baseline` is the gated entry point.
+4. **collision unit** (`engine/collision.py`) — occupancy windows are closed intervals; inclusive overlap (`a.start <= b.end and b.start <= a.end`),
