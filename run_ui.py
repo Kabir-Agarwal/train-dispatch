@@ -22,7 +22,9 @@ def main():
     state = AppState(dataset="real" if args.real else "baseline")
     server = make_server(state=state, port=args.port)
     url = f"http://127.0.0.1:{server.server_address[1]}/"
-    print(f"Train dispatch UI running at {url}  (Ctrl+C to stop)")
+    which = ("REAL 27-station Indian Railways corridor"
+             if args.real else "6-city demo network")
+    print(f"Train dispatch UI running at {url}  ({which}; Ctrl+C to stop)")
     if not args.no_browser:
         webbrowser.open(url)
     try:

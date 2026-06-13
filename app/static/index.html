@@ -38,6 +38,8 @@
   .passenger-card .eta { font-size:44px; font-weight:800; margin:6px 0; }
   .passenger-card .reason { font-size:14px; color:#3c4858; max-width:420px; margin:0 auto; line-height:1.5; }
   .muted { color:#8a96a5; font-size:12.5px; }
+  .train-attr { display:block; font-size:11px; color:#7b8794; font-weight:600;
+                margin-top:2px; letter-spacing:.02em; }
   td.num { font-variant-numeric:tabular-nums; }
   /* Network map section: full-width above the grid */
   #map-section { background:#fff; border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(16,36,62,.12); margin:16px 22px 0; }
@@ -254,10 +256,16 @@ const trainPick  = () => trainPickEl.value;
 // ============================================================
 let displayNames = {};
 
-// Replace /\bS\d+\b/ tokens in text with city names
+// Replace any KNOWN station-code token in text with its real name, so no raw
+// codes ever surface in prose. Covers the 6-city S1..S6 (a subset of this) and
+// the real corridor's codes (NGP, ET, reroute chains like NDLS-MTJ-BFP-..., and
+// segment ids like BHS-BPL, whose codes are decomposed by the same pass).
+// Tokens are uppercase alnum (2-6 chars); train ids (T101) and SEG-xx are left
+// untouched because they are not keys in displayNames.
 function withNames(text) {
   if (!text) return text;
-  return String(text).replace(/\b(S\d+)\b/g, (_, id) => displayNames[id] || id);
+  return String(text).replace(/\b([A-Z][A-Z0-9]{1,5})\b/g,
+    (m) => displayNames[m] || m);
 }
 
 // Direct display-name lookup for a single station id
@@ -319,6 +327,32 @@ const FIXED_COORDS = {
   S6: [259, 498]    // Chennai
 };
 
+// ============================================================
+// REAL corridor (--real): the 27 Indian-Railways stations, geo-positioned
+// on the India outline at roughly their real locations. Derived from an
+// affine fit of (lon,lat) onto the Delhi/Bhopal/Nagpur anchors above, then
+// magnified about the corridor centroid and given a minimum spacing so all
+// 27 labels stay legible (the outline is illustrative, so spacing is
+// schematic — relative geography is preserved: Delhi north, the New Delhi–
+// Jhansi–Bina trunk running south to Nagpur, and the Bina–Saugor–Damoh–
+// Katni–Jabalpur–Pipariya loop bulging EAST so the BINA–ET diamond reads).
+const REAL_COORDS = {
+  NDLS: [246, 65],   MTJ: [268, 134],  BFP: [280, 152],  AGC: [284, 169],
+  DHO:  [279, 186],  MRA: [285, 203],  GWL: [294, 220],  VGLJ:[313, 259],
+  BINA: [295, 332],  BAQ: [282, 351],  BHS: [276, 370],  BPL: [256, 387],
+  RKMP: [258, 404],  NDPM:[272, 421],  ET:  [274, 438],  GDYA:[287, 455],
+  BZU:  [281, 472],  AMLA:[293, 489],  PAR: [312, 506],  NRKR:[313, 523],
+  NGP:  [340, 540],
+  // loop (BINA -> ... -> ET), bulging east of the trunk:
+  PPI:  [303, 417],  NU:  [344, 409],  JBP: [382, 399],  KMZ: [403, 362],
+  DMO:  [356, 358],  SGO: [322, 355]
+};
+
+// One lookup for both datasets; real codes never collide with S1..S6.
+function fixedCoord(id) {
+  return FIXED_COORDS[id] || REAL_COORDS[id] || null;
+}
+
 // Palette for trains (index-based)
 const TRAIN_COLORS = [
   '#2563eb', '#d97706', '#7c3aed', '#059669', '#dc2626',
@@ -339,8 +373,9 @@ function computeStationCoords(stations) {
   const coords = {};
   const extras = [];
   for (const id of stations) {
-    if (FIXED_COORDS[id]) {
-      coords[id] = FIXED_COORDS[id];
+    const fc = fixedCoord(id);
+    if (fc) {
+      coords[id] = fc;
     } else {
       extras.push(id);
     }
@@ -406,11 +441,20 @@ function trainPosition(stationTimes, t, coords) {
 // only rebuilt when snap changes
 // ============================================================
 let mapCoords = {};
+let mapCompact = false;   // dense network (real corridor): smaller dots, name-only labels
 
 function buildStaticMap(snap) {
   mapCoords = computeStationCoords(snap.stations);
+  // Dense corridors (the 27-station real network) render schematically:
+  // small dots, NO seg-code labels, NO in-dot codes, names on alternating
+  // sides so all 27 stay legible. The 6-city map is unchanged.
+  mapCompact = snap.stations.length > 8;
 
-  // --- Segments ---
+  const dotR    = mapCompact ? 5 : 14;
+  const segW    = mapCompact ? 2.5 : 4;
+
+  // --- Segments (both corridors are drawn here; geography makes the trunk
+  //     and the Bina–Katni–Jabalpur loop read as two lines + a diamond) ---
   clearGroup('seg-group');
   const segG = document.getElementById('seg-group');
 
@@ -427,7 +471,7 @@ function buildStaticMap(snap) {
     const line = svgEl('line', {
       x1: cA[0], y1: cA[1], x2: cB[0], y2: cB[1],
       stroke: color,
-      'stroke-width': 4,
+      'stroke-width': segW,
       'stroke-linecap': 'round',
       opacity: s.status === 'closed' ? '0.45' : '1',
       class: 'seg-line'
@@ -435,47 +479,67 @@ function buildStaticMap(snap) {
     if (s.status === 'closed') line.setAttribute('stroke-dasharray', '10,6');
     segG.appendChild(line);
 
-    const label = svgEl('text', {
-      x: mx, y: my - 6,
-      'text-anchor': 'middle',
-      class: 'seg-label'
-    }, s.id + ' (' + s.effective_time + 'm)');
-    segG.appendChild(label);
+    // Per-segment id+time labels only on the sparse 6-city map; on the dense
+    // real map they would clutter and expose seg-codes (times are in the table).
+    if (!mapCompact) {
+      const label = svgEl('text', {
+        x: mx, y: my - 6,
+        'text-anchor': 'middle',
+        class: 'seg-label'
+      }, s.id + ' (' + s.effective_time + 'm)');
+      segG.appendChild(label);
+    }
   }
 
   // --- Stations ---
   clearGroup('station-group');
   const stG = document.getElementById('station-group');
-  for (const id of snap.stations) {
+  snap.stations.forEach((id, i) => {
     const c = mapCoords[id];
-    if (!c) continue;
+    if (!c) return;
     const circle = svgEl('circle', {
-      cx: c[0], cy: c[1], r: 14,
+      cx: c[0], cy: c[1], r: dotR,
       fill: '#10243e',
       class: 'station-circle'
     });
     stG.appendChild(circle);
 
-    // Station dot label (abbreviated inside circle)
-    const dotLbl = svgEl('text', {
-      x: c[0], y: c[1],
-      'text-anchor': 'middle',
-      'dominant-baseline': 'middle',
-      fill: '#fff',
-      'font-size': '9',
-      'font-weight': '700',
-      'font-family': 'system-ui,Segoe UI,Arial,sans-serif'
-    }, id);
-    stG.appendChild(dotLbl);
+    const cityName = dn(id);   // ALWAYS the real name — never a raw code
 
-    // City name label below the circle, with white halo for readability
-    const cityName = dn(id);
-    const lbl = svgEl('text', {
-      x: c[0], y: c[1] + 18,
-      class: 'station-label-halo'
-    }, cityName);
-    stG.appendChild(lbl);
-  }
+    if (mapCompact) {
+      // Name label beside the dot, alternating left/right so neighbours
+      // (close together along the near-vertical trunk) never collide.
+      const right = (i % 2 === 0);
+      const lbl = svgEl('text', {
+        x: c[0] + (right ? dotR + 4 : -(dotR + 4)),
+        y: c[1] + 3,
+        class: 'station-label-halo'
+      }, cityName);
+      // inline styles beat the .station-label-halo stylesheet rule
+      lbl.style.textAnchor = right ? 'start' : 'end';
+      lbl.style.fontSize = '9.5px';
+      lbl.style.dominantBaseline = 'auto';
+      stG.appendChild(lbl);
+    } else {
+      // Sparse map: abbreviated id inside the dot + name below it.
+      const dotLbl = svgEl('text', {
+        x: c[0], y: c[1],
+        'text-anchor': 'middle',
+        'dominant-baseline': 'middle',
+        fill: '#fff',
+        'font-size': '9',
+        'font-weight': '700',
+        'font-family': 'system-ui,Segoe UI,Arial,sans-serif'
+      }, id);
+      stG.appendChild(dotLbl);
+
+      const lbl = svgEl('text', {
+        x: c[0], y: c[1] + 18,
+        class: 'station-label-halo'
+      }, cityName);
+      stG.appendChild(lbl);
+    }
+  });
 }
 
 // ============================================================
@@ -494,15 +558,17 @@ function drawTrains(trains, t, coords, colorMap) {
     const color = colorMap[train.id] || '#888';
     const lastMinute = train.station_times[train.station_times.length - 1][1];
     const faded = t > lastMinute;
+    const tr = mapCompact ? 6 : 9;
 
     const circle = svgEl('circle', {
-      cx: pos[0], cy: pos[1], r: 9,
+      cx: pos[0], cy: pos[1], r: tr,
       fill: color,
       stroke: '#fff',
       'stroke-width': 2,
       opacity: faded ? '0.4' : '1',
       class: 'train-dot'
     });
+    circle.style.r = tr + 'px';   // beats the .train-dot { r:9 } stylesheet rule
     tG.appendChild(circle);
 
     const lbl = svgEl('text', {
@@ -726,14 +792,23 @@ function render(snap) {
   // Schedule board — display names in arrivals and reason columns
   const board = document.querySelector('#board tbody');
   board.innerHTML = '';
+  const attrsAll = snap.train_attrs || {};
   for (const t of snap.trains) {
     const arr = t.arrivals
       ? Object.entries(t.arrivals).map(([st, m]) => dn(st) + '@' + m).join('  ')
       : '&mdash;';
     const delay = t.added_delay === null ? '&mdash;'
       : (t.added_delay > 0 ? '+' : '') + t.added_delay + ' min';
+    // Display-only attributes (real corridor): loco class + driver employee no.
+    // These never touch the engine; they ride along in the snapshot.
+    const at = attrsAll[t.id];
+    const attrLine = at
+      ? `<span class="train-attr">${at.loco_class || ''}` +
+        `${at.loco_class && at.driver_employee_no ? ' &middot; ' : ''}` +
+        `${at.driver_employee_no || ''}</span>`
+      : '';
     board.insertAdjacentHTML('beforeend',
-      `<tr><td><b>${t.id}</b></td><td><span class="pill ${t.action}">${t.action.replace('_',' ')}</span></td>` +
+      `<tr><td><b>${t.id}</b>${attrLine}</td><td><span class="pill ${t.action}">${t.action.replace('_',' ')}</span></td>` +
       `<td class="num">${t.depart_at ?? '&mdash;'}</td><td class="num">${arr}</td>` +
       `<td class="num">${delay}</td><td class="muted">${withNames(t.reason)}</td></tr>`);
   }
@@ -910,7 +985,7 @@ refreshState();
 // "Reset to baseline" "Network — segment status" "Schedule board" "Decision log"
 // "Passenger view" "pass-eta" "How this works" "Report a problem"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
-// "display_names"
+// "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 </script>
 </body>
 </html>

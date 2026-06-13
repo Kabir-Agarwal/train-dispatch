@@ -1,5 +1,25 @@
 # PROGRESS.md
 
+## Phase C (branch real-railway) — real-corridor UI / display skin: DONE, awaiting visual pass
+Built 2026-06-13. Full suite: **165 passed** (159 from Phase B + 6 new UI gates). master untouched; `engine/` **zero diffs in history and working tree** — verified again this round (`git diff master -- engine/` empty). Phase C is display-layer ONLY: the only real content changes are `app/static/index.html`, one line in `run_ui.py`, and the new gate `tests/test_real_corridor_ui.py`. No engine, scheduler, anomaly, state, or data change.
+
+### What changed (display layer only)
+- **Geo-positioned all 27 real stations** on the India outline (`REAL_COORDS` in the page). Coords come from an affine fit of (lon,lat) onto the existing Delhi/Bhopal/Nagpur anchors, then magnified about the corridor centroid with a 17px minimum spacing so all 27 labels stay legible. Relative geography is preserved: Delhi north, the NDLS–Jhansi–Bina trunk running south to Nagpur, and the Bina–Saugor–Damoh–Katni–Jabalpur–Pipariya loop **bulging east** so the **BINA–ET diamond** reads as two distinct lines (trunk via Bhopal vs the eastern loop).
+- **Dense-map (compact) render mode** (`stations.length > 8`): smaller dots (r=5), name-only labels alternating left/right, no per-segment id labels, no in-dot codes. The 6-city map is byte-for-byte unchanged (still r=14 dots, codes in dots, seg labels).
+- **Both display attributes on the board**: loco class + driver employee number render as a sub-line under each train id (`WAP-7 · DRV-4102`), straight from the snapshot's `train_attrs`. Absent for the 6-city (no attrs) — sub-line simply omitted.
+- **`withNames()` generalized** from `\bS\d+\b` to *any* known station code (keys of `display_names`). The real corridor's prose (reasons, decision log, trigger, passenger text) now humanizes `NGP`→Nagpur, `ET`→Itarsi Jn, reroute chains `NDLS-MTJ-BFP-…`→full names, and segment ids `BHS-BPL`→`Vidisha-Bhopal Jn`. 6-city behavior is a strict subset (S1→Delhi unchanged; `SEG-12` and train ids `T101` left alone — not display_names keys).
+- `run_ui.py --real` now announces "REAL 27-station Indian Railways corridor".
+
+### Kept working (regression-gated on the real page)
+Ghost preview (`/api/preview`, Apply/Cancel), the "How this works" panel, the legend, the India outline + illustrative caption, the plain summary after Apply, the five anomaly controls + Reset — all still served, asserted by `test_six_city_ui_features_still_present_on_real_page`.
+
+### The new gate (`tests/test_real_corridor_ui.py`, 6 tests)
+Serves `AppState(dataset="real")` over the real HTTP path and asserts: all 27 stations have a baked-in map coordinate; the loop/diamond stations are placed; `loco_class` + `driver_employee_no` are wired into the page; the `/api/state` snapshot exposes 27 stations + 8 trains' attrs (DRV-/WAP-WAG-WDM); every station code maps to a unique real name (so no raw codes leak through `withNames`); and the 6-city features survive.
+
+### STOPPED at Phase C boundary — UI built + gated; user does the visual pass and records.
+
+---
+
 ## Phase B (branch real-railway) — real diamond network, reroutes + ghost on real data: DONE, awaiting review
 Built 2026-06-13. Full suite: **159 passed**. master untouched (= origin/master = cd37586, verified); `engine/` zero diffs in history and working tree, verified again this round.
 
@@ -22,7 +42,7 @@ A parallel session's Phase A (Mumbai CSMT–Nagpur, commit 82077b6 — its PROGR
 Closure recompute (the heaviest case: 2 reroutes + a 1062-min hold search over a ~100-window table): **36 ms**. Full suite 4.6 s. No scaling concern at this size.
 
 ### Display
-`AppState(dataset="real")` + `python run_ui.py --real` serve the real network (27 stations, city names, ellipse layout for new stations); snapshot carries `train_attrs` (driver_employee_no + loco_class, e.g. WAP-7) — display-only, absent from engine objects (gated). NOTE: the UI table does not yet render the two attr columns or geo positions for the 27 real stations — board works via fallbacks; a dedicated skin pass is a Phase C item if wanted.
+`AppState(dataset="real")` + `python run_ui.py --real` serve the real network (27 stations, city names, ellipse layout for new stations); snapshot carries `train_attrs` (driver_employee_no + loco_class, e.g. WAP-7) — display-only, absent from engine objects (gated). NOTE (resolved in Phase C, above): at Phase B the UI did not yet render the two attrs or geo positions for the 27 stations — Phase C added `REAL_COORDS`, the compact map mode, and the board attr sub-line.
 
 ### STOPPED at Phase B boundary.
 
