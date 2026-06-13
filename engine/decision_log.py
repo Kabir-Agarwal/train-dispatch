@@ -10,6 +10,7 @@ import re
 from dataclasses import dataclass
 
 from .anomalies import (
+    MaintenanceClosure,
     ReducedSpeed,
     TrackBlocked,
     TrackClosed,
@@ -36,6 +37,8 @@ def describe_anomaly(a):
         return f"train_delayed({a.train_id}, {a.minutes} min)"
     if isinstance(a, TrainRestricted):
         return f"train_restricted({a.train_id}, {a.segment_id})"
+    if isinstance(a, MaintenanceClosure):
+        return f"maintenance_closure({a.segment_id})"
     raise ValueError(f"unknown anomaly: {a!r}")
 
 

@@ -1,5 +1,26 @@
 # PROGRESS.md
 
+## Feature 1 — PREDICTIVE MAINTENANCE (engine + display): DONE, awaiting review
+Built 2026-06-13. master untouched at cd37586. Suite: **206 passed** (196 prior + 10 new maintenance gates). The byte-identical recompute golden gate still passes — scheduling behavior is unchanged; this is purely additive. Determinism preserved (gated). Engine changed intentionally (this feature is engine+display).
+
+### The heuristic — honest framing
+A **cumulative-load heuristic, NOT an AI prediction** (labeled that way in the UI and the snapshot). `engine/maintenance.py` (pure, deterministic): for each segment, `load_score = Σ over crossing trains of a per-train load weight` (the train's length / coach count where the dataset provides it, else 1), plus `usage_count`; the app adds `crossings/hour` over the planned horizon. Train sizes live as display-layer `LOAD_WEIGHTS` in `data/west_bengal.py` and `data/real_corridor.py` (illustrative coach counts; the scheduling engine ignores them).
+
+### Flagging
+A segment at/above the per-dataset inspection threshold (baseline 2, real 70, WB 60) is flagged "due for inspection". WB flags the 8 highest-load corridors (north trunk NFK–MLDT/MLDT–NJP at load 68; the Howrah main + Memari–Barddhaman at 62). Shown three ways: an **amber underlay on the map**, an **amber ⚠ "inspection due" badge + Load column** in the segment-status table, and a **Predictive-maintenance panel** listing each flagged track with load score, train count, crossings/h and a reason.
+
+### The impressive link (predict → schedule → reroute)
+A flagged segment's **"Schedule maintenance"** button injects a new `MaintenanceClosure` anomaly. It is routing-IDENTICAL to a track closure (added to `closed_segment_ids`; `apply_anomalies` shuts it) so the **existing reroute engine handles it unchanged** — gated as byte-identical to `TrackClosed` on the same segment. Only its label differs: the decision-log trigger reads `maintenance_closure(<seg>)`. Live-verified on WB: Reset → Schedule maintenance on flagged MYM–BWN → 4 trains (T1/T2/T4/T12) reroute onto the Dankuni chord, collision-free.
+
+### Gates (`tests/test_maintenance.py`, 10)
+Default-weight load == usage count (hand-verified); weighted load accumulates per train length (hand-verified); threshold flags the right segments busiest-first; MaintenanceClosure is a closure for routing + labeled distinctly; it reroutes **byte-identically to a track closure** and stays collision-free; deterministic over 5 runs; the snapshot exposes flags + load + honest "not an AI prediction" label; inject + HTTP round-trip reroute; the page carries the panel and honest text (the only "AI prediction" mention is the disclaimer).
+
+### NOTE: preview screenshot tool unresponsive again this session — verified via DOM (8 map underlays, 8 panel rows, 8 table badges, full Reset→schedule→reroute flow with 4 ghost reroute polylines). No console errors.
+
+### STOPPED at the Feature-1 boundary — committed; awaiting review before Feature 2 (dynamic pricing).
+
+---
+
 ## West Bengal map — station-label cleanup: DONE, awaiting visual pass
 Built 2026-06-13. Display layer ONLY (labels only — everything else unchanged); `engine/` byte-identical to e87dc10; `data/west_bengal.py` unchanged; master at cd37586. Suite: **196 passed**. Only `app/static/index.html` changed. Verified in-browser via DOM bounding-box geometry (preview screenshot tool again unresponsive this session).
 

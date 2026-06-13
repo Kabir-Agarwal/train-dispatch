@@ -11,6 +11,7 @@ import data.baseline
 import data.real_corridor
 import data.west_bengal
 from engine.anomalies import (
+    MaintenanceClosure,
     ReducedSpeed,
     TrackBlocked,
     TrackClosed,
@@ -19,6 +20,7 @@ from engine.anomalies import (
     TrainRestricted,
     apply_anomalies,
 )
+from engine.maintenance import flagged_segments, segment_load
 from engine.decision_log import (
     build_decision_log,
     describe_anomaly,
@@ -36,7 +38,7 @@ from engine.phrasing import (
 from engine.recompute import Action, RecomputeResult, recompute_schedule
 
 from .display import DISPLAY_NAMES, safe_summary
-from engine.scheduler import load_baseline
+from engine.scheduler import build_schedule, load_baseline
 
 _ANOMALY_TYPES = {
     "track_closed": lambda d: TrackClosed(d["segment"]),
@@ -45,7 +47,13 @@ _ANOMALY_TYPES = {
     "train_cancelled": lambda d: TrainCancelled(d["train"]),
     "train_delayed": lambda d: TrainDelayed(d["train"], int(d["minutes"])),
     "train_restricted": lambda d: TrainRestricted(d["train"], d["segment"]),
+    "maintenance_closure": lambda d: MaintenanceClosure(d["segment"]),
 }
+
+# Inspection threshold for the cumulative-load heuristic, per dataset (chosen so
+# the genuinely high-load corridors flag). Load weight = train length (coaches)
+# where the dataset provides it, else 1.
+_MAINT_THRESHOLD = {"baseline": 2, "real": 70, "wb": 60}
 
 
 def parse_anomaly(payload):
@@ -125,6 +133,10 @@ class AppState:
         self.dataset = dataset
         self.network = module.build_network()
         self.trains = module.build_trains()
+        # Maintenance heuristic config (display layer): per-train load weight
+        # (train length / coaches) and the inspection threshold.
+        self.load_weights = dict(getattr(module, "LOAD_WEIGHTS", {}))
+        self.maint_threshold = _MAINT_THRESHOLD.get(dataset, 2)
         self.phraser = phraser or get_phraser()
         self.reset()
         if dataset == "wb":
@@ -230,6 +242,52 @@ class AppState:
             })
         return out
 
+    def _maintenance(self):
+        """Cumulative-load heuristic over the PLANNED paths (NOT a prediction
+        model): per-segment load score, usage count, crossings/hour, and which
+        segments cross the inspection threshold. Deterministic."""
+        all_trains = self._all_trains()
+        load = segment_load(self.network, all_trains, self.load_weights)
+        flagged = flagged_segments(load, self.maint_threshold)
+        flagged_set = set(flagged)
+        # crossings per hour over the planned horizon
+        sched = build_schedule(self.network, all_trains)[0]
+        horizon = max((m for arr in sched.values() for m in arr.values()), default=0)
+        hours = max(horizon / 60.0, 1e-9)
+
+        def freq(c):
+            return round(c / hours, 2)
+
+        segs = {}
+        for sid, s in load.items():
+            segs[sid] = {
+                "load_score": s["load_score"],
+                "usage_count": s["usage_count"],
+                "frequency_per_hour": freq(s["usage_count"]),
+                "flagged": sid in flagged_set,
+            }
+        flagged_list = []
+        for sid in flagged:
+            s = load[sid]
+            ends = self.network.segment(sid).endpoints
+            flagged_list.append({
+                "id": sid,
+                "endpoints": list(ends),
+                "load_score": s["load_score"],
+                "usage_count": s["usage_count"],
+                "frequency_per_hour": freq(s["usage_count"]),
+                "reason": (f"cumulative load {s['load_score']:g} ≥ inspection "
+                           f"threshold {self.maint_threshold} "
+                           f"({s['usage_count']} trains, ~{freq(s['usage_count'])}/h)"),
+            })
+        return {
+            "heuristic": "cumulative-load heuristic (not an AI prediction)",
+            "threshold": self.maint_threshold,
+            "weighted": bool(self.load_weights),
+            "segments": segs,
+            "flagged": flagged_list,
+        }
+
     def snapshot(self):
         """Everything the admin view shows. All numbers from the engine."""
         trains = []
@@ -256,6 +314,7 @@ class AppState:
             "summary_text": safe_summary(self.result.actions)
             if (self.anomalies or self.added_trains) else "",
             "segments": self._effective_segments(),
+            "maintenance": self._maintenance(),
             "anomalies": [describe_anomaly(a) for a in self.anomalies],
             "added_train_ids": [t.id for t in self.added_trains],
             "trigger_text": trigger_text,

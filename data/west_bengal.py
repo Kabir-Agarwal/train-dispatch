@@ -135,6 +135,15 @@ TRAINS = [
 ]
 
 
+# Illustrative train sizes (coach counts) used ONLY as the per-train load weight
+# in the cumulative-load maintenance heuristic — long-distance trains stress the
+# track more than locals. Not used by the scheduling engine.
+LOAD_WEIGHTS = {
+    "T1": 22, "T2": 20, "T3": 22, "T4": 24, "T5": 14, "T6": 18,
+    "T7": 12, "T8": 10, "T9": 12, "T10": 16, "T11": 12, "T12": 20,
+}
+
+
 def build_network():
     return Network(STATIONS, SEGMENTS)
 

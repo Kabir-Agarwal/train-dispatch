@@ -56,6 +56,16 @@
                 margin-top:2px; letter-spacing:.02em; }
   .added-tag { display:inline-block; margin-left:6px; padding:1px 6px; border-radius:99px;
                background:#0891b2; color:#fff; font-size:10px; font-weight:700; vertical-align:middle; }
+  /* Predictive maintenance (cumulative-load heuristic) */
+  #maint-intro { margin:0 0 10px; }
+  #maint-table .maint-load { font-weight:700; color:#b45309; font-variant-numeric:tabular-nums; }
+  #maint-table button { padding:4px 9px; font-size:12px; background:#b45309; }
+  #maint-table button:hover { background:#92400e; }
+  tr.flagged-seg td:first-child { box-shadow:inset 3px 0 0 #e0972a; }
+  .flag-badge { display:inline-block; margin-left:6px; padding:0 6px; border-radius:99px;
+                background:#fdebd0; color:#92400e; font-size:10.5px; font-weight:700;
+                border:1px solid #e8c48a; white-space:nowrap; }
+  .seg-load { font-variant-numeric:tabular-nums; color:#5a6779; }
   td.num { font-variant-numeric:tabular-nums; }
   /* Network map section: full-width above the grid */
   #map-section { background:#fff; border-radius:12px; padding:16px 18px; box-shadow:0 1px 3px rgba(16,36,62,.12); margin:16px 22px 0; }
@@ -172,6 +182,7 @@
       <!-- West Bengal: a faint lat/long graticule for geographic context
            (no amateur blob). Populated by JS, transformed by the view. -->
       <g id="wb-graticule" style="display:none"></g>
+      <g id="maint-group"></g>
       <g id="seg-group"></g>
       <g id="ghost-seg-group"></g>
       <g id="ghost-route-group"></g>
@@ -208,6 +219,10 @@
     <span class="legend-item">
       <svg width="22" height="14"><circle cx="6" cy="7" r="5.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.6"/><circle cx="17" cy="7" r="3" fill="#aab6c2" stroke="#fff" stroke-width="1.4"/></svg>
       major / minor station
+    </span>
+    <span class="legend-item">
+      <svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#e0972a" stroke-width="8" stroke-linecap="round" opacity="0.5"/></svg>
+      flagged for inspection (high load)
     </span>
   </div>
   <div class="map-controls">
@@ -341,8 +356,16 @@
   <section>
     <h2>Network &mdash; segment status</h2>
     <table id="segments"><thead><tr>
-      <th>Segment</th><th>Connects</th><th>Status</th><th>Travel time</th>
+      <th>Segment</th><th>Connects</th><th>Status</th><th>Travel time</th><th>Load</th>
     </tr></thead><tbody></tbody></table>
+  </section>
+  <section id="maint-section">
+    <h2>Predictive maintenance</h2>
+    <p class="report-intro" id="maint-intro"></p>
+    <table id="maint-table"><thead><tr>
+      <th>Track</th><th>Load score</th><th>Trains</th><th>Crossings/h</th><th></th>
+    </tr></thead><tbody></tbody></table>
+    <div class="muted" id="maint-none" style="display:none">No segments over the inspection threshold.</div>
   </section>
   <section>
     <h2>Schedule board</h2>
@@ -738,6 +761,21 @@ function buildStaticMap(snap) {
 
   const dotR    = mapWB ? 4 : mapCompact ? 6 : 14;
   const segW    = mapWB ? 2.4 : mapCompact ? 3 : 4;
+
+  // --- Maintenance underlay: flagged (high-load) segments glow amber. ---
+  clearGroup('maint-group');
+  const maintG = document.getElementById('maint-group');
+  const maintSegs = (snap.maintenance && snap.maintenance.segments) || {};
+  for (const s of snap.segments) {
+    if (!(maintSegs[s.id] && maintSegs[s.id].flagged)) continue;
+    const cA = mapCoords[s.endpoints[0]], cB = mapCoords[s.endpoints[1]];
+    if (!cA || !cB) continue;
+    maintG.appendChild(svgEl('line', {
+      x1: cA[0], y1: cA[1], x2: cB[0], y2: cB[1],
+      stroke: '#e0972a', 'stroke-width': segW + 6, 'stroke-linecap': 'round',
+      opacity: '0.5'
+    }));
+  }
 
   // --- Segments (both corridors are drawn here; geography makes the trunk
   //     and the Bina–Katni–Jabalpur loop read as two lines + a diamond) ---
@@ -1249,17 +1287,43 @@ function render(snap) {
     summaryEl.style.display = 'none';
   }
 
-  // Segment status table — show display names in Connects column
+  // Segment status table — show display names + cumulative load; flag high load
+  const maint = snap.maintenance || { segments: {}, flagged: [], threshold: 0 };
   const segBody = document.querySelector('#segments tbody');
   segBody.innerHTML = '';
   for (const s of snap.segments) {
     const tt = s.effective_time === s.travel_time ? s.travel_time + ' min'
       : s.effective_time + ' min (was ' + s.travel_time + ')';
     const [a, b] = s.endpoints;
+    const ms = maint.segments[s.id] || { load_score: 0, flagged: false };
+    const flag = ms.flagged ? '<span class="flag-badge">&#9888; inspection due</span>' : '';
     segBody.insertAdjacentHTML('beforeend',
-      `<tr><td>${s.id}</td><td>${dn(a)} &mdash; ${dn(b)}</td>` +
-      `<td><span class="pill ${s.status}">${s.status}</span></td><td class="num">${tt}</td></tr>`);
+      `<tr class="${ms.flagged ? 'flagged-seg' : ''}"><td>${withNames(s.id)}${flag}</td>` +
+      `<td>${dn(a)} &mdash; ${dn(b)}</td>` +
+      `<td><span class="pill ${s.status}">${s.status}</span></td><td class="num">${tt}</td>` +
+      `<td class="num seg-load">${ms.load_score}</td></tr>`);
   }
+
+  // Predictive maintenance panel (cumulative-load heuristic — NOT a prediction)
+  const maintIntro = document.getElementById('maint-intro');
+  const wt = maint.weighted ? ' weighted by train length (coaches)' : '';
+  maintIntro.textContent =
+    `Cumulative-load heuristic: each track's load = sum of the trains crossing it`
+    + `${wt}. Tracks at or above the inspection threshold (${maint.threshold}) are `
+    + `flagged "due for inspection" — schedule a maintenance closure and the engine `
+    + `reroutes around it. (Heuristic, not an AI prediction.)`;
+  const mBody = document.querySelector('#maint-table tbody');
+  mBody.innerHTML = '';
+  for (const f of maint.flagged) {
+    mBody.insertAdjacentHTML('beforeend',
+      `<tr><td>${dn(f.endpoints[0])} &mdash; ${dn(f.endpoints[1])}</td>` +
+      `<td class="num maint-load">${f.load_score}</td>` +
+      `<td class="num">${f.usage_count}</td>` +
+      `<td class="num">${f.frequency_per_hour}</td>` +
+      `<td><button onclick="triggerPreview({anomalies:[{type:'maintenance_closure', segment:'${f.id}'}]})">Schedule maintenance</button></td></tr>`);
+  }
+  document.getElementById('maint-table').style.display = maint.flagged.length ? '' : 'none';
+  document.getElementById('maint-none').style.display = maint.flagged.length ? 'none' : 'block';
 
   // Schedule board — display names in arrivals and reason columns
   const board = document.querySelector('#board tbody');
@@ -1490,7 +1554,8 @@ refreshState();
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"
 // "added_train_ids" "added-tag" "WB_COORDS" "WB_GEO" "WB_MAJOR" "mapWB"
 // "wb-graticule" "zoom-controls" "Reset view" "train-legend" "WB_PRIMARY"
-// "placeWbLabels" "leader-group"
+// "placeWbLabels" "leader-group" "maintenance_closure" "Predictive maintenance"
+// "Schedule maintenance" "maint-group" "cumulative-load heuristic"
 </script>
 </body>
 </html>

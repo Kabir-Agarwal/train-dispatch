@@ -136,6 +136,14 @@ TRAIN_ATTRS = {
 }
 
 
+# Illustrative train sizes (coach counts) — per-train load weight for the
+# cumulative-load maintenance heuristic only; the scheduling engine ignores it.
+LOAD_WEIGHTS = {
+    "T101": 24, "T102": 22, "T103": 18, "T104": 16,
+    "T105": 22, "T106": 18, "T107": 16, "T108": 14,
+}
+
+
 def build_network():
     return Network(STATIONS, SEGMENTS)
 

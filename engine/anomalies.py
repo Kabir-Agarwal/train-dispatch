@@ -61,7 +61,18 @@ class TrainRestricted:
     kind = "train_restricted"
 
 
-SEGMENT_ANOMALIES = (TrackClosed, TrackBlocked, ReducedSpeed)
+@dataclass(frozen=True)
+class MaintenanceClosure:
+    """A planned maintenance closure of a segment, scheduled because its
+    cumulative-load heuristic flagged it for inspection. Routing-wise it is
+    IDENTICAL to a track closure (the same existing reroute logic handles it);
+    only its label differs, so the decision log can call it a predicted-
+    maintenance closure rather than an incident."""
+    segment_id: str
+    kind = "maintenance_closure"
+
+
+SEGMENT_ANOMALIES = (TrackClosed, TrackBlocked, ReducedSpeed, MaintenanceClosure)
 TRAIN_ANOMALIES = (TrainCancelled, TrainDelayed)
 
 
@@ -95,7 +106,10 @@ def validate_anomalies(network, trains, anomalies):
 
 
 def closed_segment_ids(anomalies):
-    return {a.segment_id for a in anomalies if isinstance(a, (TrackClosed, TrackBlocked))}
+    # A maintenance closure shuts the segment exactly like a track closure, so
+    # the existing reroute logic handles it unchanged.
+    return {a.segment_id for a in anomalies
+            if isinstance(a, (TrackClosed, TrackBlocked, MaintenanceClosure))}
 
 
 def reduced_segments(anomalies):
