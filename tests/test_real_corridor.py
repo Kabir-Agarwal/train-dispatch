@@ -1,117 +1,82 @@
-"""Gate: real corridor (Phase A) — Mumbai CSMT -> Nagpur, train 12011.
-
-Every assert is a real expected value: segment travel_times are the train's
-real timetable running minutes, segment distances are real cumulative-km
-differences, and arrivals/occupancy windows are tool-verified against the
-engine scheduler. Nothing here injects an anomaly — Phase A is data + load +
-connectivity + performance only.
-"""
+"""Gate: real corridor (Phase A). Real km from the published GT Express
+timetable; every assert hand-verified against the source values."""
 
 import time
 
 from data.real_corridor import (
+    CUMULATIVE_KM,
     DISPLAY_NAMES,
-    RUN_MINUTES,
-    SEGMENT_KM,
-    STATION_KM,
-    TRAIN_DISPLAY,
+    TRAIN_ATTRS,
     build_network,
     build_trains,
 )
+from engine.anomalies import TrainDelayed
 from engine.collision import find_conflicts
 from engine.impact import destination_reachable
 from engine.model import Train
-from engine.routes import all_open_paths
+from engine.recompute import recompute_schedule
 from engine.scheduler import load_baseline
-
-
-def test_corridor_shape():
-    net = build_network()
-    assert len(net.stations) == 18
-    assert len(net.segment_ids()) == 17
-    assert len(build_trains()) == 5
-    assert net.stations[0] == "CSMT" and net.stations[-1] == "NGP"
 
 
 def test_corridor_loads_with_zero_conflicts():
     schedule, table = load_baseline(build_network(), build_trains())
     assert find_conflicts(table) == []
-    # 17 + 17 + 8 + 14 + 17 segment occupations across R1..R5
-    assert len(table) == 73
-
-
-def test_travel_times_are_real_running_minutes_all_positive():
     net = build_network()
-    # spot checks straight from train 12011's timetable (arrival - prev departure)
-    assert net.segment("SEG-CSMT-DR").travel_time == 17
-    assert net.segment("SEG-KYN-IGP").travel_time == 125   # real Kasara ghat climb
-    assert net.segment("SEG-PLO-WR").travel_time == 33
-    assert net.segment("SEG-WR-NGP").travel_time == 105
-    times = [net.segment(s).travel_time for s in net.segment_ids()]
-    assert times == RUN_MINUTES
-    for s in net.segment_ids():
-        assert net.segment(s).travel_time > 0, s
+    assert len(net.stations) == 21
+    assert len(net.segment_ids()) == 20
+    assert len(build_trains()) == 5
 
 
-def test_distances_real_and_positive():
-    # per-segment km = consecutive cumulative-km differences, all positive
-    assert SEGMENT_KM["SEG-CSMT-DR"] == 8        # 8 - 0
-    assert SEGMENT_KM["SEG-JL-BSL"] == 25        # 444 - 419
-    assert SEGMENT_KM["SEG-WR-NGP"] == 79        # 841 - 762
-    assert all(km > 0 for km in SEGMENT_KM.values())
-    assert STATION_KM["NGP"] == 841              # corridor is 841 real km
-    assert sum(SEGMENT_KM.values()) == 841       # km differences tile the corridor
+def test_real_distances_hand_verified_and_positive():
+    net = build_network()
+    # spot checks straight from the published cumulative km
+    assert net.segment("NDLS-MTJ").travel_time == 141   # 141 - 0
+    assert net.segment("VGLJ-BINA").travel_time == 153  # 563 - 410 (longest)
+    assert net.segment("BPL-RKMP").travel_time == 6     # 707 - 701 (shortest)
+    assert net.segment("NRKR-NGP").travel_time == 86    # 1090 - 1004
+    for seg_id in net.segment_ids():
+        assert net.segment(seg_id).travel_time > 0, seg_id
+    # cumulative anchor: the corridor is 1090 real km
+    assert CUMULATIVE_KM["NGP"] == 1090
 
 
 def test_network_is_one_connected_component():
     net = build_network()
     for station in net.stations:
-        assert destination_reachable(net, "CSMT", station), station
+        assert destination_reachable(net, "NDLS", station), station
 
 
 def test_arrivals_hand_verified():
     schedule, _ = load_baseline(build_network(), build_trains())
-    assert schedule["R1"]["NGP"] == 790
-    assert schedule["R2"]["NGP"] == 920
-    assert schedule["R3"]["BSL"] == 713
-    assert schedule["R4"]["NGP"] == 1424
-    assert schedule["R5"]["NGP"] == 1690
-    # full origin->destination walk for the lead train, tool-verified
-    assert schedule["R1"] == {
-        "CSMT": 0, "DR": 17, "TNA": 44, "KYN": 66, "IGP": 191, "NK": 233,
-        "MMR": 290, "JL": 388, "BSL": 413, "MKU": 446, "SEG": 484, "AK": 509,
-        "MZR": 543, "BD": 600, "DMN": 636, "PLO": 652, "WR": 685, "NGP": 790,
-    }
+    assert schedule["R1"]["BPL"] == 701      # cumulative km == minutes at 60 km/h
+    assert schedule["R1"]["NGP"] == 1090
+    assert schedule["R2"]["BPL"] == 861      # 160 + 701
+    assert schedule["R3"]["NGP"] == 419      # 30 + (1090 - 701)
+    assert schedule["R4"]["BZU"] == 195      # 5 + (1090 - 900)
+    assert schedule["R5"]["NDLS"] == 1571    # 870 + 701
 
 
-def test_tightest_clean_headway_on_the_ghat_is_five_minutes():
-    # The 125-min Kalyan->Igatpuri ghat is the binding segment. R1 exits at 191,
-    # R2 enters at 196 -> 5 clear minutes, proving the checker is not
-    # over-flagging near-misses on a real long section.
+def test_tightest_headway_is_seven_minutes_not_a_conflict():
+    # R1 occupies VGLJ-BINA [410,563]; R2 (dep 160) occupies [570,723].
     _, table = load_baseline(build_network(), build_trains())
     windows = sorted(
-        (o.start, o.end) for o in table if o.segment_id == "SEG-KYN-IGP"
+        (o.start, o.end) for o in table if o.segment_id == "VGLJ-BINA"
     )
-    assert windows == [(66, 191), (196, 321), (366, 491), (700, 825), (966, 1091)]
+    # R1 [410,563] then R2 [570,723] (7 clear minutes), then R5 coming
+    # back north at [1008,1161] (= 870 + (701-563) entry).
+    assert windows == [(410, 563), (570, 723), (1008, 1161)]
 
 
-def test_display_fields_present_and_not_on_engine_objects():
+def test_display_attrs_present_and_not_on_engine_objects():
     trains = build_trains()
     for t in trains:
-        d = TRAIN_DISPLAY[t.id]
-        assert d["driver_emp"].startswith("EMP-")
-        assert d["loco_no"]                       # locomotive number present
-        # display-only: the engine Train carries neither field
-        assert not hasattr(t, "driver_emp")
-        assert not hasattr(t, "loco_no")
-    # city-name skin is a bijection over the 18 station codes
-    assert len(DISPLAY_NAMES) == 18
-    assert len(set(DISPLAY_NAMES.values())) == 18
-    assert DISPLAY_NAMES["CSMT"] == "Mumbai CSMT"
-    assert DISPLAY_NAMES["NGP"] == "Nagpur"
+        assert TRAIN_ATTRS[t.id]["driver_employee_no"].startswith("DRV-")
+        assert not hasattr(t, "driver_employee_no")  # engine model untouched
+    assert DISPLAY_NAMES["NDLS"] == "New Delhi"
+    assert len(set(DISPLAY_NAMES.values())) == 21  # names unique
 
 
-def test_collision_checker_and_route_enum_are_fast_at_this_size():
+def test_collision_checker_and_recompute_are_fast_at_this_size():
     net, trains = build_network(), build_trains()
     t0 = time.perf_counter()
     _, table = load_baseline(net, trains)
@@ -122,16 +87,17 @@ def test_collision_checker_and_route_enum_are_fast_at_this_size():
         find_conflicts(table)
     check_s = (time.perf_counter() - t0) / 100
 
-    # route enumeration is the real scaling risk (DFS over simple paths); on a
-    # linear corridor it must stay a single trivial path.
+    # the expensive path: a delay that forces R2 into a hold search
     t0 = time.perf_counter()
-    paths = all_open_paths(net, "CSMT", "NGP")
-    enum_s = time.perf_counter() - t0
-    assert len(paths) == 1
+    result = recompute_schedule(net, trains, [TrainDelayed("R1", 30)])
+    recompute_s = time.perf_counter() - t0
+    assert find_conflicts(list(result.occupancy_table)) == []
+    # R1 +30 shrinks the VGLJ-BINA gap to -23 -> R2 must hold 24 min
+    assert result.actions["R2"].action == "hold"
+    assert result.actions["R2"].depart_at == 184
 
-    # generous thresholds (CI headroom); real numbers are ~0.04 ms / ~0.1 ms
     assert load_s < 0.5, load_s
     assert check_s < 0.05, check_s
-    assert enum_s < 0.5, enum_s
+    assert recompute_s < 2.0, recompute_s
     print(f"\nperf: load={load_s*1000:.1f}ms  "
-          f"collision_check={check_s*1000:.3f}ms  route_enum={enum_s*1000:.3f}ms")
+          f"collision_check={check_s*1000:.2f}ms  recompute={recompute_s*1000:.0f}ms")

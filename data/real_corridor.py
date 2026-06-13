@@ -1,85 +1,98 @@
-"""Real Indian Railways corridor: Mumbai CSMT -> Nagpur (Central Railway).
+"""REAL corridor: the New Delhi -> Nagpur half of the Delhi-Chennai main line
+(Grand Trunk route), 21 stations, real cumulative kilometres.
 
-PHASE A — real-data experiment (branch real-railway). Maps real station,
-distance and travel-time data into the EXISTING engine model (engine.model
-Network/Segment/Train) WITHOUT changing any engine logic.
+Source: official IRCTC timetable of train 12616 Grand Trunk Express as
+published on confirmtkt.com/train-schedule/12616 (IRCTC partner), fetched
+2026-06-13. Distances are the published cumulative km per stop; inter-station
+distance = difference of consecutive cumulative km.
 
-SOURCE
-  Train 12011 (Mumbai CSMT - Nagpur), from the public Indian Railways
-  "Train_details" timetable dataset
-  (github.com/aaryanrr/Railway-Management, Assets/Train_details.csv — a
-   per-station cumulative-distance schedule mirrored from data.gov.in).
-  - Stations + cumulative kilometres: taken directly from that train's row.
-  - Per-segment distance: consecutive cumulative-km differences (all positive).
-  - Per-segment travel_time: the train's REAL scheduled running minutes between
-    consecutive stations (this station's arrival minus previous station's
-    departure) -> pure run time, matching the engine's zero-dwell assumption.
-    e.g. Kalyan->Igatpuri = 125 min: the real Kasara ghat climb.
+Conversion decision (logged in PROGRESS): the GT Express covers these 1090 km
+in ~18h, an end-to-end average of ~60 km/h, so travel_time minutes ==
+inter-station km (max 1). Engine model is UNCHANGED — same Segment/Train.
 
-MODEL MAPPING
-  - Engine station id  = real station code (CSMT, DR, TNA, ...).
-  - Engine segment id  = "SEG-<from>-<to>" along the corridor.
-  - travel_time (int minutes) = real running minutes above (all > 0).
-  - Display-only data (city names, km, crew/loco) lives in the dicts below and
-    is NEVER read by the engine — scheduling uses only the Segment/Train fields.
-
-BASELINE (5 trains, same direction, provably collision-free)
-  Single-track bidirectional segments. Same-direction trains keep constant time
-  separation, so two of them share a segment only if their effective departure
-  gap is <= that segment's run time; the binding segment is the longest one any
-  pair shares (Kalyan->Igatpuri, 125 min). Every pair here is spaced > 125 min
-  (or starts far enough down-line), so the baseline has ZERO conflicts. Arrivals
-  below are tool-verified against the engine scheduler (see test_real_corridor).
-    R1 CSMT->NGP dep   0 : NGP @ 790
-    R2 CSMT->NGP dep 130 : NGP @ 920
-    R3 CSMT->BSL dep 300 : BSL @ 713
-    R4 KYN ->NGP dep 700 : NGP @ 1424
-    R5 CSMT->NGP dep 900 : NGP @ 1690
-  An opposite-direction full-corridor train has NO conflict-free slot while
-  these five saturate the single track (confirmed by search) — true single-track
-  behaviour; crossing/sequencing logic belongs to the later phases, not Phase A.
+Driver employee numbers are SYNTHETIC display-only placeholders (DRV-xxxx) —
+not real people. They do not exist on the engine Train object at all.
 """
 
 from engine.model import Network, Segment, Train
 
-# (station code, display city name, cumulative km from Mumbai CSMT)
-STATIONS = [
-    ("CSMT", "Mumbai CSMT", 0),
-    ("DR", "Dadar", 8),
-    ("TNA", "Thane", 33),
-    ("KYN", "Kalyan", 53),
-    ("IGP", "Igatpuri", 136),
-    ("NK", "Nasik Road", 187),
-    ("MMR", "Manmad", 260),
-    ("JL", "Jalgaon", 419),
-    ("BSL", "Bhusaval", 444),
-    ("MKU", "Malkapur", 499),
-    ("SEG", "Shegaon", 551),
-    ("AK", "Akola", 588),
-    ("MZR", "Murtajapur", 626),
-    ("BD", "Badnera", 667),
-    ("DMN", "Dhamangaon", 713),
-    ("PLO", "Pulgaon", 733),
-    ("WR", "Wardha", 762),
-    ("NGP", "Nagpur", 841),
+# (code, display name, cumulative km from New Delhi)
+_STOPS = [
+    ("NDLS", "New Delhi", 0),
+    ("MTJ", "Mathura Jn", 141),
+    ("BFP", "Bilochpura Agra", 190),
+    ("AGC", "Agra Cantt", 195),
+    ("DHO", "Dhaulpur", 247),
+    ("MRA", "Morena", 275),
+    ("GWL", "Gwalior", 313),
+    ("VGLJ", "V. Lakshmibai Jhansi", 410),
+    ("BINA", "Bina Jn", 563),
+    ("BAQ", "Ganj Basoda", 609),
+    ("BHS", "Vidisha", 648),
+    ("BPL", "Bhopal Jn", 701),
+    ("RKMP", "Rani Kamalapati", 707),
+    ("NDPM", "Narmadapuram", 775),
+    ("ET", "Itarsi Jn", 793),
+    ("GDYA", "Ghoradongri", 863),
+    ("BZU", "Betul", 900),
+    ("AMLA", "Amla Jn", 923),
+    ("PAR", "Pandhurna", 986),
+    ("NRKR", "Narkher", 1004),
+    ("NGP", "Nagpur", 1090),
 ]
 
-# real scheduled running minutes between consecutive stations (train 12011)
-RUN_MINUTES = [17, 27, 22, 125, 42, 57, 98, 25, 33, 38, 25, 34, 57, 36, 16, 33, 105]
-
-CODES = [c for c, _, _ in STATIONS]
-
-# --- display-only lookups (engine never reads these) -----------------------
-DISPLAY_NAMES = {c: name for c, name, _ in STATIONS}
-STATION_KM = {c: km for c, _, km in STATIONS}
+STATIONS = [code for code, _, _ in _STOPS]
+DISPLAY_NAMES = {code: name for code, name, _ in _STOPS}
+CUMULATIVE_KM = {code: km for code, _, km in _STOPS}
 
 
-def _seg_id(a, b):
-    return f"SEG-{a}-{b}"
+def _segments():
+    segs = []
+    for (a, _, km_a), (b, _, km_b) in zip(_STOPS, _STOPS[1:]):
+        km = km_b - km_a
+        segs.append(Segment(f"{a}-{b}", (a, b), max(1, int(km))))
+    return segs
 
 
-SEGMENTS = []
-SEGMENT_KM = {}
-for _i in range(len(CODES) - 1):
-    _a, _b = CODES[_i], CODES[_i + 1]
-    SEGMENTS.append(Segment(_seg_id(_a, _
+SEGMENTS = _segments()
+
+
+def _path(origin, destination):
+    """Ordered segment ids along the (linear) corridor between two stations."""
+    i, j = STATIONS.index(origin), STATIONS.index(destination)
+    if i < j:
+        return tuple(f"{STATIONS[k]}-{STATIONS[k + 1]}" for k in range(i, j))
+    return tuple(f"{STATIONS[k]}-{STATIONS[k + 1]}" for k in range(i - 1, j - 1, -1))
+
+
+# 5 trains, hand-verified collision-free (see tests for the tight cases):
+# R1 full southbound; R2 southbound to Bhopal with 160-min headway (longest
+# segment is 153 min, so the closest approach is 7 min and never a shared
+# minute); R3 short southbound Bhopal->Nagpur ahead of R1; R4 short
+# northbound Nagpur->Betul long before southbound traffic arrives there;
+# R5 northbound Bhopal->New Delhi departing after R2 has cleared into Bhopal.
+TRAINS = [
+    Train("R1", "NDLS", "NGP", _path("NDLS", "NGP"), 0),
+    Train("R2", "NDLS", "BPL", _path("NDLS", "BPL"), 160),
+    Train("R3", "BPL", "NGP", _path("BPL", "NGP"), 30),
+    Train("R4", "NGP", "BZU", _path("NGP", "BZU"), 5),
+    Train("R5", "BPL", "NDLS", _path("BPL", "NDLS"), 870),
+]
+
+# DISPLAY-ONLY train attributes (never on the engine Train object; scheduling
+# is unaffected). Second attribute slot pending user confirmation.
+TRAIN_ATTRS = {
+    "R1": {"driver_employee_no": "DRV-4102"},
+    "R2": {"driver_employee_no": "DRV-2218"},
+    "R3": {"driver_employee_no": "DRV-3870"},
+    "R4": {"driver_employee_no": "DRV-1956"},
+    "R5": {"driver_employee_no": "DRV-2741"},
+}
+
+
+def build_network():
+    return Network(STATIONS, SEGMENTS)
+
+
+def build_trains():
+    return list(TRAINS)

@@ -2,4 +2,3 @@ __pycache__/
 *.pyc
 .pytest_cache/
 pytest-cache-files-*/
-data/_raw_train_details.csv
