@@ -234,7 +234,7 @@
       predicted reroute
     </span>
     <span class="legend-item">
-      <svg width="26" height="14"><circle cx="6" cy="7" r="5.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.4"/><circle cx="6" cy="7" r="2.3" fill="#fff"/><circle cx="19" cy="7" r="3.6" fill="#5a6f86" stroke="#fff" stroke-width="1.2"/><circle cx="19" cy="7" r="1.5" fill="#fff"/></svg>
+      <svg width="26" height="14"><circle cx="6" cy="7" r="5.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.4"/><rect x="2.4" y="6" width="7.2" height="2.2" rx="1.1" fill="#fff"/><circle cx="19" cy="7" r="3.6" fill="#5a6f86" stroke="#fff" stroke-width="1.2"/><rect x="16.6" y="6.2" width="4.8" height="1.6" rx="0.8" fill="#fff"/></svg>
       station (major / minor)
     </span>
     <span class="legend-item">
@@ -875,9 +875,9 @@ function buildStaticMap(snap) {
     else if (tier === 'primary')   { r = 6.5;  fill = '#1f3a5f'; }
     else if (tier === 'secondary') { r = 5;    fill = '#3f5c7d'; }
     else                           { r = 4;    fill = '#5a6f86'; }  // minor: clear, not washed
-    // Station SYMBOL: a transit-stop "ring" — a filled circle with a white
-    // centre — on the dense maps; the 6-city geographic map keeps its round
-    // dots (which carry the S1.. code inside, drawn below).
+    // Station SYMBOL: a transit-stop glyph — a filled colour ring with a white
+    // horizontal bar across it (reads as a station/platform marker, distinct
+    // from a plain dot). The 6-city geographic map keeps its coded round dots.
     let marker;
     if (mapCompact) {
       marker = svgEl('g', { class: 'station-stop' });
@@ -885,8 +885,11 @@ function buildStaticMap(snap) {
         class: 'station-ring' });
       if (tier === 'primary') ring.setAttribute('stroke-width', '2');
       marker.appendChild(ring);
-      marker.appendChild(svgEl('circle', { cx: c[0], cy: c[1],
-        r: Math.max(1.5, r * 0.42), fill: '#fff' }));   // white centre dot
+      const barW = r * 1.3, barH = Math.max(1.4, r * 0.42);   // white platform bar
+      marker.appendChild(svgEl('rect', {
+        x: c[0] - barW / 2, y: c[1] - barH / 2, width: barW, height: barH,
+        rx: barH / 2, ry: barH / 2, fill: '#fff'
+      }));
     } else {
       marker = svgEl('circle', { cx: c[0], cy: c[1], r: r, fill: fill,
         class: 'station-circle' });
@@ -1267,11 +1270,20 @@ function clampPan() {
   viewY = Math.min(m, Math.max(H - H * viewK - m, viewY));
 }
 
-// Default WB view: frame the populated south (Kolkata–Barddhaman–Asansol/
-// Kharagpur) so the canvas is filled and the money-shot is front-and-centre;
-// the sparse north is reachable by zooming out / panning.
+// Default WB view: fit the WHOLE network — EVERY station (and therefore every
+// train path) — inside the canvas with a margin, so no train can ever travel
+// off-screen (e.g. heading north to Malda / New Jalpaiguri). The dense south is
+// reachable by zooming in. Bounds are computed from the live coords, so this
+// stays correct if the train/station data changes.
 function setWBDefaultView() {
-  const x0 = 60, y0 = 340, x1 = 462, y1 = 690, W = 500, H = 700;
+  const W = 500, H = 700, m = 26;   // canvas + margin
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const id in WB_COORDS) {
+    const [x, y] = WB_COORDS[id];
+    if (x < x0) x0 = x; if (x > x1) x1 = x;
+    if (y < y0) y0 = y; if (y > y1) y1 = y;
+  }
+  x0 -= m; y0 -= m; x1 += m; y1 += m;
   viewK = Math.min(W / (x1 - x0), H / (y1 - y0));
   viewX = (W - (x1 - x0) * viewK) / 2 - x0 * viewK;
   viewY = (H - (y1 - y0) * viewK) / 2 - y0 * viewK;

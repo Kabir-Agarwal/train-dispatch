@@ -101,37 +101,49 @@ def _route(*stations):
     return tuple(segs)
 
 
-# Representative services crossing the network — many run through the densest
-# junction (Barddhaman, BWN). Departures spread; the probe does not require a
-# collision-free baseline (recompute uses build_schedule only for reference).
+# Representative services with VARIED origins/destinations spread across the
+# whole state (north: NJP/Malda/Alipurduar; south/Kolkata: Howrah/Sealdah/Digha/
+# Haldia; west: Asansol/Adra/Purulia/Kharagpur; east border: Bangaon/Lalgola) —
+# 12 different origin stations, so the network looks realistically busy rather
+# than all leaving from one place. Departures are staggered. T1 still runs the
+# Howrah–Barddhaman MAIN line so the default money-shot (closing MYM-BWN) reroutes
+# it onto the Dankuni chord. Routes are validated for adjacency by _route().
 TRAINS = [
+    # south -> far north (main + Rampurhat loop): the money-shot train
     Train("T1", "HWH", "NJP",
           _route("HWH", "BLY", "SRP", "CGR", "BDC", "MYM", "BWN", "BHP", "SNT",
                  "RPH", "NHT", "NFK", "MLDT", "NJP"), 0),
-    Train("T2", "HWH", "ASN",
-          _route("HWH", "BLY", "SRP", "CGR", "BDC", "MYM", "BWN", "DGR", "UDL",
-                 "ASN"), 30),
-    Train("T3", "SDAH", "NJP",
+    # Sealdah -> Alipurduar (south-east -> far north-east, via Lalgola line)
+    Train("T2", "SDAH", "APDJ",
           _route("SDAH", "DDJ", "BT", "NH", "RHA", "KNJ", "BPC", "AZ", "NFK",
-                 "MLDT", "NJP"), 15),
-    Train("T4", "HWH", "APDJ",
-          _route("HWH", "DKAE", "SKG", "BWN", "BHP", "SNT", "RPH", "NHT", "NFK",
-                 "MLDT", "NJP", "NCB", "APDJ"), 45),
-    Train("T5", "KGP", "ASN", _route("KGP", "MDN", "ADRA", "ASN"), 20),
-    Train("T6", "HWH", "PRR",
-          _route("HWH", "SRC", "ULB", "MCA", "PKU", "KGP", "MDN", "ADRA", "PRR"), 60),
-    Train("T7", "SDAH", "LGL",
-          _route("SDAH", "DDJ", "BT", "NH", "RHA", "KNJ", "BPC", "LGL"), 10),
-    Train("T8", "NJP", "APDJ", _route("NJP", "SGUJ", "NMZ", "HSA", "APDJ"), 0),
-    Train("T9", "BWN", "KWAE", _route("BWN", "KWAE"), 25),
-    Train("T10", "HWH", "BPRS",
-          _route("HWH", "SRC", "ULB", "MCA", "PKU", "KGP", "MDN", "ADRA", "BQA",
-                 "BPRS"), 35),
-    Train("T11", "HWH", "KGP",
-          _route("HWH", "SRC", "ULB", "MCA", "PKU", "KGP"), 50),
-    Train("T12", "ASN", "HWH",
-          _route("ASN", "UDL", "DGR", "BWN", "MYM", "BDC", "CGR", "SRP", "BLY",
-                 "HWH"), 70),
+                 "MLDT", "NJP", "NCB", "APDJ"), 20),
+    # north -> south (opposite direction down the main line)
+    Train("T3", "NJP", "HWH",
+          _route("NJP", "MLDT", "NFK", "NHT", "RPH", "SNT", "BHP", "BWN", "MYM",
+                 "BDC", "CGR", "SRP", "BLY", "HWH"), 35),
+    # west: Asansol -> Kharagpur (via Adra / Midnapore)
+    Train("T4", "ASN", "KGP", _route("ASN", "ADRA", "MDN", "KGP"), 15),
+    # far west: Purulia -> Howrah
+    Train("T5", "PRR", "HWH",
+          _route("PRR", "ADRA", "MDN", "KGP", "PKU", "MCA", "ULB", "SRC", "HWH"), 25),
+    # south coast: Digha -> Barddhaman (via the Dankuni chord)
+    Train("T6", "DGH", "BWN",
+          _route("DGH", "TMZ", "PKU", "MCA", "ULB", "SRC", "DKAE", "SKG", "BWN"), 40),
+    # east border: Bangaon -> Sealdah
+    Train("T7", "BNJ", "SDAH",
+          _route("BNJ", "RHA", "NH", "BT", "DDJ", "SDAH"), 10),
+    # far north Dooars loop: Alipurduar -> New Jalpaiguri
+    Train("T8", "APDJ", "NJP", _route("APDJ", "HSA", "NMZ", "SGUJ", "NJP"), 5),
+    # north-east border: Lalgola -> Azimganj
+    Train("T9", "LGL", "AZ", _route("LGL", "BPC", "AZ"), 35),
+    # south-west: Kharagpur -> Bishnupur
+    Train("T10", "KGP", "BPRS",
+          _route("KGP", "MDN", "ADRA", "BQA", "BPRS"), 45),
+    # south port: Haldia -> Howrah
+    Train("T11", "HLZ", "HWH",
+          _route("HLZ", "PKU", "MCA", "ULB", "SRC", "HWH"), 50),
+    # central short hop: Barddhaman -> Katwa
+    Train("T12", "BWN", "KWAE", _route("BWN", "KWAE"), 25),
 ]
 
 

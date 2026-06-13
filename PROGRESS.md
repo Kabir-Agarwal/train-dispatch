@@ -1,6 +1,19 @@
 # PROGRESS.md
 
-## Train-car glide + station-stop glyphs: DONE, awaiting visual pass
+## WB realism + off-map fix + station glyph: DONE, awaiting visual pass
+Built 2026-06-14. Engine LOGIC untouched (no recompute/anomalies/scheduler/routes/collision/model change); master at cd37586. Suite: **217 passed** (215 + 2 new WB gates). One data change (WB trains) with gates added; the recompute golden was regenerated and **only the 4 wb/* scenarios changed — baseline & real entries are byte-identical, proving the engine is untouched.** Reasoned from the projection math (screenshot tool down); no console errors.
+
+1. **Train origins spread (data realism)** — redesigned the 12 WB services to start from **12 different stations across every corner**: north (NJP, Alipurduar), south/Kolkata (Howrah, Sealdah, Digha, Haldia), west (Asansol, Purulia, Kharagpur), east border (Bangaon, Lalgola), central (Barddhaman). Ids T1..T12 kept (LOAD_WEIGHTS still apply). T1 still runs the Howrah–Barddhaman MAIN so the default money-shot (close MYM-BWN) reroutes onto the chord. Maintenance inspection threshold re-tuned to 50 (loads now top out ~64; flags the 4 busiest corridors). New gates: origins-are-spread, and **baseline-is-collision-free** (the engine's deconfliction of the nominal timetable has 0 conflicts — verified).
+2. **Trains leaving the map (bug) — FIXED** — root cause: the default view framed only the south band, so stations north of it (Malda/NJP/Alipurduar) projected ABOVE the canvas (screen y < 0), and northbound trains slid off the top. `setWBDefaultView` now **fits the WHOLE network with margin**, computed from the live coords. Verified: all 50 stations AND every train position sampled along every segment of all 12 trains are inside the 500×700 viewBox (0 out of bounds).
+3. **Station glyph** — the transit-stop symbol is now a colour ring with a **white horizontal platform bar** across it (distinct, reads as a station, not a dot). Major 6.5 / secondary 5 / minor 4 px. 6-city map keeps coded round dots. Legend updated.
+
+(Train-car glide + on-track + stop-at-arrival from the prior commit are unchanged and still verified: 0 label overlaps, trains render as cars.)
+
+### STOPPED — awaiting your visual pass.
+
+---
+
+## Train-car glide + station-stop glyphs: DONE, reviewed & approved
 Built 2026-06-14. Display layer ONLY (`app/static/index.html`); engine + data untouched; master at cd37586. Suite: **215 passed** (unchanged). Verified by reasoning through the rendering math (screenshot tool down); no console errors.
 
 1. **Smooth gliding trains** — the rAF loop already advances `simTime` continuously; the breakage was that the marker SHAPE swapped (parked dot ⇄ moving arrow) at departure/arrival, which flickered. Now ONE consistent **train-car glyph** (a small rounded-rect car body + a white cab-window at the leading end, colored per train, white outline) is used whether moving or parked — no shape swap. It glides along its segment (verified: ~0.083 px per rAF frame, constant) and rests at its destination. Orientation follows the current segment's exact direction when moving, level when parked. The 6-city map keeps round dots.

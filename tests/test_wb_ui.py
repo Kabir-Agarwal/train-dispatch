@@ -85,13 +85,15 @@ def test_reroute_is_collision_free_and_consistent(wb_url):
 
 def test_reset_clears_default_anomaly_back_to_baseline():
     s = AppState(dataset="wb")
-    assert s.snapshot()["anomalies"] == ["track_closed(MYM-BWN)"]
+    snap0 = s.snapshot()
+    assert snap0["anomalies"] == ["track_closed(MYM-BWN)"]
+    seg0 = next(x for x in snap0["segments"] if x["id"] == "MYM-BWN")
+    assert seg0["status"] == "closed"                # default closure active
     s.reset()
     snap = s.snapshot()
     assert snap["anomalies"] == []                   # default anomaly cleared
-    # baseline is the engine's collision-free deconfliction of the WB timetable;
-    # with the Memari–Barddhaman main open again, no train takes the chord detour.
-    assert not any("SKG-BWN" in (t["path"] or []) for t in snap["trains"])
+    seg = next(x for x in snap["segments"] if x["id"] == "MYM-BWN")
+    assert seg["status"] == "open"                   # Memari–Barddhaman main reopened
 
 
 def test_wb_page_keeps_corridor_features(wb_url):

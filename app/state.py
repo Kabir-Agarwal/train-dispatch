@@ -54,7 +54,7 @@ _ANOMALY_TYPES = {
 # Inspection threshold for the cumulative-load heuristic, per dataset (chosen so
 # the genuinely high-load corridors flag). Load weight = train length (coaches)
 # where the dataset provides it, else 1.
-_MAINT_THRESHOLD = {"baseline": 2, "real": 70, "wb": 60}
+_MAINT_THRESHOLD = {"baseline": 2, "real": 70, "wb": 50}
 
 
 def parse_anomaly(payload):

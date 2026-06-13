@@ -48,3 +48,25 @@ def test_every_train_path_is_a_valid_connected_route():
     for t in build_trains():
         arrivals, _ = compute_train_schedule(net, t)   # raises if path is broken
         assert arrivals[t.destination] > arrivals[t.origin]
+
+
+def test_train_origins_are_spread_across_the_network():
+    """Demo realism: trains start from many different stations (not all from one
+    or two), so the network looks busy across all corners."""
+    trains = build_trains()
+    origins = {t.origin for t in trains}
+    assert len(origins) >= 10                     # 12 trains, >=10 distinct origins
+    # spans the corners: north, south/Kolkata, west, east-border
+    assert origins & {"NJP", "APDJ", "MLDT", "NCB"}      # north
+    assert origins & {"HWH", "SDAH", "DGH", "HLZ"}       # south / Kolkata
+    assert origins & {"ASN", "ADRA", "PRR", "KGP"}       # west
+    assert origins & {"BNJ", "LGL"}                      # east border
+
+
+def test_baseline_is_collision_free():
+    """The displayed WB baseline (the engine's deconfliction of the nominal
+    timetable) is collision-free — no two trains share a segment-minute."""
+    from engine.collision import find_conflicts
+    from engine.recompute import recompute_schedule
+    res = recompute_schedule(build_network(), build_trains(), [])
+    assert find_conflicts(list(res.occupancy_table)) == []
