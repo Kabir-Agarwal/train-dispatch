@@ -1,6 +1,19 @@
 # PROGRESS.md
 
-## Feature 2 — DYNAMIC PRICING (passenger fare estimate): DONE, awaiting visual pass
+## Deployment prep (Render/Railway) — DONE, no app-logic change
+Built 2026-06-13. master untouched at cd37586. Suite: **215 passed** (unchanged). App is **stdlib-only** (verified: no third-party imports). Confirmed both run modes locally.
+
+- `app/server.py`: `make_server(..., host="127.0.0.1")` — additive host param; the default keeps local/tests on loopback, deployment passes `host="0.0.0.0"`.
+- `run_ui.py`: reads `$PORT` (set by Render/Railway) and, when present, binds `0.0.0.0:$PORT` (public) — else stays on `--port` at loopback for local use. Skips opening a browser when deployed. Dataset via `--real`/`--wb` flags or `$DATASET`. Startup line flushed for platform logs.
+- `requirements.txt`: comment-only (no runtime deps; exists so the platform detects Python). `Procfile`: `web: python run_ui.py --wb --no-browser`. `render.yaml`: Blueprint (branch real-railway, build `pip install -r requirements.txt`, start `python run_ui.py --wb --no-browser`).
+- **Default landing = the West Bengal real-railway demo** (strongest), via the `--wb` start command.
+- `DEPLOY.md`: exact Render steps (connect repo → branch real-railway → build/start commands) + Railway + local verify.
+
+Verified: `PORT=8146 python run_ui.py --wb --no-browser` → binds 0.0.0.0:8146, `/` HTTP 200, `/api/state` dataset=wb (50 stations, 8 flagged), passenger fare present; `python run_ui.py --no-browser` → 127.0.0.1, 6-city baseline. STOP.
+
+---
+
+## Feature 2 — DYNAMIC PRICING (passenger fare estimate): DONE, reviewed & approved
 Built 2026-06-13. master untouched at cd37586. Suite: **215 passed** (206 prior + 9 pricing gates). Additive — no scheduling/engine-behavior change; the byte-identical recompute golden gate still passes. Determinism gated (5 runs).
 
 ### Pricing engine (`engine/pricing.py`) — rule-based, NOT ML

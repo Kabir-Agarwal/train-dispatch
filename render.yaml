@@ -1,0 +1,13 @@
+# Render Blueprint — one-click deploy of the West Bengal demo.
+# In Render: New + > Blueprint, point at this repo on branch real-railway.
+services:
+  - type: web
+    name: train-dispatch
+    runtime: python
+    branch: real-railway
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run_ui.py --wb --no-browser
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"

@@ -92,10 +92,12 @@ def make_handler(state):
     return Handler
 
 
-def make_server(state=None, port=0):
-    """port=0 -> OS-assigned (tests). Returns the server; caller serves."""
+def make_server(state=None, port=0, host="127.0.0.1"):
+    """port=0 -> OS-assigned (tests). host defaults to loopback (local/tests);
+    deployment passes host="0.0.0.0" to accept public traffic. Returns the
+    server; caller serves."""
     state = state or AppState()
-    return ThreadingHTTPServer(("127.0.0.1", port), make_handler(state))
+    return ThreadingHTTPServer((host, port), make_handler(state))
 
 
 def serve_in_thread(state=None):

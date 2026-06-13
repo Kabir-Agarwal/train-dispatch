@@ -1,0 +1,6 @@
+# No third-party RUNTIME dependencies — this app uses only the Python standard
+# library (http.server, json, dataclasses, argparse, threading, re, math, ...).
+# This file exists so Render/Railway detect a Python project and run a (no-op)
+# `pip install -r requirements.txt`.
+#
+# Dev/test only (NOT required to run the live site): pytest
