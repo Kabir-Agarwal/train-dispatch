@@ -1,5 +1,29 @@
 # PROGRESS.md
 
+## Engine optimization (branch real-railway) — placement/hold search: ~2.6–3.6s → ~0.37–0.48s, behavior-identical
+Built 2026-06-13. master untouched at cd37586. Suite: **190 passed** (189 + 1 byte-identical golden gate). Determinism preserved (5 identical recompute runs). **No behavior change** — proven below.
+
+### What changed (`engine/recompute.py` only; routing/anomalies/model untouched)
+The WB probe showed the cost was NOT the DFS route enumeration (~340 ms) but the placement/hold search: `_choose × min_hold_schedule` re-ran `find_conflicts` over the whole growing table ~29k times. Two correctness-preserving fixes:
+1. **Incremental conflict index** (`index_table` + `_occs_conflict`/`_occs_blockers`). The committed table is indexed once per train placement (segment → intervals); a candidate is tested only against the segments it uses. This is provably equivalent to `find_conflicts(table+occs)` being non-empty — the committed table is already conflict-free and a simple path's occupancies are on distinct segments, so the only conflicts that function could ever report are candidate-vs-committed cross pairs. Removed the ~29k full-table O(N²) rescans.
+2. **Analytic min-hold** (`min_hold_schedule`). Each committed window on a segment the train uses forbids a closed interval of holds `[committed.start − occ.end, committed.end − occ.start]`; the answer is the smallest `h ≥ 0` in no forbidden interval, found by a sort+sweep instead of scanning holds minute-by-minute up to ~900. Returns the identical minimal hold the old loop returned.
+3. **(Not needed.)** Branch-and-bound/top-K in `_choose` was reserved for "still over 500 ms" — we're under, so it was not applied.
+The helper functions accept either a prebuilt index (recompute's fast path) or a raw table (direct callers/`test_slots.py`), via `_as_index`, so the existing unit tests pass unchanged.
+
+### Behavior-identical — gated
+`tests/_golden_gen.py` froze recompute outputs from the PRE-optimization engine across **20 fixed scenarios** (baseline + real corridor + West Bengal: closures, reduced-speed, delay, cancel, restriction, strand, add-train) into `tests/recompute_golden.json`. `tests/test_recompute_golden.py` asserts the optimized engine reproduces every one **byte-for-byte** (actions/path/depart/arrivals/added_delay/reason + totals + occupancy table). All 189 prior tests stay green; the collision-free re-check at the end of `recompute_schedule` is unchanged — safety stays absolute.
+
+### RE-PROBE result (probe_wb.py, WB worst-case closure MYM–BWN at the densest junction)
+Before: **~2.6–3.6 s**.  After: **~0.37–0.48 s** (median ~0.4 s; 4 reroutes, 0 stranded, 0 conflicts). ~6–8× faster.
+Of the ~400 ms remaining, **~340 ms is now the DFS route enumeration** (`all_open_paths`, called once per train — untouched); the placement/hold search itself is now ~25–130 ms.
+
+### VERDICT: feasible — UNDER 500 ms, ready to wire the WB UI.
+Note: headroom is thin and the DFS enumeration is now the dominant remaining cost (one run touched 476 ms). If we want more margin later, the next lever is capping route enumeration (k-shortest / A* with pruning) — the user's original guess, which only becomes the bottleneck now that the placement search is fixed. Not required to proceed.
+
+### STOPPED at the boundary — optimization done + gated, new timing reported; WB UI not started, awaiting go-ahead.
+
+---
+
 ## West Bengal PERFORMANCE PROBE (branch real-railway) — data layer only, NO UI: result = STOP
 Built 2026-06-13. Data layer only; `engine/` and the UI are UNCHANGED; master untouched at cd37586. Suite: **189 passed** (185 + 4 WB data gates). NO WB UI was built — the probe verdict is STOP (see below).
 

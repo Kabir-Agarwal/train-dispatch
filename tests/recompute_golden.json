@@ -1,0 +1,8938 @@
+{
+ "baseline/add-conflicts": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 0,
+     "S2": 10,
+     "S3": 18,
+     "S4": 30
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-34"
+    ],
+    "reason": "proceeds as planned; arrives S4 at minute 30"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 29
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 29"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 70,
+     "S2": 60,
+     "S3": 52,
+     "S4": 40
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-34",
+     "SEG-23",
+     "SEG-12"
+    ],
+    "reason": "proceeds as planned; arrives S1 at minute 70"
+   },
+   "T9": {
+    "action": "hold",
+    "added_delay": 11,
+    "arrivals": {
+     "S1": 11,
+     "S2": 21
+    },
+    "depart_at": 11,
+    "path": [
+     "SEG-12"
+    ],
+    "reason": "held at S1 until minute 11 so T1 clear(s) the line; arrives S2 at minute 21 (+11 min)"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-12",
+    0,
+    10
+   ],
+   [
+    "T1",
+    "SEG-23",
+    10,
+    18
+   ],
+   [
+    "T1",
+    "SEG-34",
+    18,
+    30
+   ],
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    29
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-12",
+    60,
+    70
+   ],
+   [
+    "T5",
+    "SEG-23",
+    52,
+    60
+   ],
+   [
+    "T5",
+    "SEG-34",
+    40,
+    52
+   ],
+   [
+    "T9",
+    "SEG-12",
+    11,
+    21
+   ]
+  ],
+  "total_added_delay": 11
+ },
+ "baseline/add-fits": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 0,
+     "S2": 10,
+     "S3": 18,
+     "S4": 30
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-34"
+    ],
+    "reason": "proceeds as planned; arrives S4 at minute 30"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 29
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 29"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 70,
+     "S2": 60,
+     "S3": 52,
+     "S4": 40
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-34",
+     "SEG-23",
+     "SEG-12"
+    ],
+    "reason": "proceeds as planned; arrives S1 at minute 70"
+   },
+   "T9": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S3": 40,
+     "S6": 51
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-36"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 51"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-12",
+    0,
+    10
+   ],
+   [
+    "T1",
+    "SEG-23",
+    10,
+    18
+   ],
+   [
+    "T1",
+    "SEG-34",
+    18,
+    30
+   ],
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    29
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-12",
+    60,
+    70
+   ],
+   [
+    "T5",
+    "SEG-23",
+    52,
+    60
+   ],
+   [
+    "T5",
+    "SEG-34",
+    40,
+    52
+   ],
+   [
+    "T9",
+    "SEG-36",
+    40,
+    51
+   ]
+  ],
+  "total_added_delay": 0
+ },
+ "baseline/cancel-T3": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 0,
+     "S2": 10,
+     "S3": 18,
+     "S4": 30
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-34"
+    ],
+    "reason": "proceeds as planned; arrives S4 at minute 30"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 29
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 29"
+   },
+   "T3": {
+    "action": "cancelled",
+    "added_delay": null,
+    "arrivals": null,
+    "depart_at": null,
+    "path": null,
+    "reason": "T3 cancelled by admin"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 70,
+     "S2": 60,
+     "S3": 52,
+     "S4": 40
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-34",
+     "SEG-23",
+     "SEG-12"
+    ],
+    "reason": "proceeds as planned; arrives S1 at minute 70"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-12",
+    0,
+    10
+   ],
+   [
+    "T1",
+    "SEG-23",
+    10,
+    18
+   ],
+   [
+    "T1",
+    "SEG-34",
+    18,
+    30
+   ],
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    29
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-12",
+    60,
+    70
+   ],
+   [
+    "T5",
+    "SEG-23",
+    52,
+    60
+   ],
+   [
+    "T5",
+    "SEG-34",
+    40,
+    52
+   ]
+  ],
+  "total_added_delay": 0
+ },
+ "baseline/close-SEG-15": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 0,
+     "S2": 10,
+     "S3": 18,
+     "S4": 30
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-34"
+    ],
+    "reason": "proceeds as planned; arrives S4 at minute 30"
+   },
+   "T2": {
+    "action": "reroute",
+    "added_delay": 11,
+    "arrivals": {
+     "S1": 11,
+     "S2": 21,
+     "S3": 29,
+     "S6": 40
+    },
+    "depart_at": 11,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-36"
+    ],
+    "reason": "rerouted via S1-S2-S3-S6, departing minute 11 because planned path uses closed segment(s) SEG-15; arrives S6 at minute 40 (+11 min)"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 70,
+     "S2": 60,
+     "S3": 52,
+     "S4": 40
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-34",
+     "SEG-23",
+     "SEG-12"
+    ],
+    "reason": "proceeds as planned; arrives S1 at minute 70"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-12",
+    0,
+    10
+   ],
+   [
+    "T1",
+    "SEG-23",
+    10,
+    18
+   ],
+   [
+    "T1",
+    "SEG-34",
+    18,
+    30
+   ],
+   [
+    "T2",
+    "SEG-12",
+    11,
+    21
+   ],
+   [
+    "T2",
+    "SEG-23",
+    21,
+    29
+   ],
+   [
+    "T2",
+    "SEG-36",
+    29,
+    40
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-12",
+    60,
+    70
+   ],
+   [
+    "T5",
+    "SEG-23",
+    52,
+    60
+   ],
+   [
+    "T5",
+    "SEG-34",
+    40,
+    52
+   ]
+  ],
+  "total_added_delay": 11
+ },
+ "baseline/close-SEG-34": {
+  "actions": {
+   "T1": {
+    "action": "reroute",
+    "added_delay": -8,
+    "arrivals": {
+     "S1": 0,
+     "S4": 22,
+     "S5": 15
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-15",
+     "SEG-45"
+    ],
+    "reason": "rerouted via S1-S5-S4 because planned path uses closed segment(s) SEG-34; arrives S4 at minute 22 (-8 min)"
+   },
+   "T2": {
+    "action": "reroute",
+    "added_delay": 5,
+    "arrivals": {
+     "S1": 5,
+     "S2": 15,
+     "S3": 23,
+     "S6": 34
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-36"
+    ],
+    "reason": "rerouted via S1-S2-S3-S6 because avoids conflict with T1 on the planned path; arrives S6 at minute 34 (+5 min)"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "reroute",
+    "added_delay": -8,
+    "arrivals": {
+     "S1": 62,
+     "S4": 40,
+     "S5": 47
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-45",
+     "SEG-15"
+    ],
+    "reason": "rerouted via S4-S5-S1 because planned path uses closed segment(s) SEG-34; arrives S1 at minute 62 (-8 min)"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-15",
+    0,
+    15
+   ],
+   [
+    "T1",
+    "SEG-45",
+    15,
+    22
+   ],
+   [
+    "T2",
+    "SEG-12",
+    5,
+    15
+   ],
+   [
+    "T2",
+    "SEG-23",
+    15,
+    23
+   ],
+   [
+    "T2",
+    "SEG-36",
+    23,
+    34
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-15",
+    47,
+    62
+   ],
+   [
+    "T5",
+    "SEG-45",
+    40,
+    47
+   ]
+  ],
+  "total_added_delay": -11
+ },
+ "baseline/delay-T1-12": {
+  "actions": {
+   "T1": {
+    "action": "depart_delayed",
+    "added_delay": 12,
+    "arrivals": {
+     "S1": 12,
+     "S2": 22,
+     "S3": 30,
+     "S4": 42
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-34"
+    ],
+    "reason": "departs 12 min late (admin-injected delay); arrives S4 at minute 42 (+12 min)"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 29
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 29"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "reroute",
+    "added_delay": -8,
+    "arrivals": {
+     "S1": 62,
+     "S4": 40,
+     "S5": 47
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-45",
+     "SEG-15"
+    ],
+    "reason": "rerouted via S4-S5-S1 because avoids conflict with T1 on the planned path; arrives S1 at minute 62 (-8 min)"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-12",
+    12,
+    22
+   ],
+   [
+    "T1",
+    "SEG-23",
+    22,
+    30
+   ],
+   [
+    "T1",
+    "SEG-34",
+    30,
+    42
+   ],
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    29
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-15",
+    47,
+    62
+   ],
+   [
+    "T5",
+    "SEG-45",
+    40,
+    47
+   ]
+  ],
+  "total_added_delay": 4
+ },
+ "baseline/double-close": {
+  "actions": {
+   "T1": {
+    "action": "stranded",
+    "added_delay": null,
+    "arrivals": null,
+    "depart_at": null,
+    "path": null,
+    "reason": "no remaining route from S1 to S4; cannot complete"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 29
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 29"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "stranded",
+    "added_delay": null,
+    "arrivals": null,
+    "depart_at": null,
+    "path": null,
+    "reason": "no remaining route from S4 to S6; cannot complete"
+   },
+   "T5": {
+    "action": "stranded",
+    "added_delay": null,
+    "arrivals": null,
+    "depart_at": null,
+    "path": null,
+    "reason": "no remaining route from S4 to S1; cannot complete"
+   }
+  },
+  "table": [
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    29
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ]
+  ],
+  "total_added_delay": 0
+ },
+ "baseline/empty": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 0,
+     "S2": 10,
+     "S3": 18,
+     "S4": 30
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-34"
+    ],
+    "reason": "proceeds as planned; arrives S4 at minute 30"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 29
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 29"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 70,
+     "S2": 60,
+     "S3": 52,
+     "S4": 40
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-34",
+     "SEG-23",
+     "SEG-12"
+    ],
+    "reason": "proceeds as planned; arrives S1 at minute 70"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-12",
+    0,
+    10
+   ],
+   [
+    "T1",
+    "SEG-23",
+    10,
+    18
+   ],
+   [
+    "T1",
+    "SEG-34",
+    18,
+    30
+   ],
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    29
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-12",
+    60,
+    70
+   ],
+   [
+    "T5",
+    "SEG-23",
+    52,
+    60
+   ],
+   [
+    "T5",
+    "SEG-34",
+    40,
+    52
+   ]
+  ],
+  "total_added_delay": 0
+ },
+ "baseline/reduce-SEG-56": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 0,
+     "S2": 10,
+     "S3": 18,
+     "S4": 30
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-34"
+    ],
+    "reason": "proceeds as planned; arrives S4 at minute 30"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 9,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 38
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "same path and departure; reduced speed adds 9 min (arrives S6 at minute 38)"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "reroute",
+    "added_delay": 15,
+    "arrivals": {
+     "S3": 43,
+     "S4": 31,
+     "S6": 54
+    },
+    "depart_at": 31,
+    "path": [
+     "SEG-34",
+     "SEG-36"
+    ],
+    "reason": "rerouted via S4-S3-S6, departing minute 31 because avoids conflict with T2 on the planned path; arrives S6 at minute 54 (+15 min)"
+   },
+   "T5": {
+    "action": "reroute",
+    "added_delay": -8,
+    "arrivals": {
+     "S1": 62,
+     "S4": 40,
+     "S5": 47
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-45",
+     "SEG-15"
+    ],
+    "reason": "rerouted via S4-S5-S1 because avoids conflict with T4 on the planned path; arrives S1 at minute 62 (-8 min)"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-12",
+    0,
+    10
+   ],
+   [
+    "T1",
+    "SEG-23",
+    10,
+    18
+   ],
+   [
+    "T1",
+    "SEG-34",
+    18,
+    30
+   ],
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    38
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-34",
+    31,
+    43
+   ],
+   [
+    "T4",
+    "SEG-36",
+    43,
+    54
+   ],
+   [
+    "T5",
+    "SEG-15",
+    47,
+    62
+   ],
+   [
+    "T5",
+    "SEG-45",
+    40,
+    47
+   ]
+  ],
+  "total_added_delay": 16
+ },
+ "baseline/restrict-T1-SEG-34": {
+  "actions": {
+   "T1": {
+    "action": "reroute",
+    "added_delay": -8,
+    "arrivals": {
+     "S1": 0,
+     "S4": 22,
+     "S5": 15
+    },
+    "depart_at": 0,
+    "path": [
+     "SEG-15",
+     "SEG-45"
+    ],
+    "reason": "rerouted via S1-S5-S4 because this train is barred from segment(s) SEG-34; arrives S4 at minute 22 (-8 min)"
+   },
+   "T2": {
+    "action": "reroute",
+    "added_delay": 5,
+    "arrivals": {
+     "S1": 5,
+     "S2": 15,
+     "S3": 23,
+     "S6": 34
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-12",
+     "SEG-23",
+     "SEG-36"
+    ],
+    "reason": "rerouted via S1-S2-S3-S6 because avoids conflict with T1 on the planned path; arrives S6 at minute 34 (+5 min)"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 70,
+     "S2": 60,
+     "S3": 52,
+     "S4": 40
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-34",
+     "SEG-23",
+     "SEG-12"
+    ],
+    "reason": "proceeds as planned; arrives S1 at minute 70"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "SEG-15",
+    0,
+    15
+   ],
+   [
+    "T1",
+    "SEG-45",
+    15,
+    22
+   ],
+   [
+    "T2",
+    "SEG-12",
+    5,
+    15
+   ],
+   [
+    "T2",
+    "SEG-23",
+    15,
+    23
+   ],
+   [
+    "T2",
+    "SEG-36",
+    23,
+    34
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-12",
+    60,
+    70
+   ],
+   [
+    "T5",
+    "SEG-23",
+    52,
+    60
+   ],
+   [
+    "T5",
+    "SEG-34",
+    40,
+    52
+   ]
+  ],
+  "total_added_delay": -3
+ },
+ "baseline/restrict-T1-strand": {
+  "actions": {
+   "T1": {
+    "action": "stranded",
+    "added_delay": null,
+    "arrivals": null,
+    "depart_at": null,
+    "path": null,
+    "reason": "no remaining route from S1 to S4 (barred from SEG-34); cannot complete"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 5,
+     "S5": 20,
+     "S6": 29
+    },
+    "depart_at": 5,
+    "path": [
+     "SEG-15",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 29"
+   },
+   "T3": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S2": 12,
+     "S6": 32
+    },
+    "depart_at": 12,
+    "path": [
+     "SEG-26"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 32"
+   },
+   "T4": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S4": 23,
+     "S5": 30,
+     "S6": 39
+    },
+    "depart_at": 23,
+    "path": [
+     "SEG-45",
+     "SEG-56"
+    ],
+    "reason": "proceeds as planned; arrives S6 at minute 39"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "S1": 70,
+     "S2": 60,
+     "S3": 52,
+     "S4": 40
+    },
+    "depart_at": 40,
+    "path": [
+     "SEG-34",
+     "SEG-23",
+     "SEG-12"
+    ],
+    "reason": "proceeds as planned; arrives S1 at minute 70"
+   }
+  },
+  "table": [
+   [
+    "T2",
+    "SEG-15",
+    5,
+    20
+   ],
+   [
+    "T2",
+    "SEG-56",
+    20,
+    29
+   ],
+   [
+    "T3",
+    "SEG-26",
+    12,
+    32
+   ],
+   [
+    "T4",
+    "SEG-45",
+    23,
+    30
+   ],
+   [
+    "T4",
+    "SEG-56",
+    30,
+    39
+   ],
+   [
+    "T5",
+    "SEG-12",
+    60,
+    70
+   ],
+   [
+    "T5",
+    "SEG-23",
+    52,
+    60
+   ],
+   [
+    "T5",
+    "SEG-34",
+    40,
+    52
+   ]
+  ],
+  "total_added_delay": 0
+ },
+ "real/close-BHS-BPL": {
+  "actions": {
+   "T101": {
+    "action": "reroute",
+    "added_delay": 368,
+    "arrivals": {
+     "AGC": 195,
+     "AMLA": 1291,
+     "BFP": 190,
+     "BINA": 563,
+     "BZU": 1268,
+     "DHO": 247,
+     "DMO": 715,
+     "ET": 1161,
+     "GDYA": 1231,
+     "GWL": 313,
+     "JBP": 915,
+     "KMZ": 824,
+     "MRA": 275,
+     "MTJ": 141,
+     "NDLS": 0,
+     "NGP": 1458,
+     "NRKR": 1372,
+     "NU": 999,
+     "PAR": 1354,
+     "PPI": 1093,
+     "SGO": 638,
+     "VGLJ": 410
+    },
+    "depart_at": 0,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP",
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "rerouted via NDLS-MTJ-BFP-AGC-DHO-MRA-GWL-VGLJ-BINA-SGO-DMO-KMZ-JBP-NU-PPI-ET-GDYA-BZU-AMLA-PAR-NRKR-NGP because planned path uses closed segment(s) BHS-BPL; arrives NGP at minute 1458 (+368 min)"
+   },
+   "T102": {
+    "action": "reroute",
+    "added_delay": 1590,
+    "arrivals": {
+     "AGC": 1393,
+     "BFP": 1388,
+     "BINA": 1761,
+     "BPL": 2451,
+     "DHO": 1445,
+     "DMO": 1913,
+     "ET": 2359,
+     "GWL": 1511,
+     "JBP": 2113,
+     "KMZ": 2022,
+     "MRA": 1473,
+     "MTJ": 1339,
+     "NDLS": 1198,
+     "NDPM": 2377,
+     "NU": 2197,
+     "PPI": 2291,
+     "RKMP": 2445,
+     "SGO": 1836,
+     "VGLJ": 1608
+    },
+    "depart_at": 1198,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP",
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET",
+     "NDPM-ET",
+     "RKMP-NDPM",
+     "BPL-RKMP"
+    ],
+    "reason": "rerouted via NDLS-MTJ-BFP-AGC-DHO-MRA-GWL-VGLJ-BINA-SGO-DMO-KMZ-JBP-NU-PPI-ET-NDPM-RKMP-BPL, departing minute 1198 because planned path uses closed segment(s) BHS-BPL; arrives BPL at minute 2451 (+1590 min)"
+   },
+   "T103": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 252,
+     "BPL": 30,
+     "BZU": 229,
+     "ET": 122,
+     "GDYA": 192,
+     "NDPM": 104,
+     "NGP": 419,
+     "NRKR": 333,
+     "PAR": 315,
+     "RKMP": 36
+    },
+    "depart_at": 30,
+    "path": [
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "proceeds as planned; arrives NGP at minute 419"
+   },
+   "T104": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 172,
+     "BZU": 195,
+     "NGP": 5,
+     "NRKR": 91,
+     "PAR": 109
+    },
+    "depart_at": 5,
+    "path": [
+     "NRKR-NGP",
+     "PAR-NRKR",
+     "AMLA-PAR",
+     "BZU-AMLA"
+    ],
+    "reason": "proceeds as planned; arrives BZU at minute 195"
+   },
+   "T105": {
+    "action": "reroute",
+    "added_delay": 2134,
+    "arrivals": {
+     "AGC": 3510,
+     "BFP": 3515,
+     "BINA": 3142,
+     "BPL": 2452,
+     "DHO": 3458,
+     "DMO": 2990,
+     "ET": 2544,
+     "GWL": 3392,
+     "JBP": 2790,
+     "KMZ": 2881,
+     "MRA": 3430,
+     "MTJ": 3564,
+     "NDLS": 3705,
+     "NDPM": 2526,
+     "NU": 2706,
+     "PPI": 2612,
+     "RKMP": 2458,
+     "SGO": 3067,
+     "VGLJ": 3295
+    },
+    "depart_at": 2452,
+    "path": [
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "PPI-ET",
+     "NU-PPI",
+     "JBP-NU",
+     "KMZ-JBP",
+     "DMO-KMZ",
+     "SGO-DMO",
+     "BINA-SGO",
+     "VGLJ-BINA",
+     "GWL-VGLJ",
+     "MRA-GWL",
+     "DHO-MRA",
+     "AGC-DHO",
+     "BFP-AGC",
+     "MTJ-BFP",
+     "NDLS-MTJ"
+    ],
+    "reason": "rerouted via BPL-RKMP-NDPM-ET-PPI-NU-JBP-KMZ-DMO-SGO-BINA-VGLJ-GWL-MRA-DHO-AGC-BFP-MTJ-NDLS, departing minute 2452 because planned path uses closed segment(s) BHS-BPL; arrives NDLS at minute 3705 (+2134 min)"
+   },
+   "T106": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 515,
+     "BFP": 510,
+     "BINA": 883,
+     "DHO": 567,
+     "DMO": 1035,
+     "GWL": 633,
+     "JBP": 1235,
+     "KMZ": 1144,
+     "MRA": 595,
+     "MTJ": 461,
+     "NDLS": 320,
+     "SGO": 958,
+     "VGLJ": 730
+    },
+    "depart_at": 320,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP"
+    ],
+    "reason": "proceeds as planned; arrives JBP at minute 1235"
+   },
+   "T107": {
+    "action": "hold",
+    "added_delay": 1062,
+    "arrivals": {
+     "BINA": 1760,
+     "DMO": 1608,
+     "ET": 1162,
+     "JBP": 1408,
+     "KMZ": 1499,
+     "NU": 1324,
+     "PPI": 1230,
+     "SGO": 1685
+    },
+    "depart_at": 1162,
+    "path": [
+     "PPI-ET",
+     "NU-PPI",
+     "JBP-NU",
+     "KMZ-JBP",
+     "DMO-KMZ",
+     "SGO-DMO",
+     "BINA-SGO"
+    ],
+    "reason": "held at ET until minute 1162 so T101 clear(s) the line; arrives BINA at minute 1760 (+1062 min)"
+   },
+   "T108": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ET": 946,
+     "JBP": 700,
+     "NU": 784,
+     "PPI": 878
+    },
+    "depart_at": 700,
+    "path": [
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET"
+    ],
+    "reason": "proceeds as planned; arrives ET at minute 946"
+   }
+  },
+  "table": [
+   [
+    "T101",
+    "AGC-DHO",
+    195,
+    247
+   ],
+   [
+    "T101",
+    "AMLA-PAR",
+    1291,
+    1354
+   ],
+   [
+    "T101",
+    "BFP-AGC",
+    190,
+    195
+   ],
+   [
+    "T101",
+    "BINA-SGO",
+    563,
+    638
+   ],
+   [
+    "T101",
+    "BZU-AMLA",
+    1268,
+    1291
+   ],
+   [
+    "T101",
+    "DHO-MRA",
+    247,
+    275
+   ],
+   [
+    "T101",
+    "DMO-KMZ",
+    715,
+    824
+   ],
+   [
+    "T101",
+    "ET-GDYA",
+    1161,
+    1231
+   ],
+   [
+    "T101",
+    "GDYA-BZU",
+    1231,
+    1268
+   ],
+   [
+    "T101",
+    "GWL-VGLJ",
+    313,
+    410
+   ],
+   [
+    "T101",
+    "JBP-NU",
+    915,
+    999
+   ],
+   [
+    "T101",
+    "KMZ-JBP",
+    824,
+    915
+   ],
+   [
+    "T101",
+    "MRA-GWL",
+    275,
+    313
+   ],
+   [
+    "T101",
+    "MTJ-BFP",
+    141,
+    190
+   ],
+   [
+    "T101",
+    "NDLS-MTJ",
+    0,
+    141
+   ],
+   [
+    "T101",
+    "NRKR-NGP",
+    1372,
+    1458
+   ],
+   [
+    "T101",
+    "NU-PPI",
+    999,
+    1093
+   ],
+   [
+    "T101",
+    "PAR-NRKR",
+    1354,
+    1372
+   ],
+   [
+    "T101",
+    "PPI-ET",
+    1093,
+    1161
+   ],
+   [
+    "T101",
+    "SGO-DMO",
+    638,
+    715
+   ],
+   [
+    "T101",
+    "VGLJ-BINA",
+    410,
+    563
+   ],
+   [
+    "T102",
+    "AGC-DHO",
+    1393,
+    1445
+   ],
+   [
+    "T102",
+    "BFP-AGC",
+    1388,
+    1393
+   ],
+   [
+    "T102",
+    "BINA-SGO",
+    1761,
+    1836
+   ],
+   [
+    "T102",
+    "BPL-RKMP",
+    2445,
+    2451
+   ],
+   [
+    "T102",
+    "DHO-MRA",
+    1445,
+    1473
+   ],
+   [
+    "T102",
+    "DMO-KMZ",
+    1913,
+    2022
+   ],
+   [
+    "T102",
+    "GWL-VGLJ",
+    1511,
+    1608
+   ],
+   [
+    "T102",
+    "JBP-NU",
+    2113,
+    2197
+   ],
+   [
+    "T102",
+    "KMZ-JBP",
+    2022,
+    2113
+   ],
+   [
+    "T102",
+    "MRA-GWL",
+    1473,
+    1511
+   ],
+   [
+    "T102",
+    "MTJ-BFP",
+    1339,
+    1388
+   ],
+   [
+    "T102",
+    "NDLS-MTJ",
+    1198,
+    1339
+   ],
+   [
+    "T102",
+    "NDPM-ET",
+    2359,
+    2377
+   ],
+   [
+    "T102",
+    "NU-PPI",
+    2197,
+    2291
+   ],
+   [
+    "T102",
+    "PPI-ET",
+    2291,
+    2359
+   ],
+   [
+    "T102",
+    "RKMP-NDPM",
+    2377,
+    2445
+   ],
+   [
+    "T102",
+    "SGO-DMO",
+    1836,
+    1913
+   ],
+   [
+    "T102",
+    "VGLJ-BINA",
+    1608,
+    1761
+   ],
+   [
+    "T103",
+    "AMLA-PAR",
+    252,
+    315
+   ],
+   [
+    "T103",
+    "BPL-RKMP",
+    30,
+    36
+   ],
+   [
+    "T103",
+    "BZU-AMLA",
+    229,
+    252
+   ],
+   [
+    "T103",
+    "ET-GDYA",
+    122,
+    192
+   ],
+   [
+    "T103",
+    "GDYA-BZU",
+    192,
+    229
+   ],
+   [
+    "T103",
+    "NDPM-ET",
+    104,
+    122
+   ],
+   [
+    "T103",
+    "NRKR-NGP",
+    333,
+    419
+   ],
+   [
+    "T103",
+    "PAR-NRKR",
+    315,
+    333
+   ],
+   [
+    "T103",
+    "RKMP-NDPM",
+    36,
+    104
+   ],
+   [
+    "T104",
+    "AMLA-PAR",
+    109,
+    172
+   ],
+   [
+    "T104",
+    "BZU-AMLA",
+    172,
+    195
+   ],
+   [
+    "T104",
+    "NRKR-NGP",
+    5,
+    91
+   ],
+   [
+    "T104",
+    "PAR-NRKR",
+    91,
+    109
+   ],
+   [
+    "T105",
+    "AGC-DHO",
+    3458,
+    3510
+   ],
+   [
+    "T105",
+    "BFP-AGC",
+    3510,
+    3515
+   ],
+   [
+    "T105",
+    "BINA-SGO",
+    3067,
+    3142
+   ],
+   [
+    "T105",
+    "BPL-RKMP",
+    2452,
+    2458
+   ],
+   [
+    "T105",
+    "DHO-MRA",
+    3430,
+    3458
+   ],
+   [
+    "T105",
+    "DMO-KMZ",
+    2881,
+    2990
+   ],
+   [
+    "T105",
+    "GWL-VGLJ",
+    3295,
+    3392
+   ],
+   [
+    "T105",
+    "JBP-NU",
+    2706,
+    2790
+   ],
+   [
+    "T105",
+    "KMZ-JBP",
+    2790,
+    2881
+   ],
+   [
+    "T105",
+    "MRA-GWL",
+    3392,
+    3430
+   ],
+   [
+    "T105",
+    "MTJ-BFP",
+    3515,
+    3564
+   ],
+   [
+    "T105",
+    "NDLS-MTJ",
+    3564,
+    3705
+   ],
+   [
+    "T105",
+    "NDPM-ET",
+    2526,
+    2544
+   ],
+   [
+    "T105",
+    "NU-PPI",
+    2612,
+    2706
+   ],
+   [
+    "T105",
+    "PPI-ET",
+    2544,
+    2612
+   ],
+   [
+    "T105",
+    "RKMP-NDPM",
+    2458,
+    2526
+   ],
+   [
+    "T105",
+    "SGO-DMO",
+    2990,
+    3067
+   ],
+   [
+    "T105",
+    "VGLJ-BINA",
+    3142,
+    3295
+   ],
+   [
+    "T106",
+    "AGC-DHO",
+    515,
+    567
+   ],
+   [
+    "T106",
+    "BFP-AGC",
+    510,
+    515
+   ],
+   [
+    "T106",
+    "BINA-SGO",
+    883,
+    958
+   ],
+   [
+    "T106",
+    "DHO-MRA",
+    567,
+    595
+   ],
+   [
+    "T106",
+    "DMO-KMZ",
+    1035,
+    1144
+   ],
+   [
+    "T106",
+    "GWL-VGLJ",
+    633,
+    730
+   ],
+   [
+    "T106",
+    "KMZ-JBP",
+    1144,
+    1235
+   ],
+   [
+    "T106",
+    "MRA-GWL",
+    595,
+    633
+   ],
+   [
+    "T106",
+    "MTJ-BFP",
+    461,
+    510
+   ],
+   [
+    "T106",
+    "NDLS-MTJ",
+    320,
+    461
+   ],
+   [
+    "T106",
+    "SGO-DMO",
+    958,
+    1035
+   ],
+   [
+    "T106",
+    "VGLJ-BINA",
+    730,
+    883
+   ],
+   [
+    "T107",
+    "BINA-SGO",
+    1685,
+    1760
+   ],
+   [
+    "T107",
+    "DMO-KMZ",
+    1499,
+    1608
+   ],
+   [
+    "T107",
+    "JBP-NU",
+    1324,
+    1408
+   ],
+   [
+    "T107",
+    "KMZ-JBP",
+    1408,
+    1499
+   ],
+   [
+    "T107",
+    "NU-PPI",
+    1230,
+    1324
+   ],
+   [
+    "T107",
+    "PPI-ET",
+    1162,
+    1230
+   ],
+   [
+    "T107",
+    "SGO-DMO",
+    1608,
+    1685
+   ],
+   [
+    "T108",
+    "JBP-NU",
+    700,
+    784
+   ],
+   [
+    "T108",
+    "NU-PPI",
+    784,
+    878
+   ],
+   [
+    "T108",
+    "PPI-ET",
+    878,
+    946
+   ]
+  ],
+  "total_added_delay": 5154
+ },
+ "real/delay-T101-30": {
+  "actions": {
+   "T101": {
+    "action": "depart_delayed",
+    "added_delay": 30,
+    "arrivals": {
+     "AGC": 225,
+     "AMLA": 953,
+     "BAQ": 639,
+     "BFP": 220,
+     "BHS": 678,
+     "BINA": 593,
+     "BPL": 731,
+     "BZU": 930,
+     "DHO": 277,
+     "ET": 823,
+     "GDYA": 893,
+     "GWL": 343,
+     "MRA": 305,
+     "MTJ": 171,
+     "NDLS": 30,
+     "NDPM": 805,
+     "NGP": 1120,
+     "NRKR": 1034,
+     "PAR": 1016,
+     "RKMP": 737,
+     "VGLJ": 440
+    },
+    "depart_at": 30,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-BAQ",
+     "BAQ-BHS",
+     "BHS-BPL",
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "departs 30 min late (admin-injected delay); arrives NGP at minute 1120 (+30 min)"
+   },
+   "T102": {
+    "action": "hold",
+    "added_delay": 24,
+    "arrivals": {
+     "AGC": 379,
+     "BAQ": 793,
+     "BFP": 374,
+     "BHS": 832,
+     "BINA": 747,
+     "BPL": 885,
+     "DHO": 431,
+     "GWL": 497,
+     "MRA": 459,
+     "MTJ": 325,
+     "NDLS": 184,
+     "VGLJ": 594
+    },
+    "depart_at": 184,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-BAQ",
+     "BAQ-BHS",
+     "BHS-BPL"
+    ],
+    "reason": "held at NDLS until minute 184 so T101 clear(s) the line; arrives BPL at minute 885 (+24 min)"
+   },
+   "T103": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 252,
+     "BPL": 30,
+     "BZU": 229,
+     "ET": 122,
+     "GDYA": 192,
+     "NDPM": 104,
+     "NGP": 419,
+     "NRKR": 333,
+     "PAR": 315,
+     "RKMP": 36
+    },
+    "depart_at": 30,
+    "path": [
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "proceeds as planned; arrives NGP at minute 419"
+   },
+   "T104": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 172,
+     "BZU": 195,
+     "NGP": 5,
+     "NRKR": 91,
+     "PAR": 109
+    },
+    "depart_at": 5,
+    "path": [
+     "NRKR-NGP",
+     "PAR-NRKR",
+     "AMLA-PAR",
+     "BZU-AMLA"
+    ],
+    "reason": "proceeds as planned; arrives BZU at minute 195"
+   },
+   "T105": {
+    "action": "hold",
+    "added_delay": 16,
+    "arrivals": {
+     "AGC": 1392,
+     "BAQ": 978,
+     "BFP": 1397,
+     "BHS": 939,
+     "BINA": 1024,
+     "BPL": 886,
+     "DHO": 1340,
+     "GWL": 1274,
+     "MRA": 1312,
+     "MTJ": 1446,
+     "NDLS": 1587,
+     "VGLJ": 1177
+    },
+    "depart_at": 886,
+    "path": [
+     "BHS-BPL",
+     "BAQ-BHS",
+     "BINA-BAQ",
+     "VGLJ-BINA",
+     "GWL-VGLJ",
+     "MRA-GWL",
+     "DHO-MRA",
+     "AGC-DHO",
+     "BFP-AGC",
+     "MTJ-BFP",
+     "NDLS-MTJ"
+    ],
+    "reason": "held at BPL until minute 886 so T102 clear(s) the line; arrives NDLS at minute 1587 (+16 min)"
+   },
+   "T106": {
+    "action": "hold",
+    "added_delay": 18,
+    "arrivals": {
+     "AGC": 533,
+     "BFP": 528,
+     "BINA": 901,
+     "DHO": 585,
+     "DMO": 1053,
+     "GWL": 651,
+     "JBP": 1253,
+     "KMZ": 1162,
+     "MRA": 613,
+     "MTJ": 479,
+     "NDLS": 338,
+     "SGO": 976,
+     "VGLJ": 748
+    },
+    "depart_at": 338,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP"
+    ],
+    "reason": "held at NDLS until minute 338 so T102 clear(s) the line; arrives JBP at minute 1253 (+18 min)"
+   },
+   "T107": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BINA": 698,
+     "DMO": 546,
+     "ET": 100,
+     "JBP": 346,
+     "KMZ": 437,
+     "NU": 262,
+     "PPI": 168,
+     "SGO": 623
+    },
+    "depart_at": 100,
+    "path": [
+     "PPI-ET",
+     "NU-PPI",
+     "JBP-NU",
+     "KMZ-JBP",
+     "DMO-KMZ",
+     "SGO-DMO",
+     "BINA-SGO"
+    ],
+    "reason": "proceeds as planned; arrives BINA at minute 698"
+   },
+   "T108": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ET": 946,
+     "JBP": 700,
+     "NU": 784,
+     "PPI": 878
+    },
+    "depart_at": 700,
+    "path": [
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET"
+    ],
+    "reason": "proceeds as planned; arrives ET at minute 946"
+   }
+  },
+  "table": [
+   [
+    "T101",
+    "AGC-DHO",
+    225,
+    277
+   ],
+   [
+    "T101",
+    "AMLA-PAR",
+    953,
+    1016
+   ],
+   [
+    "T101",
+    "BAQ-BHS",
+    639,
+    678
+   ],
+   [
+    "T101",
+    "BFP-AGC",
+    220,
+    225
+   ],
+   [
+    "T101",
+    "BHS-BPL",
+    678,
+    731
+   ],
+   [
+    "T101",
+    "BINA-BAQ",
+    593,
+    639
+   ],
+   [
+    "T101",
+    "BPL-RKMP",
+    731,
+    737
+   ],
+   [
+    "T101",
+    "BZU-AMLA",
+    930,
+    953
+   ],
+   [
+    "T101",
+    "DHO-MRA",
+    277,
+    305
+   ],
+   [
+    "T101",
+    "ET-GDYA",
+    823,
+    893
+   ],
+   [
+    "T101",
+    "GDYA-BZU",
+    893,
+    930
+   ],
+   [
+    "T101",
+    "GWL-VGLJ",
+    343,
+    440
+   ],
+   [
+    "T101",
+    "MRA-GWL",
+    305,
+    343
+   ],
+   [
+    "T101",
+    "MTJ-BFP",
+    171,
+    220
+   ],
+   [
+    "T101",
+    "NDLS-MTJ",
+    30,
+    171
+   ],
+   [
+    "T101",
+    "NDPM-ET",
+    805,
+    823
+   ],
+   [
+    "T101",
+    "NRKR-NGP",
+    1034,
+    1120
+   ],
+   [
+    "T101",
+    "PAR-NRKR",
+    1016,
+    1034
+   ],
+   [
+    "T101",
+    "RKMP-NDPM",
+    737,
+    805
+   ],
+   [
+    "T101",
+    "VGLJ-BINA",
+    440,
+    593
+   ],
+   [
+    "T102",
+    "AGC-DHO",
+    379,
+    431
+   ],
+   [
+    "T102",
+    "BAQ-BHS",
+    793,
+    832
+   ],
+   [
+    "T102",
+    "BFP-AGC",
+    374,
+    379
+   ],
+   [
+    "T102",
+    "BHS-BPL",
+    832,
+    885
+   ],
+   [
+    "T102",
+    "BINA-BAQ",
+    747,
+    793
+   ],
+   [
+    "T102",
+    "DHO-MRA",
+    431,
+    459
+   ],
+   [
+    "T102",
+    "GWL-VGLJ",
+    497,
+    594
+   ],
+   [
+    "T102",
+    "MRA-GWL",
+    459,
+    497
+   ],
+   [
+    "T102",
+    "MTJ-BFP",
+    325,
+    374
+   ],
+   [
+    "T102",
+    "NDLS-MTJ",
+    184,
+    325
+   ],
+   [
+    "T102",
+    "VGLJ-BINA",
+    594,
+    747
+   ],
+   [
+    "T103",
+    "AMLA-PAR",
+    252,
+    315
+   ],
+   [
+    "T103",
+    "BPL-RKMP",
+    30,
+    36
+   ],
+   [
+    "T103",
+    "BZU-AMLA",
+    229,
+    252
+   ],
+   [
+    "T103",
+    "ET-GDYA",
+    122,
+    192
+   ],
+   [
+    "T103",
+    "GDYA-BZU",
+    192,
+    229
+   ],
+   [
+    "T103",
+    "NDPM-ET",
+    104,
+    122
+   ],
+   [
+    "T103",
+    "NRKR-NGP",
+    333,
+    419
+   ],
+   [
+    "T103",
+    "PAR-NRKR",
+    315,
+    333
+   ],
+   [
+    "T103",
+    "RKMP-NDPM",
+    36,
+    104
+   ],
+   [
+    "T104",
+    "AMLA-PAR",
+    109,
+    172
+   ],
+   [
+    "T104",
+    "BZU-AMLA",
+    172,
+    195
+   ],
+   [
+    "T104",
+    "NRKR-NGP",
+    5,
+    91
+   ],
+   [
+    "T104",
+    "PAR-NRKR",
+    91,
+    109
+   ],
+   [
+    "T105",
+    "AGC-DHO",
+    1340,
+    1392
+   ],
+   [
+    "T105",
+    "BAQ-BHS",
+    939,
+    978
+   ],
+   [
+    "T105",
+    "BFP-AGC",
+    1392,
+    1397
+   ],
+   [
+    "T105",
+    "BHS-BPL",
+    886,
+    939
+   ],
+   [
+    "T105",
+    "BINA-BAQ",
+    978,
+    1024
+   ],
+   [
+    "T105",
+    "DHO-MRA",
+    1312,
+    1340
+   ],
+   [
+    "T105",
+    "GWL-VGLJ",
+    1177,
+    1274
+   ],
+   [
+    "T105",
+    "MRA-GWL",
+    1274,
+    1312
+   ],
+   [
+    "T105",
+    "MTJ-BFP",
+    1397,
+    1446
+   ],
+   [
+    "T105",
+    "NDLS-MTJ",
+    1446,
+    1587
+   ],
+   [
+    "T105",
+    "VGLJ-BINA",
+    1024,
+    1177
+   ],
+   [
+    "T106",
+    "AGC-DHO",
+    533,
+    585
+   ],
+   [
+    "T106",
+    "BFP-AGC",
+    528,
+    533
+   ],
+   [
+    "T106",
+    "BINA-SGO",
+    901,
+    976
+   ],
+   [
+    "T106",
+    "DHO-MRA",
+    585,
+    613
+   ],
+   [
+    "T106",
+    "DMO-KMZ",
+    1053,
+    1162
+   ],
+   [
+    "T106",
+    "GWL-VGLJ",
+    651,
+    748
+   ],
+   [
+    "T106",
+    "KMZ-JBP",
+    1162,
+    1253
+   ],
+   [
+    "T106",
+    "MRA-GWL",
+    613,
+    651
+   ],
+   [
+    "T106",
+    "MTJ-BFP",
+    479,
+    528
+   ],
+   [
+    "T106",
+    "NDLS-MTJ",
+    338,
+    479
+   ],
+   [
+    "T106",
+    "SGO-DMO",
+    976,
+    1053
+   ],
+   [
+    "T106",
+    "VGLJ-BINA",
+    748,
+    901
+   ],
+   [
+    "T107",
+    "BINA-SGO",
+    623,
+    698
+   ],
+   [
+    "T107",
+    "DMO-KMZ",
+    437,
+    546
+   ],
+   [
+    "T107",
+    "JBP-NU",
+    262,
+    346
+   ],
+   [
+    "T107",
+    "KMZ-JBP",
+    346,
+    437
+   ],
+   [
+    "T107",
+    "NU-PPI",
+    168,
+    262
+   ],
+   [
+    "T107",
+    "PPI-ET",
+    100,
+    168
+   ],
+   [
+    "T107",
+    "SGO-DMO",
+    546,
+    623
+   ],
+   [
+    "T108",
+    "JBP-NU",
+    700,
+    784
+   ],
+   [
+    "T108",
+    "NU-PPI",
+    784,
+    878
+   ],
+   [
+    "T108",
+    "PPI-ET",
+    878,
+    946
+   ]
+  ],
+  "total_added_delay": 88
+ },
+ "real/empty": {
+  "actions": {
+   "T101": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 195,
+     "AMLA": 923,
+     "BAQ": 609,
+     "BFP": 190,
+     "BHS": 648,
+     "BINA": 563,
+     "BPL": 701,
+     "BZU": 900,
+     "DHO": 247,
+     "ET": 793,
+     "GDYA": 863,
+     "GWL": 313,
+     "MRA": 275,
+     "MTJ": 141,
+     "NDLS": 0,
+     "NDPM": 775,
+     "NGP": 1090,
+     "NRKR": 1004,
+     "PAR": 986,
+     "RKMP": 707,
+     "VGLJ": 410
+    },
+    "depart_at": 0,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-BAQ",
+     "BAQ-BHS",
+     "BHS-BPL",
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "proceeds as planned; arrives NGP at minute 1090"
+   },
+   "T102": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 355,
+     "BAQ": 769,
+     "BFP": 350,
+     "BHS": 808,
+     "BINA": 723,
+     "BPL": 861,
+     "DHO": 407,
+     "GWL": 473,
+     "MRA": 435,
+     "MTJ": 301,
+     "NDLS": 160,
+     "VGLJ": 570
+    },
+    "depart_at": 160,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-BAQ",
+     "BAQ-BHS",
+     "BHS-BPL"
+    ],
+    "reason": "proceeds as planned; arrives BPL at minute 861"
+   },
+   "T103": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 252,
+     "BPL": 30,
+     "BZU": 229,
+     "ET": 122,
+     "GDYA": 192,
+     "NDPM": 104,
+     "NGP": 419,
+     "NRKR": 333,
+     "PAR": 315,
+     "RKMP": 36
+    },
+    "depart_at": 30,
+    "path": [
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "proceeds as planned; arrives NGP at minute 419"
+   },
+   "T104": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 172,
+     "BZU": 195,
+     "NGP": 5,
+     "NRKR": 91,
+     "PAR": 109
+    },
+    "depart_at": 5,
+    "path": [
+     "NRKR-NGP",
+     "PAR-NRKR",
+     "AMLA-PAR",
+     "BZU-AMLA"
+    ],
+    "reason": "proceeds as planned; arrives BZU at minute 195"
+   },
+   "T105": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 1376,
+     "BAQ": 962,
+     "BFP": 1381,
+     "BHS": 923,
+     "BINA": 1008,
+     "BPL": 870,
+     "DHO": 1324,
+     "GWL": 1258,
+     "MRA": 1296,
+     "MTJ": 1430,
+     "NDLS": 1571,
+     "VGLJ": 1161
+    },
+    "depart_at": 870,
+    "path": [
+     "BHS-BPL",
+     "BAQ-BHS",
+     "BINA-BAQ",
+     "VGLJ-BINA",
+     "GWL-VGLJ",
+     "MRA-GWL",
+     "DHO-MRA",
+     "AGC-DHO",
+     "BFP-AGC",
+     "MTJ-BFP",
+     "NDLS-MTJ"
+    ],
+    "reason": "proceeds as planned; arrives NDLS at minute 1571"
+   },
+   "T106": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 515,
+     "BFP": 510,
+     "BINA": 883,
+     "DHO": 567,
+     "DMO": 1035,
+     "GWL": 633,
+     "JBP": 1235,
+     "KMZ": 1144,
+     "MRA": 595,
+     "MTJ": 461,
+     "NDLS": 320,
+     "SGO": 958,
+     "VGLJ": 730
+    },
+    "depart_at": 320,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP"
+    ],
+    "reason": "proceeds as planned; arrives JBP at minute 1235"
+   },
+   "T107": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BINA": 698,
+     "DMO": 546,
+     "ET": 100,
+     "JBP": 346,
+     "KMZ": 437,
+     "NU": 262,
+     "PPI": 168,
+     "SGO": 623
+    },
+    "depart_at": 100,
+    "path": [
+     "PPI-ET",
+     "NU-PPI",
+     "JBP-NU",
+     "KMZ-JBP",
+     "DMO-KMZ",
+     "SGO-DMO",
+     "BINA-SGO"
+    ],
+    "reason": "proceeds as planned; arrives BINA at minute 698"
+   },
+   "T108": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ET": 946,
+     "JBP": 700,
+     "NU": 784,
+     "PPI": 878
+    },
+    "depart_at": 700,
+    "path": [
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET"
+    ],
+    "reason": "proceeds as planned; arrives ET at minute 946"
+   }
+  },
+  "table": [
+   [
+    "T101",
+    "AGC-DHO",
+    195,
+    247
+   ],
+   [
+    "T101",
+    "AMLA-PAR",
+    923,
+    986
+   ],
+   [
+    "T101",
+    "BAQ-BHS",
+    609,
+    648
+   ],
+   [
+    "T101",
+    "BFP-AGC",
+    190,
+    195
+   ],
+   [
+    "T101",
+    "BHS-BPL",
+    648,
+    701
+   ],
+   [
+    "T101",
+    "BINA-BAQ",
+    563,
+    609
+   ],
+   [
+    "T101",
+    "BPL-RKMP",
+    701,
+    707
+   ],
+   [
+    "T101",
+    "BZU-AMLA",
+    900,
+    923
+   ],
+   [
+    "T101",
+    "DHO-MRA",
+    247,
+    275
+   ],
+   [
+    "T101",
+    "ET-GDYA",
+    793,
+    863
+   ],
+   [
+    "T101",
+    "GDYA-BZU",
+    863,
+    900
+   ],
+   [
+    "T101",
+    "GWL-VGLJ",
+    313,
+    410
+   ],
+   [
+    "T101",
+    "MRA-GWL",
+    275,
+    313
+   ],
+   [
+    "T101",
+    "MTJ-BFP",
+    141,
+    190
+   ],
+   [
+    "T101",
+    "NDLS-MTJ",
+    0,
+    141
+   ],
+   [
+    "T101",
+    "NDPM-ET",
+    775,
+    793
+   ],
+   [
+    "T101",
+    "NRKR-NGP",
+    1004,
+    1090
+   ],
+   [
+    "T101",
+    "PAR-NRKR",
+    986,
+    1004
+   ],
+   [
+    "T101",
+    "RKMP-NDPM",
+    707,
+    775
+   ],
+   [
+    "T101",
+    "VGLJ-BINA",
+    410,
+    563
+   ],
+   [
+    "T102",
+    "AGC-DHO",
+    355,
+    407
+   ],
+   [
+    "T102",
+    "BAQ-BHS",
+    769,
+    808
+   ],
+   [
+    "T102",
+    "BFP-AGC",
+    350,
+    355
+   ],
+   [
+    "T102",
+    "BHS-BPL",
+    808,
+    861
+   ],
+   [
+    "T102",
+    "BINA-BAQ",
+    723,
+    769
+   ],
+   [
+    "T102",
+    "DHO-MRA",
+    407,
+    435
+   ],
+   [
+    "T102",
+    "GWL-VGLJ",
+    473,
+    570
+   ],
+   [
+    "T102",
+    "MRA-GWL",
+    435,
+    473
+   ],
+   [
+    "T102",
+    "MTJ-BFP",
+    301,
+    350
+   ],
+   [
+    "T102",
+    "NDLS-MTJ",
+    160,
+    301
+   ],
+   [
+    "T102",
+    "VGLJ-BINA",
+    570,
+    723
+   ],
+   [
+    "T103",
+    "AMLA-PAR",
+    252,
+    315
+   ],
+   [
+    "T103",
+    "BPL-RKMP",
+    30,
+    36
+   ],
+   [
+    "T103",
+    "BZU-AMLA",
+    229,
+    252
+   ],
+   [
+    "T103",
+    "ET-GDYA",
+    122,
+    192
+   ],
+   [
+    "T103",
+    "GDYA-BZU",
+    192,
+    229
+   ],
+   [
+    "T103",
+    "NDPM-ET",
+    104,
+    122
+   ],
+   [
+    "T103",
+    "NRKR-NGP",
+    333,
+    419
+   ],
+   [
+    "T103",
+    "PAR-NRKR",
+    315,
+    333
+   ],
+   [
+    "T103",
+    "RKMP-NDPM",
+    36,
+    104
+   ],
+   [
+    "T104",
+    "AMLA-PAR",
+    109,
+    172
+   ],
+   [
+    "T104",
+    "BZU-AMLA",
+    172,
+    195
+   ],
+   [
+    "T104",
+    "NRKR-NGP",
+    5,
+    91
+   ],
+   [
+    "T104",
+    "PAR-NRKR",
+    91,
+    109
+   ],
+   [
+    "T105",
+    "AGC-DHO",
+    1324,
+    1376
+   ],
+   [
+    "T105",
+    "BAQ-BHS",
+    923,
+    962
+   ],
+   [
+    "T105",
+    "BFP-AGC",
+    1376,
+    1381
+   ],
+   [
+    "T105",
+    "BHS-BPL",
+    870,
+    923
+   ],
+   [
+    "T105",
+    "BINA-BAQ",
+    962,
+    1008
+   ],
+   [
+    "T105",
+    "DHO-MRA",
+    1296,
+    1324
+   ],
+   [
+    "T105",
+    "GWL-VGLJ",
+    1161,
+    1258
+   ],
+   [
+    "T105",
+    "MRA-GWL",
+    1258,
+    1296
+   ],
+   [
+    "T105",
+    "MTJ-BFP",
+    1381,
+    1430
+   ],
+   [
+    "T105",
+    "NDLS-MTJ",
+    1430,
+    1571
+   ],
+   [
+    "T105",
+    "VGLJ-BINA",
+    1008,
+    1161
+   ],
+   [
+    "T106",
+    "AGC-DHO",
+    515,
+    567
+   ],
+   [
+    "T106",
+    "BFP-AGC",
+    510,
+    515
+   ],
+   [
+    "T106",
+    "BINA-SGO",
+    883,
+    958
+   ],
+   [
+    "T106",
+    "DHO-MRA",
+    567,
+    595
+   ],
+   [
+    "T106",
+    "DMO-KMZ",
+    1035,
+    1144
+   ],
+   [
+    "T106",
+    "GWL-VGLJ",
+    633,
+    730
+   ],
+   [
+    "T106",
+    "KMZ-JBP",
+    1144,
+    1235
+   ],
+   [
+    "T106",
+    "MRA-GWL",
+    595,
+    633
+   ],
+   [
+    "T106",
+    "MTJ-BFP",
+    461,
+    510
+   ],
+   [
+    "T106",
+    "NDLS-MTJ",
+    320,
+    461
+   ],
+   [
+    "T106",
+    "SGO-DMO",
+    958,
+    1035
+   ],
+   [
+    "T106",
+    "VGLJ-BINA",
+    730,
+    883
+   ],
+   [
+    "T107",
+    "BINA-SGO",
+    623,
+    698
+   ],
+   [
+    "T107",
+    "DMO-KMZ",
+    437,
+    546
+   ],
+   [
+    "T107",
+    "JBP-NU",
+    262,
+    346
+   ],
+   [
+    "T107",
+    "KMZ-JBP",
+    346,
+    437
+   ],
+   [
+    "T107",
+    "NU-PPI",
+    168,
+    262
+   ],
+   [
+    "T107",
+    "PPI-ET",
+    100,
+    168
+   ],
+   [
+    "T107",
+    "SGO-DMO",
+    546,
+    623
+   ],
+   [
+    "T108",
+    "JBP-NU",
+    700,
+    784
+   ],
+   [
+    "T108",
+    "NU-PPI",
+    784,
+    878
+   ],
+   [
+    "T108",
+    "PPI-ET",
+    878,
+    946
+   ]
+  ],
+  "total_added_delay": 0
+ },
+ "real/reduce-NRKR-NGP": {
+  "actions": {
+   "T101": {
+    "action": "unchanged",
+    "added_delay": 86,
+    "arrivals": {
+     "AGC": 195,
+     "AMLA": 923,
+     "BAQ": 609,
+     "BFP": 190,
+     "BHS": 648,
+     "BINA": 563,
+     "BPL": 701,
+     "BZU": 900,
+     "DHO": 247,
+     "ET": 793,
+     "GDYA": 863,
+     "GWL": 313,
+     "MRA": 275,
+     "MTJ": 141,
+     "NDLS": 0,
+     "NDPM": 775,
+     "NGP": 1176,
+     "NRKR": 1004,
+     "PAR": 986,
+     "RKMP": 707,
+     "VGLJ": 410
+    },
+    "depart_at": 0,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-BAQ",
+     "BAQ-BHS",
+     "BHS-BPL",
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "same path and departure; reduced speed adds 86 min (arrives NGP at minute 1176)"
+   },
+   "T102": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 355,
+     "BAQ": 769,
+     "BFP": 350,
+     "BHS": 808,
+     "BINA": 723,
+     "BPL": 861,
+     "DHO": 407,
+     "GWL": 473,
+     "MRA": 435,
+     "MTJ": 301,
+     "NDLS": 160,
+     "VGLJ": 570
+    },
+    "depart_at": 160,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-BAQ",
+     "BAQ-BHS",
+     "BHS-BPL"
+    ],
+    "reason": "proceeds as planned; arrives BPL at minute 861"
+   },
+   "T103": {
+    "action": "hold",
+    "added_delay": 139,
+    "arrivals": {
+     "AMLA": 305,
+     "BPL": 83,
+     "BZU": 282,
+     "ET": 175,
+     "GDYA": 245,
+     "NDPM": 157,
+     "NGP": 558,
+     "NRKR": 386,
+     "PAR": 368,
+     "RKMP": 89
+    },
+    "depart_at": 83,
+    "path": [
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "held at BPL until minute 83 so T104 clear(s) the line; arrives NGP at minute 558 (+139 min)"
+   },
+   "T104": {
+    "action": "unchanged",
+    "added_delay": 86,
+    "arrivals": {
+     "AMLA": 258,
+     "BZU": 281,
+     "NGP": 5,
+     "NRKR": 177,
+     "PAR": 195
+    },
+    "depart_at": 5,
+    "path": [
+     "NRKR-NGP",
+     "PAR-NRKR",
+     "AMLA-PAR",
+     "BZU-AMLA"
+    ],
+    "reason": "same path and departure; reduced speed adds 86 min (arrives BZU at minute 281)"
+   },
+   "T105": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 1376,
+     "BAQ": 962,
+     "BFP": 1381,
+     "BHS": 923,
+     "BINA": 1008,
+     "BPL": 870,
+     "DHO": 1324,
+     "GWL": 1258,
+     "MRA": 1296,
+     "MTJ": 1430,
+     "NDLS": 1571,
+     "VGLJ": 1161
+    },
+    "depart_at": 870,
+    "path": [
+     "BHS-BPL",
+     "BAQ-BHS",
+     "BINA-BAQ",
+     "VGLJ-BINA",
+     "GWL-VGLJ",
+     "MRA-GWL",
+     "DHO-MRA",
+     "AGC-DHO",
+     "BFP-AGC",
+     "MTJ-BFP",
+     "NDLS-MTJ"
+    ],
+    "reason": "proceeds as planned; arrives NDLS at minute 1571"
+   },
+   "T106": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 515,
+     "BFP": 510,
+     "BINA": 883,
+     "DHO": 567,
+     "DMO": 1035,
+     "GWL": 633,
+     "JBP": 1235,
+     "KMZ": 1144,
+     "MRA": 595,
+     "MTJ": 461,
+     "NDLS": 320,
+     "SGO": 958,
+     "VGLJ": 730
+    },
+    "depart_at": 320,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP"
+    ],
+    "reason": "proceeds as planned; arrives JBP at minute 1235"
+   },
+   "T107": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BINA": 698,
+     "DMO": 546,
+     "ET": 100,
+     "JBP": 346,
+     "KMZ": 437,
+     "NU": 262,
+     "PPI": 168,
+     "SGO": 623
+    },
+    "depart_at": 100,
+    "path": [
+     "PPI-ET",
+     "NU-PPI",
+     "JBP-NU",
+     "KMZ-JBP",
+     "DMO-KMZ",
+     "SGO-DMO",
+     "BINA-SGO"
+    ],
+    "reason": "proceeds as planned; arrives BINA at minute 698"
+   },
+   "T108": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ET": 946,
+     "JBP": 700,
+     "NU": 784,
+     "PPI": 878
+    },
+    "depart_at": 700,
+    "path": [
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET"
+    ],
+    "reason": "proceeds as planned; arrives ET at minute 946"
+   }
+  },
+  "table": [
+   [
+    "T101",
+    "AGC-DHO",
+    195,
+    247
+   ],
+   [
+    "T101",
+    "AMLA-PAR",
+    923,
+    986
+   ],
+   [
+    "T101",
+    "BAQ-BHS",
+    609,
+    648
+   ],
+   [
+    "T101",
+    "BFP-AGC",
+    190,
+    195
+   ],
+   [
+    "T101",
+    "BHS-BPL",
+    648,
+    701
+   ],
+   [
+    "T101",
+    "BINA-BAQ",
+    563,
+    609
+   ],
+   [
+    "T101",
+    "BPL-RKMP",
+    701,
+    707
+   ],
+   [
+    "T101",
+    "BZU-AMLA",
+    900,
+    923
+   ],
+   [
+    "T101",
+    "DHO-MRA",
+    247,
+    275
+   ],
+   [
+    "T101",
+    "ET-GDYA",
+    793,
+    863
+   ],
+   [
+    "T101",
+    "GDYA-BZU",
+    863,
+    900
+   ],
+   [
+    "T101",
+    "GWL-VGLJ",
+    313,
+    410
+   ],
+   [
+    "T101",
+    "MRA-GWL",
+    275,
+    313
+   ],
+   [
+    "T101",
+    "MTJ-BFP",
+    141,
+    190
+   ],
+   [
+    "T101",
+    "NDLS-MTJ",
+    0,
+    141
+   ],
+   [
+    "T101",
+    "NDPM-ET",
+    775,
+    793
+   ],
+   [
+    "T101",
+    "NRKR-NGP",
+    1004,
+    1176
+   ],
+   [
+    "T101",
+    "PAR-NRKR",
+    986,
+    1004
+   ],
+   [
+    "T101",
+    "RKMP-NDPM",
+    707,
+    775
+   ],
+   [
+    "T101",
+    "VGLJ-BINA",
+    410,
+    563
+   ],
+   [
+    "T102",
+    "AGC-DHO",
+    355,
+    407
+   ],
+   [
+    "T102",
+    "BAQ-BHS",
+    769,
+    808
+   ],
+   [
+    "T102",
+    "BFP-AGC",
+    350,
+    355
+   ],
+   [
+    "T102",
+    "BHS-BPL",
+    808,
+    861
+   ],
+   [
+    "T102",
+    "BINA-BAQ",
+    723,
+    769
+   ],
+   [
+    "T102",
+    "DHO-MRA",
+    407,
+    435
+   ],
+   [
+    "T102",
+    "GWL-VGLJ",
+    473,
+    570
+   ],
+   [
+    "T102",
+    "MRA-GWL",
+    435,
+    473
+   ],
+   [
+    "T102",
+    "MTJ-BFP",
+    301,
+    350
+   ],
+   [
+    "T102",
+    "NDLS-MTJ",
+    160,
+    301
+   ],
+   [
+    "T102",
+    "VGLJ-BINA",
+    570,
+    723
+   ],
+   [
+    "T103",
+    "AMLA-PAR",
+    305,
+    368
+   ],
+   [
+    "T103",
+    "BPL-RKMP",
+    83,
+    89
+   ],
+   [
+    "T103",
+    "BZU-AMLA",
+    282,
+    305
+   ],
+   [
+    "T103",
+    "ET-GDYA",
+    175,
+    245
+   ],
+   [
+    "T103",
+    "GDYA-BZU",
+    245,
+    282
+   ],
+   [
+    "T103",
+    "NDPM-ET",
+    157,
+    175
+   ],
+   [
+    "T103",
+    "NRKR-NGP",
+    386,
+    558
+   ],
+   [
+    "T103",
+    "PAR-NRKR",
+    368,
+    386
+   ],
+   [
+    "T103",
+    "RKMP-NDPM",
+    89,
+    157
+   ],
+   [
+    "T104",
+    "AMLA-PAR",
+    195,
+    258
+   ],
+   [
+    "T104",
+    "BZU-AMLA",
+    258,
+    281
+   ],
+   [
+    "T104",
+    "NRKR-NGP",
+    5,
+    177
+   ],
+   [
+    "T104",
+    "PAR-NRKR",
+    177,
+    195
+   ],
+   [
+    "T105",
+    "AGC-DHO",
+    1324,
+    1376
+   ],
+   [
+    "T105",
+    "BAQ-BHS",
+    923,
+    962
+   ],
+   [
+    "T105",
+    "BFP-AGC",
+    1376,
+    1381
+   ],
+   [
+    "T105",
+    "BHS-BPL",
+    870,
+    923
+   ],
+   [
+    "T105",
+    "BINA-BAQ",
+    962,
+    1008
+   ],
+   [
+    "T105",
+    "DHO-MRA",
+    1296,
+    1324
+   ],
+   [
+    "T105",
+    "GWL-VGLJ",
+    1161,
+    1258
+   ],
+   [
+    "T105",
+    "MRA-GWL",
+    1258,
+    1296
+   ],
+   [
+    "T105",
+    "MTJ-BFP",
+    1381,
+    1430
+   ],
+   [
+    "T105",
+    "NDLS-MTJ",
+    1430,
+    1571
+   ],
+   [
+    "T105",
+    "VGLJ-BINA",
+    1008,
+    1161
+   ],
+   [
+    "T106",
+    "AGC-DHO",
+    515,
+    567
+   ],
+   [
+    "T106",
+    "BFP-AGC",
+    510,
+    515
+   ],
+   [
+    "T106",
+    "BINA-SGO",
+    883,
+    958
+   ],
+   [
+    "T106",
+    "DHO-MRA",
+    567,
+    595
+   ],
+   [
+    "T106",
+    "DMO-KMZ",
+    1035,
+    1144
+   ],
+   [
+    "T106",
+    "GWL-VGLJ",
+    633,
+    730
+   ],
+   [
+    "T106",
+    "KMZ-JBP",
+    1144,
+    1235
+   ],
+   [
+    "T106",
+    "MRA-GWL",
+    595,
+    633
+   ],
+   [
+    "T106",
+    "MTJ-BFP",
+    461,
+    510
+   ],
+   [
+    "T106",
+    "NDLS-MTJ",
+    320,
+    461
+   ],
+   [
+    "T106",
+    "SGO-DMO",
+    958,
+    1035
+   ],
+   [
+    "T106",
+    "VGLJ-BINA",
+    730,
+    883
+   ],
+   [
+    "T107",
+    "BINA-SGO",
+    623,
+    698
+   ],
+   [
+    "T107",
+    "DMO-KMZ",
+    437,
+    546
+   ],
+   [
+    "T107",
+    "JBP-NU",
+    262,
+    346
+   ],
+   [
+    "T107",
+    "KMZ-JBP",
+    346,
+    437
+   ],
+   [
+    "T107",
+    "NU-PPI",
+    168,
+    262
+   ],
+   [
+    "T107",
+    "PPI-ET",
+    100,
+    168
+   ],
+   [
+    "T107",
+    "SGO-DMO",
+    546,
+    623
+   ],
+   [
+    "T108",
+    "JBP-NU",
+    700,
+    784
+   ],
+   [
+    "T108",
+    "NU-PPI",
+    784,
+    878
+   ],
+   [
+    "T108",
+    "PPI-ET",
+    878,
+    946
+   ]
+  ],
+  "total_added_delay": 311
+ },
+ "real/restrict-T101-BHS-BPL": {
+  "actions": {
+   "T101": {
+    "action": "reroute",
+    "added_delay": 368,
+    "arrivals": {
+     "AGC": 195,
+     "AMLA": 1291,
+     "BFP": 190,
+     "BINA": 563,
+     "BZU": 1268,
+     "DHO": 247,
+     "DMO": 715,
+     "ET": 1161,
+     "GDYA": 1231,
+     "GWL": 313,
+     "JBP": 915,
+     "KMZ": 824,
+     "MRA": 275,
+     "MTJ": 141,
+     "NDLS": 0,
+     "NGP": 1458,
+     "NRKR": 1372,
+     "NU": 999,
+     "PAR": 1354,
+     "PPI": 1093,
+     "SGO": 638,
+     "VGLJ": 410
+    },
+    "depart_at": 0,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP",
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "rerouted via NDLS-MTJ-BFP-AGC-DHO-MRA-GWL-VGLJ-BINA-SGO-DMO-KMZ-JBP-NU-PPI-ET-GDYA-BZU-AMLA-PAR-NRKR-NGP because this train is barred from segment(s) BHS-BPL; arrives NGP at minute 1458 (+368 min)"
+   },
+   "T102": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 355,
+     "BAQ": 769,
+     "BFP": 350,
+     "BHS": 808,
+     "BINA": 723,
+     "BPL": 861,
+     "DHO": 407,
+     "GWL": 473,
+     "MRA": 435,
+     "MTJ": 301,
+     "NDLS": 160,
+     "VGLJ": 570
+    },
+    "depart_at": 160,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-BAQ",
+     "BAQ-BHS",
+     "BHS-BPL"
+    ],
+    "reason": "proceeds as planned; arrives BPL at minute 861"
+   },
+   "T103": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 252,
+     "BPL": 30,
+     "BZU": 229,
+     "ET": 122,
+     "GDYA": 192,
+     "NDPM": 104,
+     "NGP": 419,
+     "NRKR": 333,
+     "PAR": 315,
+     "RKMP": 36
+    },
+    "depart_at": 30,
+    "path": [
+     "BPL-RKMP",
+     "RKMP-NDPM",
+     "NDPM-ET",
+     "ET-GDYA",
+     "GDYA-BZU",
+     "BZU-AMLA",
+     "AMLA-PAR",
+     "PAR-NRKR",
+     "NRKR-NGP"
+    ],
+    "reason": "proceeds as planned; arrives NGP at minute 419"
+   },
+   "T104": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AMLA": 172,
+     "BZU": 195,
+     "NGP": 5,
+     "NRKR": 91,
+     "PAR": 109
+    },
+    "depart_at": 5,
+    "path": [
+     "NRKR-NGP",
+     "PAR-NRKR",
+     "AMLA-PAR",
+     "BZU-AMLA"
+    ],
+    "reason": "proceeds as planned; arrives BZU at minute 195"
+   },
+   "T105": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 1376,
+     "BAQ": 962,
+     "BFP": 1381,
+     "BHS": 923,
+     "BINA": 1008,
+     "BPL": 870,
+     "DHO": 1324,
+     "GWL": 1258,
+     "MRA": 1296,
+     "MTJ": 1430,
+     "NDLS": 1571,
+     "VGLJ": 1161
+    },
+    "depart_at": 870,
+    "path": [
+     "BHS-BPL",
+     "BAQ-BHS",
+     "BINA-BAQ",
+     "VGLJ-BINA",
+     "GWL-VGLJ",
+     "MRA-GWL",
+     "DHO-MRA",
+     "AGC-DHO",
+     "BFP-AGC",
+     "MTJ-BFP",
+     "NDLS-MTJ"
+    ],
+    "reason": "proceeds as planned; arrives NDLS at minute 1571"
+   },
+   "T106": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "AGC": 515,
+     "BFP": 510,
+     "BINA": 883,
+     "DHO": 567,
+     "DMO": 1035,
+     "GWL": 633,
+     "JBP": 1235,
+     "KMZ": 1144,
+     "MRA": 595,
+     "MTJ": 461,
+     "NDLS": 320,
+     "SGO": 958,
+     "VGLJ": 730
+    },
+    "depart_at": 320,
+    "path": [
+     "NDLS-MTJ",
+     "MTJ-BFP",
+     "BFP-AGC",
+     "AGC-DHO",
+     "DHO-MRA",
+     "MRA-GWL",
+     "GWL-VGLJ",
+     "VGLJ-BINA",
+     "BINA-SGO",
+     "SGO-DMO",
+     "DMO-KMZ",
+     "KMZ-JBP"
+    ],
+    "reason": "proceeds as planned; arrives JBP at minute 1235"
+   },
+   "T107": {
+    "action": "reroute",
+    "added_delay": -345,
+    "arrivals": {
+     "BAQ": 307,
+     "BHS": 268,
+     "BINA": 353,
+     "BPL": 215,
+     "ET": 123,
+     "NDPM": 141,
+     "RKMP": 209
+    },
+    "depart_at": 123,
+    "path": [
+     "NDPM-ET",
+     "RKMP-NDPM",
+     "BPL-RKMP",
+     "BHS-BPL",
+     "BAQ-BHS",
+     "BINA-BAQ"
+    ],
+    "reason": "rerouted via ET-NDPM-RKMP-BPL-BHS-BAQ-BINA, departing minute 123 because avoids conflict with T101 on the planned path; arrives BINA at minute 353 (-345 min)"
+   },
+   "T108": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ET": 946,
+     "JBP": 700,
+     "NU": 784,
+     "PPI": 878
+    },
+    "depart_at": 700,
+    "path": [
+     "JBP-NU",
+     "NU-PPI",
+     "PPI-ET"
+    ],
+    "reason": "proceeds as planned; arrives ET at minute 946"
+   }
+  },
+  "table": [
+   [
+    "T101",
+    "AGC-DHO",
+    195,
+    247
+   ],
+   [
+    "T101",
+    "AMLA-PAR",
+    1291,
+    1354
+   ],
+   [
+    "T101",
+    "BFP-AGC",
+    190,
+    195
+   ],
+   [
+    "T101",
+    "BINA-SGO",
+    563,
+    638
+   ],
+   [
+    "T101",
+    "BZU-AMLA",
+    1268,
+    1291
+   ],
+   [
+    "T101",
+    "DHO-MRA",
+    247,
+    275
+   ],
+   [
+    "T101",
+    "DMO-KMZ",
+    715,
+    824
+   ],
+   [
+    "T101",
+    "ET-GDYA",
+    1161,
+    1231
+   ],
+   [
+    "T101",
+    "GDYA-BZU",
+    1231,
+    1268
+   ],
+   [
+    "T101",
+    "GWL-VGLJ",
+    313,
+    410
+   ],
+   [
+    "T101",
+    "JBP-NU",
+    915,
+    999
+   ],
+   [
+    "T101",
+    "KMZ-JBP",
+    824,
+    915
+   ],
+   [
+    "T101",
+    "MRA-GWL",
+    275,
+    313
+   ],
+   [
+    "T101",
+    "MTJ-BFP",
+    141,
+    190
+   ],
+   [
+    "T101",
+    "NDLS-MTJ",
+    0,
+    141
+   ],
+   [
+    "T101",
+    "NRKR-NGP",
+    1372,
+    1458
+   ],
+   [
+    "T101",
+    "NU-PPI",
+    999,
+    1093
+   ],
+   [
+    "T101",
+    "PAR-NRKR",
+    1354,
+    1372
+   ],
+   [
+    "T101",
+    "PPI-ET",
+    1093,
+    1161
+   ],
+   [
+    "T101",
+    "SGO-DMO",
+    638,
+    715
+   ],
+   [
+    "T101",
+    "VGLJ-BINA",
+    410,
+    563
+   ],
+   [
+    "T102",
+    "AGC-DHO",
+    355,
+    407
+   ],
+   [
+    "T102",
+    "BAQ-BHS",
+    769,
+    808
+   ],
+   [
+    "T102",
+    "BFP-AGC",
+    350,
+    355
+   ],
+   [
+    "T102",
+    "BHS-BPL",
+    808,
+    861
+   ],
+   [
+    "T102",
+    "BINA-BAQ",
+    723,
+    769
+   ],
+   [
+    "T102",
+    "DHO-MRA",
+    407,
+    435
+   ],
+   [
+    "T102",
+    "GWL-VGLJ",
+    473,
+    570
+   ],
+   [
+    "T102",
+    "MRA-GWL",
+    435,
+    473
+   ],
+   [
+    "T102",
+    "MTJ-BFP",
+    301,
+    350
+   ],
+   [
+    "T102",
+    "NDLS-MTJ",
+    160,
+    301
+   ],
+   [
+    "T102",
+    "VGLJ-BINA",
+    570,
+    723
+   ],
+   [
+    "T103",
+    "AMLA-PAR",
+    252,
+    315
+   ],
+   [
+    "T103",
+    "BPL-RKMP",
+    30,
+    36
+   ],
+   [
+    "T103",
+    "BZU-AMLA",
+    229,
+    252
+   ],
+   [
+    "T103",
+    "ET-GDYA",
+    122,
+    192
+   ],
+   [
+    "T103",
+    "GDYA-BZU",
+    192,
+    229
+   ],
+   [
+    "T103",
+    "NDPM-ET",
+    104,
+    122
+   ],
+   [
+    "T103",
+    "NRKR-NGP",
+    333,
+    419
+   ],
+   [
+    "T103",
+    "PAR-NRKR",
+    315,
+    333
+   ],
+   [
+    "T103",
+    "RKMP-NDPM",
+    36,
+    104
+   ],
+   [
+    "T104",
+    "AMLA-PAR",
+    109,
+    172
+   ],
+   [
+    "T104",
+    "BZU-AMLA",
+    172,
+    195
+   ],
+   [
+    "T104",
+    "NRKR-NGP",
+    5,
+    91
+   ],
+   [
+    "T104",
+    "PAR-NRKR",
+    91,
+    109
+   ],
+   [
+    "T105",
+    "AGC-DHO",
+    1324,
+    1376
+   ],
+   [
+    "T105",
+    "BAQ-BHS",
+    923,
+    962
+   ],
+   [
+    "T105",
+    "BFP-AGC",
+    1376,
+    1381
+   ],
+   [
+    "T105",
+    "BHS-BPL",
+    870,
+    923
+   ],
+   [
+    "T105",
+    "BINA-BAQ",
+    962,
+    1008
+   ],
+   [
+    "T105",
+    "DHO-MRA",
+    1296,
+    1324
+   ],
+   [
+    "T105",
+    "GWL-VGLJ",
+    1161,
+    1258
+   ],
+   [
+    "T105",
+    "MRA-GWL",
+    1258,
+    1296
+   ],
+   [
+    "T105",
+    "MTJ-BFP",
+    1381,
+    1430
+   ],
+   [
+    "T105",
+    "NDLS-MTJ",
+    1430,
+    1571
+   ],
+   [
+    "T105",
+    "VGLJ-BINA",
+    1008,
+    1161
+   ],
+   [
+    "T106",
+    "AGC-DHO",
+    515,
+    567
+   ],
+   [
+    "T106",
+    "BFP-AGC",
+    510,
+    515
+   ],
+   [
+    "T106",
+    "BINA-SGO",
+    883,
+    958
+   ],
+   [
+    "T106",
+    "DHO-MRA",
+    567,
+    595
+   ],
+   [
+    "T106",
+    "DMO-KMZ",
+    1035,
+    1144
+   ],
+   [
+    "T106",
+    "GWL-VGLJ",
+    633,
+    730
+   ],
+   [
+    "T106",
+    "KMZ-JBP",
+    1144,
+    1235
+   ],
+   [
+    "T106",
+    "MRA-GWL",
+    595,
+    633
+   ],
+   [
+    "T106",
+    "MTJ-BFP",
+    461,
+    510
+   ],
+   [
+    "T106",
+    "NDLS-MTJ",
+    320,
+    461
+   ],
+   [
+    "T106",
+    "SGO-DMO",
+    958,
+    1035
+   ],
+   [
+    "T106",
+    "VGLJ-BINA",
+    730,
+    883
+   ],
+   [
+    "T107",
+    "BAQ-BHS",
+    268,
+    307
+   ],
+   [
+    "T107",
+    "BHS-BPL",
+    215,
+    268
+   ],
+   [
+    "T107",
+    "BINA-BAQ",
+    307,
+    353
+   ],
+   [
+    "T107",
+    "BPL-RKMP",
+    209,
+    215
+   ],
+   [
+    "T107",
+    "NDPM-ET",
+    123,
+    141
+   ],
+   [
+    "T107",
+    "RKMP-NDPM",
+    141,
+    209
+   ],
+   [
+    "T108",
+    "JBP-NU",
+    700,
+    784
+   ],
+   [
+    "T108",
+    "NU-PPI",
+    784,
+    878
+   ],
+   [
+    "T108",
+    "PPI-ET",
+    878,
+    946
+   ]
+  ],
+  "total_added_delay": 23
+ },
+ "wb/close-BWN-DGR": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BDC": 40,
+     "BHP": 137,
+     "BLY": 8,
+     "BWN": 96,
+     "CGR": 32,
+     "HWH": 0,
+     "MLDT": 287,
+     "MYM": 68,
+     "NFK": 247,
+     "NHT": 212,
+     "NJP": 507,
+     "RPH": 195,
+     "SNT": 165,
+     "SRP": 20
+    },
+    "depart_at": 0,
+    "path": [
+     "HWH-BLY",
+     "BLY-SRP",
+     "SRP-CGR",
+     "CGR-BDC",
+     "BDC-MYM",
+     "MYM-BWN",
+     "BWN-BHP",
+     "BHP-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "NHT-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "proceeds as planned; arrives NJP at minute 507"
+   },
+   "T10": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 276,
+     "BPRS": 353,
+     "BQA": 318,
+     "HWH": 35,
+     "KGP": 158,
+     "MCA": 101,
+     "MDN": 176,
+     "PKU": 123,
+     "SRC": 41,
+     "ULB": 71
+    },
+    "depart_at": 35,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-BQA",
+     "BQA-BPRS"
+    ],
+    "reason": "proceeds as planned; arrives BPRS at minute 353"
+   },
+   "T11": {
+    "action": "hold",
+    "added_delay": 21,
+    "arrivals": {
+     "HWH": 71,
+     "KGP": 194,
+     "MCA": 137,
+     "PKU": 159,
+     "SRC": 77,
+     "ULB": 107
+    },
+    "depart_at": 71,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP"
+    ],
+    "reason": "held at HWH until minute 71 so T10 clear(s) the line; arrives KGP at minute 194 (+21 min)"
+   },
+   "T12": {
+    "action": "reroute",
+    "added_delay": 125,
+    "arrivals": {
+     "ASN": 113,
+     "AZ": 273,
+     "BDC": 350,
+     "BLY": 382,
+     "CGR": 358,
+     "HWH": 390,
+     "KWAE": 308,
+     "NHT": 243,
+     "RPH": 226,
+     "SNT": 196,
+     "SRP": 370,
+     "UDL": 136
+    },
+    "depart_at": 113,
+    "path": [
+     "UDL-ASN",
+     "UDL-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "AZ-NHT",
+     "KWAE-AZ",
+     "BDC-KWAE",
+     "CGR-BDC",
+     "SRP-CGR",
+     "BLY-SRP",
+     "HWH-BLY"
+    ],
+    "reason": "rerouted via ASN-UDL-SNT-RPH-NHT-AZ-KWAE-BDC-CGR-SRP-BLY-HWH, departing minute 113 because planned path uses closed segment(s) BWN-DGR; arrives HWH at minute 390 (+125 min)"
+   },
+   "T2": {
+    "action": "reroute",
+    "added_delay": 65,
+    "arrivals": {
+     "ASN": 290,
+     "BHP": 179,
+     "BWN": 138,
+     "DKAE": 58,
+     "HWH": 40,
+     "SKG": 108,
+     "SNT": 207,
+     "UDL": 267
+    },
+    "depart_at": 40,
+    "path": [
+     "HWH-DKAE",
+     "DKAE-SKG",
+     "SKG-BWN",
+     "BWN-BHP",
+     "BHP-SNT",
+     "UDL-SNT",
+     "UDL-ASN"
+    ],
+    "reason": "rerouted via HWH-DKAE-SKG-BWN-BHP-SNT-UDL-ASN, departing minute 40 because planned path uses closed segment(s) BWN-DGR; arrives ASN at minute 290 (+65 min)"
+   },
+   "T3": {
+    "action": "hold",
+    "added_delay": 231,
+    "arrivals": {
+     "AZ": 428,
+     "BPC": 416,
+     "BT": 270,
+     "DDJ": 252,
+     "KNJ": 346,
+     "MLDT": 508,
+     "NFK": 468,
+     "NH": 284,
+     "NJP": 728,
+     "RHA": 314,
+     "SDAH": 246
+    },
+    "depart_at": 246,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-AZ",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "held at SDAH until minute 246 so T1, T7 clear(s) the line; arrives NJP at minute 728 (+231 min)"
+   },
+   "T4": {
+    "action": "reroute",
+    "added_delay": 363,
+    "arrivals": {
+     "ADRA": 389,
+     "APDJ": 1097,
+     "ASN": 489,
+     "AZ": 649,
+     "DKAE": 142,
+     "HSA": 1067,
+     "HWH": 124,
+     "KGP": 271,
+     "MCA": 214,
+     "MDN": 289,
+     "MLDT": 729,
+     "NFK": 689,
+     "NHT": 619,
+     "NJP": 949,
+     "NMZ": 1007,
+     "PKU": 236,
+     "RPH": 602,
+     "SGUJ": 957,
+     "SNT": 572,
+     "SRC": 154,
+     "UDL": 512,
+     "ULB": 184
+    },
+    "depart_at": 124,
+    "path": [
+     "HWH-DKAE",
+     "SRC-DKAE",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ASN-ADRA",
+     "UDL-ASN",
+     "UDL-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "AZ-NHT",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP",
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "rerouted via HWH-DKAE-SRC-ULB-MCA-PKU-KGP-MDN-ADRA-ASN-UDL-SNT-RPH-NHT-AZ-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 124 because avoids conflict with T1, T2, T3 on the planned path; arrives APDJ at minute 1097 (+363 min)"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 138,
+     "ASN": 238,
+     "KGP": 20,
+     "MDN": 38
+    },
+    "depart_at": 20,
+    "path": [
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ASN-ADRA"
+    ],
+    "reason": "proceeds as planned; arrives ASN at minute 238"
+   },
+   "T6": {
+    "action": "hold",
+    "added_delay": 189,
+    "arrivals": {
+     "ADRA": 490,
+     "HWH": 249,
+     "KGP": 372,
+     "MCA": 315,
+     "MDN": 390,
+     "PKU": 337,
+     "PRR": 530,
+     "SRC": 255,
+     "ULB": 285
+    },
+    "depart_at": 249,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-PRR"
+    ],
+    "reason": "held at HWH until minute 249 so T10, T11, T4 clear(s) the line; arrives PRR at minute 530 (+189 min)"
+   },
+   "T7": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BPC": 180,
+     "BT": 34,
+     "DDJ": 16,
+     "KNJ": 110,
+     "LGL": 218,
+     "NH": 48,
+     "RHA": 78,
+     "SDAH": 10
+    },
+    "depart_at": 10,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-LGL"
+    ],
+    "reason": "proceeds as planned; arrives LGL at minute 218"
+   },
+   "T8": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "APDJ": 148,
+     "HSA": 118,
+     "NJP": 0,
+     "NMZ": 58,
+     "SGUJ": 8
+    },
+    "depart_at": 0,
+    "path": [
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "proceeds as planned; arrives APDJ at minute 148"
+   },
+   "T9": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BWN": 25,
+     "KWAE": 78
+    },
+    "depart_at": 25,
+    "path": [
+     "BWN-KWAE"
+    ],
+    "reason": "proceeds as planned; arrives KWAE at minute 78"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "BDC-MYM",
+    40,
+    68
+   ],
+   [
+    "T1",
+    "BHP-SNT",
+    137,
+    165
+   ],
+   [
+    "T1",
+    "BLY-SRP",
+    8,
+    20
+   ],
+   [
+    "T1",
+    "BWN-BHP",
+    96,
+    137
+   ],
+   [
+    "T1",
+    "CGR-BDC",
+    32,
+    40
+   ],
+   [
+    "T1",
+    "HWH-BLY",
+    0,
+    8
+   ],
+   [
+    "T1",
+    "MLDT-NJP",
+    287,
+    507
+   ],
+   [
+    "T1",
+    "MYM-BWN",
+    68,
+    96
+   ],
+   [
+    "T1",
+    "NFK-MLDT",
+    247,
+    287
+   ],
+   [
+    "T1",
+    "NHT-NFK",
+    212,
+    247
+   ],
+   [
+    "T1",
+    "RPH-NHT",
+    195,
+    212
+   ],
+   [
+    "T1",
+    "SNT-RPH",
+    165,
+    195
+   ],
+   [
+    "T1",
+    "SRP-CGR",
+    20,
+    32
+   ],
+   [
+    "T10",
+    "ADRA-BQA",
+    276,
+    318
+   ],
+   [
+    "T10",
+    "BQA-BPRS",
+    318,
+    353
+   ],
+   [
+    "T10",
+    "HWH-SRC",
+    35,
+    41
+   ],
+   [
+    "T10",
+    "KGP-MDN",
+    158,
+    176
+   ],
+   [
+    "T10",
+    "MCA-PKU",
+    101,
+    123
+   ],
+   [
+    "T10",
+    "MDN-ADRA",
+    176,
+    276
+   ],
+   [
+    "T10",
+    "PKU-KGP",
+    123,
+    158
+   ],
+   [
+    "T10",
+    "SRC-ULB",
+    41,
+    71
+   ],
+   [
+    "T10",
+    "ULB-MCA",
+    71,
+    101
+   ],
+   [
+    "T11",
+    "HWH-SRC",
+    71,
+    77
+   ],
+   [
+    "T11",
+    "MCA-PKU",
+    137,
+    159
+   ],
+   [
+    "T11",
+    "PKU-KGP",
+    159,
+    194
+   ],
+   [
+    "T11",
+    "SRC-ULB",
+    77,
+    107
+   ],
+   [
+    "T11",
+    "ULB-MCA",
+    107,
+    137
+   ],
+   [
+    "T12",
+    "AZ-NHT",
+    243,
+    273
+   ],
+   [
+    "T12",
+    "BDC-KWAE",
+    308,
+    350
+   ],
+   [
+    "T12",
+    "BLY-SRP",
+    370,
+    382
+   ],
+   [
+    "T12",
+    "CGR-BDC",
+    350,
+    358
+   ],
+   [
+    "T12",
+    "HWH-BLY",
+    382,
+    390
+   ],
+   [
+    "T12",
+    "KWAE-AZ",
+    273,
+    308
+   ],
+   [
+    "T12",
+    "RPH-NHT",
+    226,
+    243
+   ],
+   [
+    "T12",
+    "SNT-RPH",
+    196,
+    226
+   ],
+   [
+    "T12",
+    "SRP-CGR",
+    358,
+    370
+   ],
+   [
+    "T12",
+    "UDL-ASN",
+    113,
+    136
+   ],
+   [
+    "T12",
+    "UDL-SNT",
+    136,
+    196
+   ],
+   [
+    "T2",
+    "BHP-SNT",
+    179,
+    207
+   ],
+   [
+    "T2",
+    "BWN-BHP",
+    138,
+    179
+   ],
+   [
+    "T2",
+    "DKAE-SKG",
+    58,
+    108
+   ],
+   [
+    "T2",
+    "HWH-DKAE",
+    40,
+    58
+   ],
+   [
+    "T2",
+    "SKG-BWN",
+    108,
+    138
+   ],
+   [
+    "T2",
+    "UDL-ASN",
+    267,
+    290
+   ],
+   [
+    "T2",
+    "UDL-SNT",
+    207,
+    267
+   ],
+   [
+    "T3",
+    "AZ-NFK",
+    428,
+    468
+   ],
+   [
+    "T3",
+    "BPC-AZ",
+    416,
+    428
+   ],
+   [
+    "T3",
+    "BT-NH",
+    270,
+    284
+   ],
+   [
+    "T3",
+    "DDJ-BT",
+    252,
+    270
+   ],
+   [
+    "T3",
+    "KNJ-BPC",
+    346,
+    416
+   ],
+   [
+    "T3",
+    "MLDT-NJP",
+    508,
+    728
+   ],
+   [
+    "T3",
+    "NFK-MLDT",
+    468,
+    508
+   ],
+   [
+    "T3",
+    "NH-RHA",
+    284,
+    314
+   ],
+   [
+    "T3",
+    "RHA-KNJ",
+    314,
+    346
+   ],
+   [
+    "T3",
+    "SDAH-DDJ",
+    246,
+    252
+   ],
+   [
+    "T4",
+    "ASN-ADRA",
+    389,
+    489
+   ],
+   [
+    "T4",
+    "AZ-NFK",
+    649,
+    689
+   ],
+   [
+    "T4",
+    "AZ-NHT",
+    619,
+    649
+   ],
+   [
+    "T4",
+    "HSA-APDJ",
+    1067,
+    1097
+   ],
+   [
+    "T4",
+    "HWH-DKAE",
+    124,
+    142
+   ],
+   [
+    "T4",
+    "KGP-MDN",
+    271,
+    289
+   ],
+   [
+    "T4",
+    "MCA-PKU",
+    214,
+    236
+   ],
+   [
+    "T4",
+    "MDN-ADRA",
+    289,
+    389
+   ],
+   [
+    "T4",
+    "MLDT-NJP",
+    729,
+    949
+   ],
+   [
+    "T4",
+    "NFK-MLDT",
+    689,
+    729
+   ],
+   [
+    "T4",
+    "NJP-SGUJ",
+    949,
+    957
+   ],
+   [
+    "T4",
+    "NMZ-HSA",
+    1007,
+    1067
+   ],
+   [
+    "T4",
+    "PKU-KGP",
+    236,
+    271
+   ],
+   [
+    "T4",
+    "RPH-NHT",
+    602,
+    619
+   ],
+   [
+    "T4",
+    "SGUJ-NMZ",
+    957,
+    1007
+   ],
+   [
+    "T4",
+    "SNT-RPH",
+    572,
+    602
+   ],
+   [
+    "T4",
+    "SRC-DKAE",
+    142,
+    154
+   ],
+   [
+    "T4",
+    "SRC-ULB",
+    154,
+    184
+   ],
+   [
+    "T4",
+    "UDL-ASN",
+    489,
+    512
+   ],
+   [
+    "T4",
+    "UDL-SNT",
+    512,
+    572
+   ],
+   [
+    "T4",
+    "ULB-MCA",
+    184,
+    214
+   ],
+   [
+    "T5",
+    "ASN-ADRA",
+    138,
+    238
+   ],
+   [
+    "T5",
+    "KGP-MDN",
+    20,
+    38
+   ],
+   [
+    "T5",
+    "MDN-ADRA",
+    38,
+    138
+   ],
+   [
+    "T6",
+    "ADRA-PRR",
+    490,
+    530
+   ],
+   [
+    "T6",
+    "HWH-SRC",
+    249,
+    255
+   ],
+   [
+    "T6",
+    "KGP-MDN",
+    372,
+    390
+   ],
+   [
+    "T6",
+    "MCA-PKU",
+    315,
+    337
+   ],
+   [
+    "T6",
+    "MDN-ADRA",
+    390,
+    490
+   ],
+   [
+    "T6",
+    "PKU-KGP",
+    337,
+    372
+   ],
+   [
+    "T6",
+    "SRC-ULB",
+    255,
+    285
+   ],
+   [
+    "T6",
+    "ULB-MCA",
+    285,
+    315
+   ],
+   [
+    "T7",
+    "BPC-LGL",
+    180,
+    218
+   ],
+   [
+    "T7",
+    "BT-NH",
+    34,
+    48
+   ],
+   [
+    "T7",
+    "DDJ-BT",
+    16,
+    34
+   ],
+   [
+    "T7",
+    "KNJ-BPC",
+    110,
+    180
+   ],
+   [
+    "T7",
+    "NH-RHA",
+    48,
+    78
+   ],
+   [
+    "T7",
+    "RHA-KNJ",
+    78,
+    110
+   ],
+   [
+    "T7",
+    "SDAH-DDJ",
+    10,
+    16
+   ],
+   [
+    "T8",
+    "HSA-APDJ",
+    118,
+    148
+   ],
+   [
+    "T8",
+    "NJP-SGUJ",
+    0,
+    8
+   ],
+   [
+    "T8",
+    "NMZ-HSA",
+    58,
+    118
+   ],
+   [
+    "T8",
+    "SGUJ-NMZ",
+    8,
+    58
+   ],
+   [
+    "T9",
+    "BWN-KWAE",
+    25,
+    78
+   ]
+  ],
+  "total_added_delay": 994
+ },
+ "wb/close-MYM-BWN": {
+  "actions": {
+   "T1": {
+    "action": "reroute",
+    "added_delay": -90,
+    "arrivals": {
+     "AZ": 117,
+     "BDC": 40,
+     "BLY": 8,
+     "CGR": 32,
+     "HWH": 0,
+     "KWAE": 82,
+     "MLDT": 197,
+     "NFK": 157,
+     "NJP": 417,
+     "SRP": 20
+    },
+    "depart_at": 0,
+    "path": [
+     "HWH-BLY",
+     "BLY-SRP",
+     "SRP-CGR",
+     "CGR-BDC",
+     "BDC-KWAE",
+     "KWAE-AZ",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "rerouted via HWH-BLY-SRP-CGR-BDC-KWAE-AZ-NFK-MLDT-NJP because planned path uses closed segment(s) MYM-BWN; arrives NJP at minute 417 (-90 min)"
+   },
+   "T10": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 276,
+     "BPRS": 353,
+     "BQA": 318,
+     "HWH": 35,
+     "KGP": 158,
+     "MCA": 101,
+     "MDN": 176,
+     "PKU": 123,
+     "SRC": 41,
+     "ULB": 71
+    },
+    "depart_at": 35,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-BQA",
+     "BQA-BPRS"
+    ],
+    "reason": "proceeds as planned; arrives BPRS at minute 353"
+   },
+   "T11": {
+    "action": "hold",
+    "added_delay": 21,
+    "arrivals": {
+     "HWH": 71,
+     "KGP": 194,
+     "MCA": 137,
+     "PKU": 159,
+     "SRC": 77,
+     "ULB": 107
+    },
+    "depart_at": 71,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP"
+    ],
+    "reason": "held at HWH until minute 71 so T10 clear(s) the line; arrives KGP at minute 194 (+21 min)"
+   },
+   "T12": {
+    "action": "reroute",
+    "added_delay": 82,
+    "arrivals": {
+     "ASN": 70,
+     "AZ": 230,
+     "BDC": 307,
+     "BLY": 339,
+     "CGR": 315,
+     "HWH": 347,
+     "KWAE": 265,
+     "NHT": 200,
+     "RPH": 183,
+     "SNT": 153,
+     "SRP": 327,
+     "UDL": 93
+    },
+    "depart_at": 70,
+    "path": [
+     "UDL-ASN",
+     "UDL-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "AZ-NHT",
+     "KWAE-AZ",
+     "BDC-KWAE",
+     "CGR-BDC",
+     "SRP-CGR",
+     "BLY-SRP",
+     "HWH-BLY"
+    ],
+    "reason": "rerouted via ASN-UDL-SNT-RPH-NHT-AZ-KWAE-BDC-CGR-SRP-BLY-HWH because planned path uses closed segment(s) MYM-BWN; arrives HWH at minute 347 (+82 min)"
+   },
+   "T2": {
+    "action": "reroute",
+    "added_delay": 2,
+    "arrivals": {
+     "ASN": 227,
+     "BWN": 128,
+     "DGR": 192,
+     "DKAE": 48,
+     "HWH": 30,
+     "SKG": 98,
+     "UDL": 204
+    },
+    "depart_at": 30,
+    "path": [
+     "HWH-DKAE",
+     "DKAE-SKG",
+     "SKG-BWN",
+     "BWN-DGR",
+     "DGR-UDL",
+     "UDL-ASN"
+    ],
+    "reason": "rerouted via HWH-DKAE-SKG-BWN-DGR-UDL-ASN because planned path uses closed segment(s) MYM-BWN; arrives ASN at minute 227 (+2 min)"
+   },
+   "T3": {
+    "action": "hold",
+    "added_delay": 141,
+    "arrivals": {
+     "AZ": 338,
+     "BPC": 326,
+     "BT": 180,
+     "DDJ": 162,
+     "KNJ": 256,
+     "MLDT": 418,
+     "NFK": 378,
+     "NH": 194,
+     "NJP": 638,
+     "RHA": 224,
+     "SDAH": 156
+    },
+    "depart_at": 156,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-AZ",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "held at SDAH until minute 156 so T1, T7 clear(s) the line; arrives NJP at minute 638 (+141 min)"
+   },
+   "T4": {
+    "action": "reroute",
+    "added_delay": 273,
+    "arrivals": {
+     "APDJ": 1007,
+     "AZ": 534,
+     "BDC": 382,
+     "BPC": 522,
+     "BWN": 287,
+     "DKAE": 207,
+     "HSA": 977,
+     "HWH": 189,
+     "KNJ": 452,
+     "KWAE": 340,
+     "MLDT": 639,
+     "NFK": 599,
+     "NH": 390,
+     "NHT": 564,
+     "NJP": 859,
+     "NMZ": 917,
+     "RHA": 420,
+     "SGUJ": 867,
+     "SKG": 257
+    },
+    "depart_at": 189,
+    "path": [
+     "HWH-DKAE",
+     "DKAE-SKG",
+     "SKG-BWN",
+     "BWN-KWAE",
+     "BDC-KWAE",
+     "NH-BDC",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-AZ",
+     "AZ-NHT",
+     "NHT-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP",
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "rerouted via HWH-DKAE-SKG-BWN-KWAE-BDC-NH-RHA-KNJ-BPC-AZ-NHT-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 189 because avoids conflict with T1, T2, T3 on the planned path; arrives APDJ at minute 1007 (+273 min)"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 138,
+     "ASN": 238,
+     "KGP": 20,
+     "MDN": 38
+    },
+    "depart_at": 20,
+    "path": [
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ASN-ADRA"
+    ],
+    "reason": "proceeds as planned; arrives ASN at minute 238"
+   },
+   "T6": {
+    "action": "hold",
+    "added_delay": 76,
+    "arrivals": {
+     "ADRA": 377,
+     "HWH": 136,
+     "KGP": 259,
+     "MCA": 202,
+     "MDN": 277,
+     "PKU": 224,
+     "PRR": 417,
+     "SRC": 142,
+     "ULB": 172
+    },
+    "depart_at": 136,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-PRR"
+    ],
+    "reason": "held at HWH until minute 136 so T10, T11 clear(s) the line; arrives PRR at minute 417 (+76 min)"
+   },
+   "T7": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BPC": 180,
+     "BT": 34,
+     "DDJ": 16,
+     "KNJ": 110,
+     "LGL": 218,
+     "NH": 48,
+     "RHA": 78,
+     "SDAH": 10
+    },
+    "depart_at": 10,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-LGL"
+    ],
+    "reason": "proceeds as planned; arrives LGL at minute 218"
+   },
+   "T8": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "APDJ": 148,
+     "HSA": 118,
+     "NJP": 0,
+     "NMZ": 58,
+     "SGUJ": 8
+    },
+    "depart_at": 0,
+    "path": [
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "proceeds as planned; arrives APDJ at minute 148"
+   },
+   "T9": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BWN": 25,
+     "KWAE": 78
+    },
+    "depart_at": 25,
+    "path": [
+     "BWN-KWAE"
+    ],
+    "reason": "proceeds as planned; arrives KWAE at minute 78"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "AZ-NFK",
+    117,
+    157
+   ],
+   [
+    "T1",
+    "BDC-KWAE",
+    40,
+    82
+   ],
+   [
+    "T1",
+    "BLY-SRP",
+    8,
+    20
+   ],
+   [
+    "T1",
+    "CGR-BDC",
+    32,
+    40
+   ],
+   [
+    "T1",
+    "HWH-BLY",
+    0,
+    8
+   ],
+   [
+    "T1",
+    "KWAE-AZ",
+    82,
+    117
+   ],
+   [
+    "T1",
+    "MLDT-NJP",
+    197,
+    417
+   ],
+   [
+    "T1",
+    "NFK-MLDT",
+    157,
+    197
+   ],
+   [
+    "T1",
+    "SRP-CGR",
+    20,
+    32
+   ],
+   [
+    "T10",
+    "ADRA-BQA",
+    276,
+    318
+   ],
+   [
+    "T10",
+    "BQA-BPRS",
+    318,
+    353
+   ],
+   [
+    "T10",
+    "HWH-SRC",
+    35,
+    41
+   ],
+   [
+    "T10",
+    "KGP-MDN",
+    158,
+    176
+   ],
+   [
+    "T10",
+    "MCA-PKU",
+    101,
+    123
+   ],
+   [
+    "T10",
+    "MDN-ADRA",
+    176,
+    276
+   ],
+   [
+    "T10",
+    "PKU-KGP",
+    123,
+    158
+   ],
+   [
+    "T10",
+    "SRC-ULB",
+    41,
+    71
+   ],
+   [
+    "T10",
+    "ULB-MCA",
+    71,
+    101
+   ],
+   [
+    "T11",
+    "HWH-SRC",
+    71,
+    77
+   ],
+   [
+    "T11",
+    "MCA-PKU",
+    137,
+    159
+   ],
+   [
+    "T11",
+    "PKU-KGP",
+    159,
+    194
+   ],
+   [
+    "T11",
+    "SRC-ULB",
+    77,
+    107
+   ],
+   [
+    "T11",
+    "ULB-MCA",
+    107,
+    137
+   ],
+   [
+    "T12",
+    "AZ-NHT",
+    200,
+    230
+   ],
+   [
+    "T12",
+    "BDC-KWAE",
+    265,
+    307
+   ],
+   [
+    "T12",
+    "BLY-SRP",
+    327,
+    339
+   ],
+   [
+    "T12",
+    "CGR-BDC",
+    307,
+    315
+   ],
+   [
+    "T12",
+    "HWH-BLY",
+    339,
+    347
+   ],
+   [
+    "T12",
+    "KWAE-AZ",
+    230,
+    265
+   ],
+   [
+    "T12",
+    "RPH-NHT",
+    183,
+    200
+   ],
+   [
+    "T12",
+    "SNT-RPH",
+    153,
+    183
+   ],
+   [
+    "T12",
+    "SRP-CGR",
+    315,
+    327
+   ],
+   [
+    "T12",
+    "UDL-ASN",
+    70,
+    93
+   ],
+   [
+    "T12",
+    "UDL-SNT",
+    93,
+    153
+   ],
+   [
+    "T2",
+    "BWN-DGR",
+    128,
+    192
+   ],
+   [
+    "T2",
+    "DGR-UDL",
+    192,
+    204
+   ],
+   [
+    "T2",
+    "DKAE-SKG",
+    48,
+    98
+   ],
+   [
+    "T2",
+    "HWH-DKAE",
+    30,
+    48
+   ],
+   [
+    "T2",
+    "SKG-BWN",
+    98,
+    128
+   ],
+   [
+    "T2",
+    "UDL-ASN",
+    204,
+    227
+   ],
+   [
+    "T3",
+    "AZ-NFK",
+    338,
+    378
+   ],
+   [
+    "T3",
+    "BPC-AZ",
+    326,
+    338
+   ],
+   [
+    "T3",
+    "BT-NH",
+    180,
+    194
+   ],
+   [
+    "T3",
+    "DDJ-BT",
+    162,
+    180
+   ],
+   [
+    "T3",
+    "KNJ-BPC",
+    256,
+    326
+   ],
+   [
+    "T3",
+    "MLDT-NJP",
+    418,
+    638
+   ],
+   [
+    "T3",
+    "NFK-MLDT",
+    378,
+    418
+   ],
+   [
+    "T3",
+    "NH-RHA",
+    194,
+    224
+   ],
+   [
+    "T3",
+    "RHA-KNJ",
+    224,
+    256
+   ],
+   [
+    "T3",
+    "SDAH-DDJ",
+    156,
+    162
+   ],
+   [
+    "T4",
+    "AZ-NHT",
+    534,
+    564
+   ],
+   [
+    "T4",
+    "BDC-KWAE",
+    340,
+    382
+   ],
+   [
+    "T4",
+    "BPC-AZ",
+    522,
+    534
+   ],
+   [
+    "T4",
+    "BWN-KWAE",
+    287,
+    340
+   ],
+   [
+    "T4",
+    "DKAE-SKG",
+    207,
+    257
+   ],
+   [
+    "T4",
+    "HSA-APDJ",
+    977,
+    1007
+   ],
+   [
+    "T4",
+    "HWH-DKAE",
+    189,
+    207
+   ],
+   [
+    "T4",
+    "KNJ-BPC",
+    452,
+    522
+   ],
+   [
+    "T4",
+    "MLDT-NJP",
+    639,
+    859
+   ],
+   [
+    "T4",
+    "NFK-MLDT",
+    599,
+    639
+   ],
+   [
+    "T4",
+    "NH-BDC",
+    382,
+    390
+   ],
+   [
+    "T4",
+    "NH-RHA",
+    390,
+    420
+   ],
+   [
+    "T4",
+    "NHT-NFK",
+    564,
+    599
+   ],
+   [
+    "T4",
+    "NJP-SGUJ",
+    859,
+    867
+   ],
+   [
+    "T4",
+    "NMZ-HSA",
+    917,
+    977
+   ],
+   [
+    "T4",
+    "RHA-KNJ",
+    420,
+    452
+   ],
+   [
+    "T4",
+    "SGUJ-NMZ",
+    867,
+    917
+   ],
+   [
+    "T4",
+    "SKG-BWN",
+    257,
+    287
+   ],
+   [
+    "T5",
+    "ASN-ADRA",
+    138,
+    238
+   ],
+   [
+    "T5",
+    "KGP-MDN",
+    20,
+    38
+   ],
+   [
+    "T5",
+    "MDN-ADRA",
+    38,
+    138
+   ],
+   [
+    "T6",
+    "ADRA-PRR",
+    377,
+    417
+   ],
+   [
+    "T6",
+    "HWH-SRC",
+    136,
+    142
+   ],
+   [
+    "T6",
+    "KGP-MDN",
+    259,
+    277
+   ],
+   [
+    "T6",
+    "MCA-PKU",
+    202,
+    224
+   ],
+   [
+    "T6",
+    "MDN-ADRA",
+    277,
+    377
+   ],
+   [
+    "T6",
+    "PKU-KGP",
+    224,
+    259
+   ],
+   [
+    "T6",
+    "SRC-ULB",
+    142,
+    172
+   ],
+   [
+    "T6",
+    "ULB-MCA",
+    172,
+    202
+   ],
+   [
+    "T7",
+    "BPC-LGL",
+    180,
+    218
+   ],
+   [
+    "T7",
+    "BT-NH",
+    34,
+    48
+   ],
+   [
+    "T7",
+    "DDJ-BT",
+    16,
+    34
+   ],
+   [
+    "T7",
+    "KNJ-BPC",
+    110,
+    180
+   ],
+   [
+    "T7",
+    "NH-RHA",
+    48,
+    78
+   ],
+   [
+    "T7",
+    "RHA-KNJ",
+    78,
+    110
+   ],
+   [
+    "T7",
+    "SDAH-DDJ",
+    10,
+    16
+   ],
+   [
+    "T8",
+    "HSA-APDJ",
+    118,
+    148
+   ],
+   [
+    "T8",
+    "NJP-SGUJ",
+    0,
+    8
+   ],
+   [
+    "T8",
+    "NMZ-HSA",
+    58,
+    118
+   ],
+   [
+    "T8",
+    "SGUJ-NMZ",
+    8,
+    58
+   ],
+   [
+    "T9",
+    "BWN-KWAE",
+    25,
+    78
+   ]
+  ],
+  "total_added_delay": 505
+ },
+ "wb/delay-T1-60": {
+  "actions": {
+   "T1": {
+    "action": "depart_delayed",
+    "added_delay": 60,
+    "arrivals": {
+     "BDC": 100,
+     "BHP": 197,
+     "BLY": 68,
+     "BWN": 156,
+     "CGR": 92,
+     "HWH": 60,
+     "MLDT": 347,
+     "MYM": 128,
+     "NFK": 307,
+     "NHT": 272,
+     "NJP": 567,
+     "RPH": 255,
+     "SNT": 225,
+     "SRP": 80
+    },
+    "depart_at": 60,
+    "path": [
+     "HWH-BLY",
+     "BLY-SRP",
+     "SRP-CGR",
+     "CGR-BDC",
+     "BDC-MYM",
+     "MYM-BWN",
+     "BWN-BHP",
+     "BHP-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "NHT-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "departs 60 min late (admin-injected delay); arrives NJP at minute 567 (+60 min)"
+   },
+   "T10": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 276,
+     "BPRS": 353,
+     "BQA": 318,
+     "HWH": 35,
+     "KGP": 158,
+     "MCA": 101,
+     "MDN": 176,
+     "PKU": 123,
+     "SRC": 41,
+     "ULB": 71
+    },
+    "depart_at": 35,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-BQA",
+     "BQA-BPRS"
+    ],
+    "reason": "proceeds as planned; arrives BPRS at minute 353"
+   },
+   "T11": {
+    "action": "hold",
+    "added_delay": 21,
+    "arrivals": {
+     "HWH": 71,
+     "KGP": 194,
+     "MCA": 137,
+     "PKU": 159,
+     "SRC": 77,
+     "ULB": 107
+    },
+    "depart_at": 71,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP"
+    ],
+    "reason": "held at HWH until minute 71 so T10 clear(s) the line; arrives KGP at minute 194 (+21 min)"
+   },
+   "T12": {
+    "action": "reroute",
+    "added_delay": 82,
+    "arrivals": {
+     "ASN": 70,
+     "AZ": 230,
+     "BDC": 307,
+     "BLY": 339,
+     "CGR": 315,
+     "HWH": 347,
+     "KWAE": 265,
+     "NHT": 200,
+     "RPH": 183,
+     "SNT": 153,
+     "SRP": 327,
+     "UDL": 93
+    },
+    "depart_at": 70,
+    "path": [
+     "UDL-ASN",
+     "UDL-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "AZ-NHT",
+     "KWAE-AZ",
+     "BDC-KWAE",
+     "CGR-BDC",
+     "SRP-CGR",
+     "BLY-SRP",
+     "HWH-BLY"
+    ],
+    "reason": "rerouted via ASN-UDL-SNT-RPH-NHT-AZ-KWAE-BDC-CGR-SRP-BLY-HWH because avoids conflict with T2 on the planned path; arrives HWH at minute 347 (+82 min)"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ASN": 225,
+     "BDC": 70,
+     "BLY": 38,
+     "BWN": 126,
+     "CGR": 62,
+     "DGR": 190,
+     "HWH": 30,
+     "MYM": 98,
+     "SRP": 50,
+     "UDL": 202
+    },
+    "depart_at": 30,
+    "path": [
+     "HWH-BLY",
+     "BLY-SRP",
+     "SRP-CGR",
+     "CGR-BDC",
+     "BDC-MYM",
+     "MYM-BWN",
+     "BWN-DGR",
+     "DGR-UDL",
+     "UDL-ASN"
+    ],
+    "reason": "proceeds as planned; arrives ASN at minute 225"
+   },
+   "T3": {
+    "action": "hold",
+    "added_delay": 291,
+    "arrivals": {
+     "AZ": 488,
+     "BPC": 476,
+     "BT": 330,
+     "DDJ": 312,
+     "KNJ": 406,
+     "MLDT": 568,
+     "NFK": 528,
+     "NH": 344,
+     "NJP": 788,
+     "RHA": 374,
+     "SDAH": 306
+    },
+    "depart_at": 306,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-AZ",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "held at SDAH until minute 306 so T1, T7 clear(s) the line; arrives NJP at minute 788 (+291 min)"
+   },
+   "T4": {
+    "action": "reroute",
+    "added_delay": 423,
+    "arrivals": {
+     "ADRA": 377,
+     "APDJ": 1157,
+     "ASN": 477,
+     "AZ": 709,
+     "BDC": 632,
+     "BWN": 576,
+     "DGR": 512,
+     "DKAE": 130,
+     "HSA": 1127,
+     "HWH": 112,
+     "KGP": 259,
+     "KWAE": 674,
+     "MCA": 202,
+     "MDN": 277,
+     "MLDT": 789,
+     "MYM": 604,
+     "NFK": 749,
+     "NJP": 1009,
+     "NMZ": 1067,
+     "PKU": 224,
+     "SGUJ": 1017,
+     "SRC": 142,
+     "UDL": 500,
+     "ULB": 172
+    },
+    "depart_at": 112,
+    "path": [
+     "HWH-DKAE",
+     "SRC-DKAE",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ASN-ADRA",
+     "UDL-ASN",
+     "DGR-UDL",
+     "BWN-DGR",
+     "MYM-BWN",
+     "BDC-MYM",
+     "BDC-KWAE",
+     "KWAE-AZ",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP",
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "rerouted via HWH-DKAE-SRC-ULB-MCA-PKU-KGP-MDN-ADRA-ASN-UDL-DGR-BWN-MYM-BDC-KWAE-AZ-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 112 because avoids conflict with T1 on the planned path; arrives APDJ at minute 1157 (+423 min)"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 138,
+     "ASN": 238,
+     "KGP": 20,
+     "MDN": 38
+    },
+    "depart_at": 20,
+    "path": [
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ASN-ADRA"
+    ],
+    "reason": "proceeds as planned; arrives ASN at minute 238"
+   },
+   "T6": {
+    "action": "hold",
+    "added_delay": 177,
+    "arrivals": {
+     "ADRA": 478,
+     "HWH": 237,
+     "KGP": 360,
+     "MCA": 303,
+     "MDN": 378,
+     "PKU": 325,
+     "PRR": 518,
+     "SRC": 243,
+     "ULB": 273
+    },
+    "depart_at": 237,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-PRR"
+    ],
+    "reason": "held at HWH until minute 237 so T10, T11, T4 clear(s) the line; arrives PRR at minute 518 (+177 min)"
+   },
+   "T7": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BPC": 180,
+     "BT": 34,
+     "DDJ": 16,
+     "KNJ": 110,
+     "LGL": 218,
+     "NH": 48,
+     "RHA": 78,
+     "SDAH": 10
+    },
+    "depart_at": 10,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-LGL"
+    ],
+    "reason": "proceeds as planned; arrives LGL at minute 218"
+   },
+   "T8": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "APDJ": 148,
+     "HSA": 118,
+     "NJP": 0,
+     "NMZ": 58,
+     "SGUJ": 8
+    },
+    "depart_at": 0,
+    "path": [
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "proceeds as planned; arrives APDJ at minute 148"
+   },
+   "T9": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BWN": 25,
+     "KWAE": 78
+    },
+    "depart_at": 25,
+    "path": [
+     "BWN-KWAE"
+    ],
+    "reason": "proceeds as planned; arrives KWAE at minute 78"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "BDC-MYM",
+    100,
+    128
+   ],
+   [
+    "T1",
+    "BHP-SNT",
+    197,
+    225
+   ],
+   [
+    "T1",
+    "BLY-SRP",
+    68,
+    80
+   ],
+   [
+    "T1",
+    "BWN-BHP",
+    156,
+    197
+   ],
+   [
+    "T1",
+    "CGR-BDC",
+    92,
+    100
+   ],
+   [
+    "T1",
+    "HWH-BLY",
+    60,
+    68
+   ],
+   [
+    "T1",
+    "MLDT-NJP",
+    347,
+    567
+   ],
+   [
+    "T1",
+    "MYM-BWN",
+    128,
+    156
+   ],
+   [
+    "T1",
+    "NFK-MLDT",
+    307,
+    347
+   ],
+   [
+    "T1",
+    "NHT-NFK",
+    272,
+    307
+   ],
+   [
+    "T1",
+    "RPH-NHT",
+    255,
+    272
+   ],
+   [
+    "T1",
+    "SNT-RPH",
+    225,
+    255
+   ],
+   [
+    "T1",
+    "SRP-CGR",
+    80,
+    92
+   ],
+   [
+    "T10",
+    "ADRA-BQA",
+    276,
+    318
+   ],
+   [
+    "T10",
+    "BQA-BPRS",
+    318,
+    353
+   ],
+   [
+    "T10",
+    "HWH-SRC",
+    35,
+    41
+   ],
+   [
+    "T10",
+    "KGP-MDN",
+    158,
+    176
+   ],
+   [
+    "T10",
+    "MCA-PKU",
+    101,
+    123
+   ],
+   [
+    "T10",
+    "MDN-ADRA",
+    176,
+    276
+   ],
+   [
+    "T10",
+    "PKU-KGP",
+    123,
+    158
+   ],
+   [
+    "T10",
+    "SRC-ULB",
+    41,
+    71
+   ],
+   [
+    "T10",
+    "ULB-MCA",
+    71,
+    101
+   ],
+   [
+    "T11",
+    "HWH-SRC",
+    71,
+    77
+   ],
+   [
+    "T11",
+    "MCA-PKU",
+    137,
+    159
+   ],
+   [
+    "T11",
+    "PKU-KGP",
+    159,
+    194
+   ],
+   [
+    "T11",
+    "SRC-ULB",
+    77,
+    107
+   ],
+   [
+    "T11",
+    "ULB-MCA",
+    107,
+    137
+   ],
+   [
+    "T12",
+    "AZ-NHT",
+    200,
+    230
+   ],
+   [
+    "T12",
+    "BDC-KWAE",
+    265,
+    307
+   ],
+   [
+    "T12",
+    "BLY-SRP",
+    327,
+    339
+   ],
+   [
+    "T12",
+    "CGR-BDC",
+    307,
+    315
+   ],
+   [
+    "T12",
+    "HWH-BLY",
+    339,
+    347
+   ],
+   [
+    "T12",
+    "KWAE-AZ",
+    230,
+    265
+   ],
+   [
+    "T12",
+    "RPH-NHT",
+    183,
+    200
+   ],
+   [
+    "T12",
+    "SNT-RPH",
+    153,
+    183
+   ],
+   [
+    "T12",
+    "SRP-CGR",
+    315,
+    327
+   ],
+   [
+    "T12",
+    "UDL-ASN",
+    70,
+    93
+   ],
+   [
+    "T12",
+    "UDL-SNT",
+    93,
+    153
+   ],
+   [
+    "T2",
+    "BDC-MYM",
+    70,
+    98
+   ],
+   [
+    "T2",
+    "BLY-SRP",
+    38,
+    50
+   ],
+   [
+    "T2",
+    "BWN-DGR",
+    126,
+    190
+   ],
+   [
+    "T2",
+    "CGR-BDC",
+    62,
+    70
+   ],
+   [
+    "T2",
+    "DGR-UDL",
+    190,
+    202
+   ],
+   [
+    "T2",
+    "HWH-BLY",
+    30,
+    38
+   ],
+   [
+    "T2",
+    "MYM-BWN",
+    98,
+    126
+   ],
+   [
+    "T2",
+    "SRP-CGR",
+    50,
+    62
+   ],
+   [
+    "T2",
+    "UDL-ASN",
+    202,
+    225
+   ],
+   [
+    "T3",
+    "AZ-NFK",
+    488,
+    528
+   ],
+   [
+    "T3",
+    "BPC-AZ",
+    476,
+    488
+   ],
+   [
+    "T3",
+    "BT-NH",
+    330,
+    344
+   ],
+   [
+    "T3",
+    "DDJ-BT",
+    312,
+    330
+   ],
+   [
+    "T3",
+    "KNJ-BPC",
+    406,
+    476
+   ],
+   [
+    "T3",
+    "MLDT-NJP",
+    568,
+    788
+   ],
+   [
+    "T3",
+    "NFK-MLDT",
+    528,
+    568
+   ],
+   [
+    "T3",
+    "NH-RHA",
+    344,
+    374
+   ],
+   [
+    "T3",
+    "RHA-KNJ",
+    374,
+    406
+   ],
+   [
+    "T3",
+    "SDAH-DDJ",
+    306,
+    312
+   ],
+   [
+    "T4",
+    "ASN-ADRA",
+    377,
+    477
+   ],
+   [
+    "T4",
+    "AZ-NFK",
+    709,
+    749
+   ],
+   [
+    "T4",
+    "BDC-KWAE",
+    632,
+    674
+   ],
+   [
+    "T4",
+    "BDC-MYM",
+    604,
+    632
+   ],
+   [
+    "T4",
+    "BWN-DGR",
+    512,
+    576
+   ],
+   [
+    "T4",
+    "DGR-UDL",
+    500,
+    512
+   ],
+   [
+    "T4",
+    "HSA-APDJ",
+    1127,
+    1157
+   ],
+   [
+    "T4",
+    "HWH-DKAE",
+    112,
+    130
+   ],
+   [
+    "T4",
+    "KGP-MDN",
+    259,
+    277
+   ],
+   [
+    "T4",
+    "KWAE-AZ",
+    674,
+    709
+   ],
+   [
+    "T4",
+    "MCA-PKU",
+    202,
+    224
+   ],
+   [
+    "T4",
+    "MDN-ADRA",
+    277,
+    377
+   ],
+   [
+    "T4",
+    "MLDT-NJP",
+    789,
+    1009
+   ],
+   [
+    "T4",
+    "MYM-BWN",
+    576,
+    604
+   ],
+   [
+    "T4",
+    "NFK-MLDT",
+    749,
+    789
+   ],
+   [
+    "T4",
+    "NJP-SGUJ",
+    1009,
+    1017
+   ],
+   [
+    "T4",
+    "NMZ-HSA",
+    1067,
+    1127
+   ],
+   [
+    "T4",
+    "PKU-KGP",
+    224,
+    259
+   ],
+   [
+    "T4",
+    "SGUJ-NMZ",
+    1017,
+    1067
+   ],
+   [
+    "T4",
+    "SRC-DKAE",
+    130,
+    142
+   ],
+   [
+    "T4",
+    "SRC-ULB",
+    142,
+    172
+   ],
+   [
+    "T4",
+    "UDL-ASN",
+    477,
+    500
+   ],
+   [
+    "T4",
+    "ULB-MCA",
+    172,
+    202
+   ],
+   [
+    "T5",
+    "ASN-ADRA",
+    138,
+    238
+   ],
+   [
+    "T5",
+    "KGP-MDN",
+    20,
+    38
+   ],
+   [
+    "T5",
+    "MDN-ADRA",
+    38,
+    138
+   ],
+   [
+    "T6",
+    "ADRA-PRR",
+    478,
+    518
+   ],
+   [
+    "T6",
+    "HWH-SRC",
+    237,
+    243
+   ],
+   [
+    "T6",
+    "KGP-MDN",
+    360,
+    378
+   ],
+   [
+    "T6",
+    "MCA-PKU",
+    303,
+    325
+   ],
+   [
+    "T6",
+    "MDN-ADRA",
+    378,
+    478
+   ],
+   [
+    "T6",
+    "PKU-KGP",
+    325,
+    360
+   ],
+   [
+    "T6",
+    "SRC-ULB",
+    243,
+    273
+   ],
+   [
+    "T6",
+    "ULB-MCA",
+    273,
+    303
+   ],
+   [
+    "T7",
+    "BPC-LGL",
+    180,
+    218
+   ],
+   [
+    "T7",
+    "BT-NH",
+    34,
+    48
+   ],
+   [
+    "T7",
+    "DDJ-BT",
+    16,
+    34
+   ],
+   [
+    "T7",
+    "KNJ-BPC",
+    110,
+    180
+   ],
+   [
+    "T7",
+    "NH-RHA",
+    48,
+    78
+   ],
+   [
+    "T7",
+    "RHA-KNJ",
+    78,
+    110
+   ],
+   [
+    "T7",
+    "SDAH-DDJ",
+    10,
+    16
+   ],
+   [
+    "T8",
+    "HSA-APDJ",
+    118,
+    148
+   ],
+   [
+    "T8",
+    "NJP-SGUJ",
+    0,
+    8
+   ],
+   [
+    "T8",
+    "NMZ-HSA",
+    58,
+    118
+   ],
+   [
+    "T8",
+    "SGUJ-NMZ",
+    8,
+    58
+   ],
+   [
+    "T9",
+    "BWN-KWAE",
+    25,
+    78
+   ]
+  ],
+  "total_added_delay": 1054
+ },
+ "wb/empty": {
+  "actions": {
+   "T1": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BDC": 40,
+     "BHP": 137,
+     "BLY": 8,
+     "BWN": 96,
+     "CGR": 32,
+     "HWH": 0,
+     "MLDT": 287,
+     "MYM": 68,
+     "NFK": 247,
+     "NHT": 212,
+     "NJP": 507,
+     "RPH": 195,
+     "SNT": 165,
+     "SRP": 20
+    },
+    "depart_at": 0,
+    "path": [
+     "HWH-BLY",
+     "BLY-SRP",
+     "SRP-CGR",
+     "CGR-BDC",
+     "BDC-MYM",
+     "MYM-BWN",
+     "BWN-BHP",
+     "BHP-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "NHT-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "proceeds as planned; arrives NJP at minute 507"
+   },
+   "T10": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 276,
+     "BPRS": 353,
+     "BQA": 318,
+     "HWH": 35,
+     "KGP": 158,
+     "MCA": 101,
+     "MDN": 176,
+     "PKU": 123,
+     "SRC": 41,
+     "ULB": 71
+    },
+    "depart_at": 35,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-BQA",
+     "BQA-BPRS"
+    ],
+    "reason": "proceeds as planned; arrives BPRS at minute 353"
+   },
+   "T11": {
+    "action": "hold",
+    "added_delay": 21,
+    "arrivals": {
+     "HWH": 71,
+     "KGP": 194,
+     "MCA": 137,
+     "PKU": 159,
+     "SRC": 77,
+     "ULB": 107
+    },
+    "depart_at": 71,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP"
+    ],
+    "reason": "held at HWH until minute 71 so T10 clear(s) the line; arrives KGP at minute 194 (+21 min)"
+   },
+   "T12": {
+    "action": "reroute",
+    "added_delay": 66,
+    "arrivals": {
+     "ASN": 83,
+     "BDC": 291,
+     "BHP": 194,
+     "BLY": 323,
+     "BWN": 235,
+     "CGR": 299,
+     "HWH": 331,
+     "MYM": 263,
+     "SNT": 166,
+     "SRP": 311,
+     "UDL": 106
+    },
+    "depart_at": 83,
+    "path": [
+     "UDL-ASN",
+     "UDL-SNT",
+     "BHP-SNT",
+     "BWN-BHP",
+     "MYM-BWN",
+     "BDC-MYM",
+     "CGR-BDC",
+     "SRP-CGR",
+     "BLY-SRP",
+     "HWH-BLY"
+    ],
+    "reason": "rerouted via ASN-UDL-SNT-BHP-BWN-MYM-BDC-CGR-SRP-BLY-HWH, departing minute 83 because avoids conflict with T2 on the planned path; arrives HWH at minute 331 (+66 min)"
+   },
+   "T2": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ASN": 225,
+     "BDC": 70,
+     "BLY": 38,
+     "BWN": 126,
+     "CGR": 62,
+     "DGR": 190,
+     "HWH": 30,
+     "MYM": 98,
+     "SRP": 50,
+     "UDL": 202
+    },
+    "depart_at": 30,
+    "path": [
+     "HWH-BLY",
+     "BLY-SRP",
+     "SRP-CGR",
+     "CGR-BDC",
+     "BDC-MYM",
+     "MYM-BWN",
+     "BWN-DGR",
+     "DGR-UDL",
+     "UDL-ASN"
+    ],
+    "reason": "proceeds as planned; arrives ASN at minute 225"
+   },
+   "T3": {
+    "action": "hold",
+    "added_delay": 231,
+    "arrivals": {
+     "AZ": 428,
+     "BPC": 416,
+     "BT": 270,
+     "DDJ": 252,
+     "KNJ": 346,
+     "MLDT": 508,
+     "NFK": 468,
+     "NH": 284,
+     "NJP": 728,
+     "RHA": 314,
+     "SDAH": 246
+    },
+    "depart_at": 246,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-AZ",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP"
+    ],
+    "reason": "held at SDAH until minute 246 so T1, T7 clear(s) the line; arrives NJP at minute 728 (+231 min)"
+   },
+   "T4": {
+    "action": "reroute",
+    "added_delay": 363,
+    "arrivals": {
+     "ADRA": 389,
+     "APDJ": 1097,
+     "ASN": 489,
+     "AZ": 649,
+     "DKAE": 142,
+     "HSA": 1067,
+     "HWH": 124,
+     "KGP": 271,
+     "MCA": 214,
+     "MDN": 289,
+     "MLDT": 729,
+     "NFK": 689,
+     "NHT": 619,
+     "NJP": 949,
+     "NMZ": 1007,
+     "PKU": 236,
+     "RPH": 602,
+     "SGUJ": 957,
+     "SNT": 572,
+     "SRC": 154,
+     "UDL": 512,
+     "ULB": 184
+    },
+    "depart_at": 124,
+    "path": [
+     "HWH-DKAE",
+     "SRC-DKAE",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ASN-ADRA",
+     "UDL-ASN",
+     "UDL-SNT",
+     "SNT-RPH",
+     "RPH-NHT",
+     "AZ-NHT",
+     "AZ-NFK",
+     "NFK-MLDT",
+     "MLDT-NJP",
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "rerouted via HWH-DKAE-SRC-ULB-MCA-PKU-KGP-MDN-ADRA-ASN-UDL-SNT-RPH-NHT-AZ-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 124 because avoids conflict with T1, T3 on the planned path; arrives APDJ at minute 1097 (+363 min)"
+   },
+   "T5": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "ADRA": 138,
+     "ASN": 238,
+     "KGP": 20,
+     "MDN": 38
+    },
+    "depart_at": 20,
+    "path": [
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ASN-ADRA"
+    ],
+    "reason": "proceeds as planned; arrives ASN at minute 238"
+   },
+   "T6": {
+    "action": "hold",
+    "added_delay": 189,
+    "arrivals": {
+     "ADRA": 490,
+     "HWH": 249,
+     "KGP": 372,
+     "MCA": 315,
+     "MDN": 390,
+     "PKU": 337,
+     "PRR": 530,
+     "SRC": 255,
+     "ULB": 285
+    },
+    "depart_at": 249,
+    "path": [
+     "HWH-SRC",
+     "SRC-ULB",
+     "ULB-MCA",
+     "MCA-PKU",
+     "PKU-KGP",
+     "KGP-MDN",
+     "MDN-ADRA",
+     "ADRA-PRR"
+    ],
+    "reason": "held at HWH until minute 249 so T10, T11, T4 clear(s) the line; arrives PRR at minute 530 (+189 min)"
+   },
+   "T7": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BPC": 180,
+     "BT": 34,
+     "DDJ": 16,
+     "KNJ": 110,
+     "LGL": 218,
+     "NH": 48,
+     "RHA": 78,
+     "SDAH": 10
+    },
+    "depart_at": 10,
+    "path": [
+     "SDAH-DDJ",
+     "DDJ-BT",
+     "BT-NH",
+     "NH-RHA",
+     "RHA-KNJ",
+     "KNJ-BPC",
+     "BPC-LGL"
+    ],
+    "reason": "proceeds as planned; arrives LGL at minute 218"
+   },
+   "T8": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "APDJ": 148,
+     "HSA": 118,
+     "NJP": 0,
+     "NMZ": 58,
+     "SGUJ": 8
+    },
+    "depart_at": 0,
+    "path": [
+     "NJP-SGUJ",
+     "SGUJ-NMZ",
+     "NMZ-HSA",
+     "HSA-APDJ"
+    ],
+    "reason": "proceeds as planned; arrives APDJ at minute 148"
+   },
+   "T9": {
+    "action": "unchanged",
+    "added_delay": 0,
+    "arrivals": {
+     "BWN": 25,
+     "KWAE": 78
+    },
+    "depart_at": 25,
+    "path": [
+     "BWN-KWAE"
+    ],
+    "reason": "proceeds as planned; arrives KWAE at minute 78"
+   }
+  },
+  "table": [
+   [
+    "T1",
+    "BDC-MYM",
+    40,
+    68
+   ],
+   [
+    "T1",
+    "BHP-SNT",
+    137,
+    165
+   ],
+   [
+    "T1",
+    "BLY-SRP",
+    8,
+    20
+   ],
+   [
+    "T1",
+    "BWN-BHP",
+    96,
+    137
+   ],
+   [
+    "T1",
+    "CGR-BDC",
+    32,
+    40
+   ],
+   [
+    "T1",
+    "HWH-BLY",
+    0,
+    8
+   ],
+   [
+    "T1",
+    "MLDT-NJP",
+    287,
+    507
+   ],
+   [
+    "T1",
+    "MYM-BWN",
+    68,
+    96
+   ],
+   [
+    "T1",
+    "NFK-MLDT",
+    247,
+    287
+   ],
+   [
+    "T1",
+    "NHT-NFK",
+    212,
+    247
+   ],
+   [
+    "T1",
+    "RPH-NHT",
+    195,
+    212
+   ],
+   [
+    "T1",
+    "SNT-RPH",
+    165,
+    195
+   ],
+   [
+    "T1",
+    "SRP-CGR",
+    20,
+    32
+   ],
+   [
+    "T10",
+    "ADRA-BQA",
+    276,
+    318
+   ],
+   [
+    "T10",
+    "BQA-BPRS",
+    318,
+    353
+   ],
+   [
+    "T10",
+    "HWH-SRC",
+    35,
+    41
+   ],
+   [
+    "T10",
+    "KGP-MDN",
+    158,
+    176
+   ],
+   [
+    "T10",
+    "MCA-PKU",
+    101,
+    123
+   ],
+   [
+    "T10",
+    "MDN-ADRA",
+    176,
+    276
+   ],
+   [
+    "T10",
+    "PKU-KGP",
+    123,
+    158
+   ],
+   [
+    "T10",
+    "SRC-ULB",
+    41,
+    71
+   ],
+   [
+    "T10",
+    "ULB-MCA",
+    71,
+    101
+   ],
+   [
+    "T11",
+    "HWH-SRC",
+    71,
+    77
+   ],
+   [
+    "T11",
+    "MCA-PKU",
+    137,
+    159
+   ],
+   [
+    "T11",
+    "PKU-KGP",
+    159,
+    194
+   ],
+   [
+    "T11",
+    "SRC-ULB",
+    77,
+    107
+   ],
+   [
+    "T11",
+    "ULB-MCA",
+    107,
+    137
+   ],
+   [
+    "T12",
+    "BDC-MYM",
+    263,
+    291
+   ],
+   [
+    "T12",
+    "BHP-SNT",
+    166,
+    194
+   ],
+   [
+    "T12",
+    "BLY-SRP",
+    311,
+    323
+   ],
+   [
+    "T12",
+    "BWN-BHP",
+    194,
+    235
+   ],
+   [
+    "T12",
+    "CGR-BDC",
+    291,
+    299
+   ],
+   [
+    "T12",
+    "HWH-BLY",
+    323,
+    331
+   ],
+   [
+    "T12",
+    "MYM-BWN",
+    235,
+    263
+   ],
+   [
+    "T12",
+    "SRP-CGR",
+    299,
+    311
+   ],
+   [
+    "T12",
+    "UDL-ASN",
+    83,
+    106
+   ],
+   [
+    "T12",
+    "UDL-SNT",
+    106,
+    166
+   ],
+   [
+    "T2",
+    "BDC-MYM",
+    70,
+    98
+   ],
+   [
+    "T2",
+    "BLY-SRP",
+    38,
+    50
+   ],
+   [
+    "T2",
+    "BWN-DGR",
+    126,
+    190
+   ],
+   [
+    "T2",
+    "CGR-BDC",
+    62,
+    70
+   ],
+   [
+    "T2",
+    "DGR-UDL",
+    190,
+    202
+   ],
+   [
+    "T2",
+    "HWH-BLY",
+    30,
+    38
+   ],
+   [
+    "T2",
+    "MYM-BWN",
+    98,
+    126
+   ],
+   [
+    "T2",
+    "SRP-CGR",
+    50,
+    62
+   ],
+   [
+    "T2",
+    "UDL-ASN",
+    202,
+    225
+   ],
+   [
+    "T3",
+    "AZ-NFK",
+    428,
+    468
+   ],
+   [
+    "T3",
+    "BPC-AZ",
+    416,
+    428
+   ],
+   [
+    "T3",
+    "BT-NH",
+    270,
+    284
+   ],
+   [
+    "T3",
+    "DDJ-BT",
+    252,
+    270
+   ],
+   [
+    "T3",
+    "KNJ-BPC",
+    346,
+    416
+   ],
+   [
+    "T3",
+    "MLDT-NJP",
+    508,
+    728
+   ],
+   [
+    "T3",
+    "NFK-MLDT",
+    468,
+    508
+   ],
+   [
+    "T3",
+    "NH-RHA",
+    284,
+    314
+   ],
+   [
+    "T3",
+    "RHA-KNJ",
+    314,
+    346
+   ],
+   [
+    "T3",
+    "SDAH-DDJ",
+    246,
+    252
+   ],
+   [
+    "T4",
+    "ASN-ADRA",
+    389,
+    489
+   ],
+   [
+    "T4",
+    "AZ-NFK",
+    649,
+    689
+   ],
+   [
+    "T4",
+    "AZ-NHT",
+    619,
+    649
+   ],
+   [
+    "T4",
+    "HSA-APDJ",
+    1067,
+    1097
+   ],
+   [
+    "T4",
+    "HWH-DKAE",
+    124,
+    142
+   ],
+   [
+    "T4",
+    "KGP-MDN",
+    271,
+    289
+   ],
+   [
+    "T4",
+    "MCA-PKU",
+    214,
+    236
+   ],
+   [
+    "T4",
+    "MDN-ADRA",
+    289,
+    389
+   ],
+   [
+    "T4",
+    "MLDT-NJP",
+    729,
+    949
+   ],
+   [
+    "T4",
+    "NFK-MLDT",
+    689,
+    729
+   ],
+   [
+    "T4",
+    "NJP-SGUJ",
+    949,
+    957
+   ],
+   [
+    "T4",
+    "NMZ-HSA",
+    1007,
+    1067
+   ],
+   [
+    "T4",
+    "PKU-KGP",
+    236,
+    271
+   ],
+   [
+    "T4",
+    "RPH-NHT",
+    602,
+    619
+   ],
+   [
+    "T4",
+    "SGUJ-NMZ",
+    957,
+    1007
+   ],
+   [
+    "T4",
+    "SNT-RPH",
+    572,
+    602
+   ],
+   [
+    "T4",
+    "SRC-DKAE",
+    142,
+    154
+   ],
+   [
+    "T4",
+    "SRC-ULB",
+    154,
+    184
+   ],
+   [
+    "T4",
+    "UDL-ASN",
+    489,
+    512
+   ],
+   [
+    "T4",
+    "UDL-SNT",
+    512,
+    572
+   ],
+   [
+    "T4",
+    "ULB-MCA",
+    184,
+    214
+   ],
+   [
+    "T5",
+    "ASN-ADRA",
+    138,
+    238
+   ],
+   [
+    "T5",
+    "KGP-MDN",
+    20,
+    38
+   ],
+   [
+    "T5",
+    "MDN-ADRA",
+    38,
+    138
+   ],
+   [
+    "T6",
+    "ADRA-PRR",
+    490,
+    530
+   ],
+   [
+    "T6",
+    "HWH-SRC",
+    249,
+    255
+   ],
+   [
+    "T6",
+    "KGP-MDN",
+    372,
+    390
+   ],
+   [
+    "T6",
+    "MCA-PKU",
+    315,
+    337
+   ],
+   [
+    "T6",
+    "MDN-ADRA",
+    390,
+    490
+   ],
+   [
+    "T6",
+    "PKU-KGP",
+    337,
+    372
+   ],
+   [
+    "T6",
+    "SRC-ULB",
+    255,
+    285
+   ],
+   [
+    "T6",
+    "ULB-MCA",
+    285,
+    315
+   ],
+   [
+    "T7",
+    "BPC-LGL",
+    180,
+    218
+   ],
+   [
+    "T7",
+    "BT-NH",
+    34,
+    48
+   ],
+   [
+    "T7",
+    "DDJ-BT",
+    16,
+    34
+   ],
+   [
+    "T7",
+    "KNJ-BPC",
+    110,
+    180
+   ],
+   [
+    "T7",
+    "NH-RHA",
+    48,
+    78
+   ],
+   [
+    "T7",
+    "RHA-KNJ",
+    78,
+    110
+   ],
+   [
+    "T7",
+    "SDAH-DDJ",
+    10,
+    16
+   ],
+   [
+    "T8",
+    "HSA-APDJ",
+    118,
+    148
+   ],
+   [
+    "T8",
+    "NJP-SGUJ",
+    0,
+    8
+   ],
+   [
+    "T8",
+    "NMZ-HSA",
+    58,
+    118
+   ],
+   [
+    "T8",
+    "SGUJ-NMZ",
+    8,
+    58
+   ],
+   [
+    "T9",
+    "BWN-KWAE",
+    25,
+    78
+   ]
+  ],
+  "total_added_delay": 870
+ }
+}
