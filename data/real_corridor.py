@@ -1,5 +1,13 @@
-"""REAL corridor: the New Delhi -> Nagpur half of the Delhi-Chennai main line
-(Grand Trunk route), 21 stations, real cumulative kilometres.
+"""REAL two-corridor network (27 stations):
+1. Trunk: New Delhi -> Nagpur half of the Delhi-Chennai main line (Grand
+   Trunk route), 21 stations, real cumulative km (train 12616 timetable).
+2. Loop: the real Bina - Saugor - Damoh - Katni - Jabalpur - Itarsi line —
+   an actual alternative route between BINA and ET avoiding Bhopal, from
+   the 11271 Vindhyachal Express timetable (ET->BPL the long way; cumulative
+   km ET=0, PPI=68, NU=162, JBP=246, KMZ=337, DMO=446, SGO=523, BINA=598).
+   Three legs independently confirmed by the 18234 Narmada Express table
+   (JBP-NU 84, NU-PPI 94, PPI-ET 67-68 km). BINA<->ET is therefore a real
+   diamond: closures between them can REROUTE instead of stranding.
 
 Source: official IRCTC timetable of train 12616 Grand Trunk Express as
 published on confirmtkt.com/train-schedule/12616 (IRCTC partner), fetched
@@ -41,8 +49,18 @@ _STOPS = [
     ("NGP", "Nagpur", 1090),
 ]
 
-STATIONS = [code for code, _, _ in _STOPS]
+_LOOP_STOPS = [
+    ("PPI", "Pipariya", 68),
+    ("NU", "Narsinghpur", 162),
+    ("JBP", "Jabalpur", 246),
+    ("KMZ", "Katni Murwara", 337),
+    ("DMO", "Damoh", 446),
+    ("SGO", "Saugor", 523),
+]
+
+STATIONS = [code for code, _, _ in _STOPS] + [c for c, _, _ in _LOOP_STOPS]
 DISPLAY_NAMES = {code: name for code, name, _ in _STOPS}
+DISPLAY_NAMES.update({code: name for code, name, _ in _LOOP_STOPS})
 CUMULATIVE_KM = {code: km for code, _, km in _STOPS}
 
 
@@ -54,7 +72,19 @@ def _segments():
     return segs
 
 
-SEGMENTS = _segments()
+# Loop segments in BINA->ET travel order; lengths = differences of the
+# 11271 cumulative km (75, 77, 109, 91, 84, 94, 68).
+_LOOP_SEGMENTS = [
+    Segment("BINA-SGO", ("BINA", "SGO"), 75),
+    Segment("SGO-DMO", ("SGO", "DMO"), 77),
+    Segment("DMO-KMZ", ("DMO", "KMZ"), 109),
+    Segment("KMZ-JBP", ("KMZ", "JBP"), 91),
+    Segment("JBP-NU", ("JBP", "NU"), 84),
+    Segment("NU-PPI", ("NU", "PPI"), 94),
+    Segment("PPI-ET", ("PPI", "ET"), 68),
+]
+
+SEGMENTS = _segments() + _LOOP_SEGMENTS
 
 
 def _path(origin, destination):
@@ -71,22 +101,38 @@ def _path(origin, destination):
 # minute); R3 short southbound Bhopal->Nagpur ahead of R1; R4 short
 # northbound Nagpur->Betul long before southbound traffic arrives there;
 # R5 northbound Bhopal->New Delhi departing after R2 has cleared into Bhopal.
+# R6 NDLS->JBP via the loop, dep 320 (same 7-min closest approach behind R2
+# on VGLJ-BINA; leaves the trunk at BINA before R5's northbound crossing
+# point at km ~625). R7 ET->BINA via the loop, dep 100 (Vindhyachal
+# pattern). R8 JBP->ET, dep 700. Pairwise hand-verified in the gates.
 TRAINS = [
     Train("R1", "NDLS", "NGP", _path("NDLS", "NGP"), 0),
     Train("R2", "NDLS", "BPL", _path("NDLS", "BPL"), 160),
     Train("R3", "BPL", "NGP", _path("BPL", "NGP"), 30),
     Train("R4", "NGP", "BZU", _path("NGP", "BZU"), 5),
     Train("R5", "BPL", "NDLS", _path("BPL", "NDLS"), 870),
+    Train("R6", "NDLS", "JBP",
+          _path("NDLS", "BINA") + ("BINA-SGO", "SGO-DMO", "DMO-KMZ", "KMZ-JBP"),
+          320),
+    Train("R7", "ET", "BINA",
+          ("PPI-ET", "NU-PPI", "JBP-NU", "KMZ-JBP", "DMO-KMZ", "SGO-DMO", "BINA-SGO"),
+          100),
+    Train("R8", "JBP", "ET", ("JBP-NU", "NU-PPI", "PPI-ET"), 700),
 ]
 
 # DISPLAY-ONLY train attributes (never on the engine Train object; scheduling
 # is unaffected). Second attribute slot pending user confirmation.
+# loco_class values are real Indian Railways classes (GT Express runs behind
+# a WAP-7; loop services typically WAP-4/WDM-3A). Display-only flavor.
 TRAIN_ATTRS = {
-    "R1": {"driver_employee_no": "DRV-4102"},
-    "R2": {"driver_employee_no": "DRV-2218"},
-    "R3": {"driver_employee_no": "DRV-3870"},
-    "R4": {"driver_employee_no": "DRV-1956"},
-    "R5": {"driver_employee_no": "DRV-2741"},
+    "R1": {"driver_employee_no": "DRV-4102", "loco_class": "WAP-7"},
+    "R2": {"driver_employee_no": "DRV-2218", "loco_class": "WAP-7"},
+    "R3": {"driver_employee_no": "DRV-3870", "loco_class": "WAP-4"},
+    "R4": {"driver_employee_no": "DRV-1956", "loco_class": "WAG-9"},
+    "R5": {"driver_employee_no": "DRV-2741", "loco_class": "WAP-4"},
+    "R6": {"driver_employee_no": "DRV-5519", "loco_class": "WAP-4"},
+    "R7": {"driver_employee_no": "DRV-6034", "loco_class": "WAP-4"},
+    "R8": {"driver_employee_no": "DRV-7178", "loco_class": "WDM-3A"},
 }
 
 
