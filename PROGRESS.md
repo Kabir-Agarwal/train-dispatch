@@ -1,5 +1,29 @@
 # PROGRESS.md
 
+## Phase A (branch real-railway) — real corridor data: DONE, awaiting review
+Built 2026-06-13. Full suite: **147 passed** (all 140 master tests green + 7 corridor gates). Branch: real-railway only; master untouched at cd37586.
+
+### Data source
+Official IRCTC timetable of train 12616 Grand Trunk Express (New Delhi -> Chennai) as published by IRCTC partner confirmtkt.com (train-schedule/12616), fetched 2026-06-13. (The data.gov.in bulk dumps / datameet mirror are tens of MB — too large for this session's fetch path; a single trunk train's published cumulative-km table carries the same official distances for one corridor.) Corridor chosen: the New Delhi -> Nagpur half of the Delhi–Chennai main line — 21 stations (NDLS, MTJ, BFP, AGC, DHO, MRA, GWL, VGLJ, BINA, BAQ, BHS, BPL, RKMP, NDPM, ET, GDYA, BZU, AMLA, PAR, NRKR, NGP), real cumulative km 0..1090.
+
+### What was built
+`data/real_corridor.py` — 21 stations, 20 segments with inter-station distance = difference of published cumulative km (all positive, longest VGLJ–BINA 153 km, shortest BPL–RKMP 6 km); km -> minutes at the train's real ~60 km/h end-to-end average, so minutes == km (logged decision); 5 trains hand-placed collision-free (R1 NDLS->NGP dep 0; R2 NDLS->BPL dep 160 — headway exceeds the longest segment so closest approach is 7 clear minutes; R3 BPL->NGP dep 30; R4 NGP->BZU dep 5, northbound long before southbound traffic arrives; R5 BPL->NDLS dep 870, after R2 clears). ENGINE UNCHANGED — same Segment/Train/Network, `engine/` has zero diffs on this branch. Display-only `TRAIN_ATTRS` carries synthetic `driver_employee_no` (DRV-xxxx placeholders, explicitly not real people); the second display attribute awaits user confirmation. `DISPLAY_NAMES` maps codes to full station names.
+
+### Gates (`test_real_corridor.py`, 7)
+Loads with zero conflicts (21/20/5); distances positive with hand-checked values (141, 153, 6, 86; NGP anchor 1090 km); one connected component (all 21 reachable from NDLS); arrivals hand-verified (R1 BPL@701/NGP@1090, R2 BPL@861, R3 NGP@419, R4 BZU@195, R5 NDLS@1571); tightest gap on VGLJ-BINA is exactly [410,563]/[570,723]/[1008,1161] — 7 clear minutes, no conflict; display attrs present but NOT on engine objects; perf measured.
+
+### Performance at this size (the question Phase A had to answer)
+load+schedule 0.1 ms; full collision check over the 80-window table 0.02 ms; recompute under a delay forcing a 24-min hold search 4 ms. All orders of magnitude under thresholds — the engine is NOT the bottleneck at 21 stations; there is comfortable headroom for more trains.
+
+### Honest limits to flag at review
+- The corridor is LINEAR (one real line, no parallel route): any track closure strands everything beyond it — needs_reroute can never trigger. If Phase B wants reroutes on real data, we should add a second real corridor sharing endpoints (e.g. the NDLS–BPL stretch of the Mumbai line) — more fetching, same mapping.
+- Loop note: corridor gate attempt 1 of 5 failed — my own expected list omitted R5's northbound window on VGLJ-BINA; fixed in attempt 2; engine untouched.
+
+### STOPPED at Phase A boundary
+Per instruction: not proceeding to more trains or anomalies until performance and mapping are confirmed. Second display attribute proposal pending user choice.
+
+---
+
 ## Freeze round — Indian map skin + plain-language layer (display only): DONE
 Built 2026-06-12. Full suite: **140 passed** (all 132 prior tests green). ZERO engine/scheduler/anomaly changes — `engine/` untouched this round (verifiable in the two commit diffs).
 
