@@ -1,5 +1,28 @@
 # PROGRESS.md
 
+## West Bengal UI (branch real-railway) — schematic 50-station mesh wired in: DONE, awaiting visual pass
+Built 2026-06-13. Display layer ONLY — `engine/` is byte-identical to the optimization commit e87dc10 (`git diff e87dc10 -- engine/` empty); `data/west_bengal.py` UNCHANGED (probe + golden dataset intact); master untouched at cd37586. Suite: **196 passed** (190 + 6 WB UI gates). Browser-verified with the preview tool: 50 dots, **0 segment-line crossings**, 0 label overlaps, money-shot reroute animates onto the chord.
+
+### Wiring (app layer)
+- `python run_ui.py --wb` → `AppState(dataset="wb")` loads the 50-station WB network. `--wb`/`--real`/default selection in run_ui.py.
+- `AppState` gains a `"wb"` branch. The nominal WB timetable is NOT conflict-free at this fidelity, so `reset()` now falls back: if `_baseline_result` raises `BaselineConflictError`, it shows the engine's **collision-free deconfliction** (`recompute([])`) as the baseline instead (still zero anomalies — just safe slotting). This is generic (not WB-specific) and leaves the other datasets' exact behavior unchanged. Snapshot exposes `dataset`.
+- **Default demo anomaly (money-shot):** on `--wb` load, the Memari–Barddhaman main (`MYM-BWN`) is closed, forcing the Howrah trains (T1/T2/T12) onto the Dankuni **chord** — a visible reroute across the mesh. "Reset to baseline" clears it.
+
+### Schematic map (display) — legibility on a 50-node mesh
+- `WB_COORDS`: a hand-designed metro-map layout (India outline hidden for this view, `viewBox` enlarged to 660×780). The Howrah–Barddhaman MAIN line is the right arc and the Dankuni CHORD the left arc, forming a clear lens so the default closure's reroute reads at a glance. The 11 loop/chord lines (main+chord, Naihati–Bandel, Katwa–Azimganj–Farakka, Rampurhat loop, Dooars loop, …) each render as a distinct branch — verified **0 interior line crossings**.
+- Major junctions (`WB_MAJOR`: Howrah, Sealdah, Barddhaman, Asansol, Kharagpur, Adra, Andal, Ranaghat, Naihati, Azimganj, Katwa, New Farakka, Nalhati, Sainthia, Berhampore, Panskura, Santragachi, Dankuni, NJP, Malda, Alipurduar, …) are larger/darker and **labeled**; the ~28 smaller stations are smaller/lighter and show their real name **on hover** (SVG `<title>`). Verified 0 label overlaps.
+- A WB-specific sub-caption explains the main/chord money-shot and the hover affordance.
+
+### Everything from the corridor UI still works (regression-gated on the WB page)
+The 7 labeled control rows (Close/Block/Reduce-speed/Delay/Cancel/Restrict/Add-train) + Reset, ghost preview, "How this works", legend, plain summary, real station names everywhere (no raw codes; `withNames` humanizes), per-train restriction, add-train. The 6-city and real-corridor maps are unchanged.
+
+### Gate (`tests/test_wb_ui.py`, 6 tests)
+All 50 stations placed in `WB_COORDS`; snapshot is `dataset:"wb"` with 50 stations and 50 unique names; the default closure draws a reroute (a Howrah train's drawn path drops `MYM-BWN` and takes the chord `SKG-BWN`); reroute is collision-free + passenger-consistent; Reset clears the default anomaly; the WB page keeps all corridor controls.
+
+### STOPPED at the boundary — WB UI built + gated; user's visual pass decides demo-readiness.
+
+---
+
 ## Engine optimization (branch real-railway) — placement/hold search: ~2.6–3.6s → ~0.37–0.48s, behavior-identical
 Built 2026-06-13. master untouched at cd37586. Suite: **190 passed** (189 + 1 byte-identical golden gate). Determinism preserved (5 identical recompute runs). **No behavior change** — proven below.
 

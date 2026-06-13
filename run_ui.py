@@ -16,14 +16,20 @@ def main():
     parser.add_argument("--no-browser", action="store_true")
     parser.add_argument("--real", action="store_true",
                         help="use the real Indian Railways corridor dataset")
+    parser.add_argument("--wb", action="store_true",
+                        help="use the 50-station West Bengal state network")
     args = parser.parse_args()
     from app.state import AppState
 
-    state = AppState(dataset="real" if args.real else "baseline")
+    dataset = "wb" if args.wb else "real" if args.real else "baseline"
+    state = AppState(dataset=dataset)
     server = make_server(state=state, port=args.port)
     url = f"http://127.0.0.1:{server.server_address[1]}/"
-    which = ("REAL 27-station Indian Railways corridor"
-             if args.real else "6-city demo network")
+    which = {
+        "wb": "West Bengal 50-station network (schematic)",
+        "real": "REAL 27-station Indian Railways corridor",
+        "baseline": "6-city demo network",
+    }[dataset]
     print(f"Train dispatch UI running at {url}  ({which}; Ctrl+C to stop)")
     if not args.no_browser:
         webbrowser.open(url)

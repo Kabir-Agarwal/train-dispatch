@@ -9,6 +9,7 @@ import re
 
 import data.baseline
 import data.real_corridor
+import data.west_bengal
 from engine.anomalies import (
     ReducedSpeed,
     TrackBlocked,
@@ -23,7 +24,7 @@ from engine.decision_log import (
     describe_anomaly,
     fact_entries_for_all_trains,
 )
-from engine.errors import DispatchError, ValidationError
+from engine.errors import BaselineConflictError, DispatchError, ValidationError
 from engine.model import Train
 from engine.routes import all_open_paths
 from engine.phrasing import (
@@ -110,6 +111,10 @@ class AppState:
             module = data.real_corridor
             self.display_names = dict(module.DISPLAY_NAMES)
             self.train_attrs = {k: dict(v) for k, v in module.TRAIN_ATTRS.items()}
+        elif dataset == "wb":
+            module = data.west_bengal
+            self.display_names = dict(module.DISPLAY_NAMES)
+            self.train_attrs = {}
         elif dataset == "baseline":
             module = data.baseline
             self.display_names = dict(DISPLAY_NAMES)
@@ -122,11 +127,22 @@ class AppState:
         self.trains = module.build_trains()
         self.phraser = phraser or get_phraser()
         self.reset()
+        if dataset == "wb":
+            # Default demo anomaly (money-shot): closing the Memari–Barddhaman
+            # main forces the Howrah trains onto the Dankuni chord — a visible
+            # reroute across the mesh. "Reset to baseline" clears it.
+            self.inject([{"type": "track_closed", "segment": "MYM-BWN"}])
 
     def reset(self):
         self.anomalies = []
         self.added_trains = []  # admin-added live trains (cleared on reset)
-        self.result = _baseline_result(self.network, self.trains)
+        try:
+            self.result = _baseline_result(self.network, self.trains)
+        except BaselineConflictError:
+            # A dense nominal timetable (the WB state mesh) is not conflict-free
+            # as published; show the engine's collision-free deconfliction as
+            # the baseline instead (still ZERO anomalies — just safe slotting).
+            self.result = recompute_schedule(self.network, self.trains, [])
         self.log = None
         self._facts = fact_entries_for_all_trains(
             self.network, self.trains, [], self.result
@@ -233,6 +249,7 @@ class AppState:
                     "violations": violations,
                 })
         return {
+            "dataset": self.dataset,
             "stations": list(self.network.stations),
             "display_names": dict(self.display_names),
             "train_attrs": {k: dict(v) for k, v in self.train_attrs.items()},

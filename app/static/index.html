@@ -470,9 +470,52 @@ const REAL_COORDS = {
   NU:   [395, 401],  PPI:  [395, 426]
 };
 
-// One lookup for both datasets; real codes never collide with S1..S6.
+// ============================================================
+// WEST BENGAL (--wb): a SCHEMATIC metro-map layout for the 50-station mesh
+// (legibility over geography — the India outline is hidden for this view).
+// Lines are drawn as clean straight runs between hubs; the Howrah–Barddhaman
+// MAIN line is the right arc and the Dankuni CHORD the left arc, so closing the
+// main reroutes the Howrah trains onto the chord as a visible lens. The 11
+// loop/chord lines each read as a distinct branch. Major junctions are labeled;
+// smaller stations show their name on hover (SVG <title>).
+const WB_COORDS = {
+  // Kolkata terminals (bottom)
+  HWH: [300, 735], SDAH: [505, 715],
+  // Howrah–Barddhaman MAIN (right arc): HWH-BLY-SRP-CGR-BDC-MYM-BWN
+  BLY: [330, 685], SRP: [348, 630], CGR: [348, 572], BDC: [330, 520],
+  MYM: [315, 470], BWN: [300, 418],
+  // Howrah–Barddhaman CHORD (left arc): HWH-DKAE-SKG-BWN
+  DKAE: [235, 660], SKG: [250, 515],
+  // Howrah–Kharagpur + Adra/Purulia/Bankura (lower-left / west)
+  SRC: [245, 700], ULB: [205, 668], MCA: [172, 632], PKU: [140, 592],
+  KGP: [118, 545], TMZ: [95, 645], DGH: [72, 688], HLZ: [185, 558],
+  JGM: [60, 575], MDN: [112, 492], ADRA: [140, 445], BQA: [185, 425],
+  BPRS: [220, 408], PRR: [95, 420], ASN: [180, 400], UDL: [222, 372],
+  DGR: [262, 395],
+  // Rampurhat loop (up from Barddhaman): BWN-BHP-SNT-RPH-NHT-NFK ; UDL-SNT link
+  BHP: [302, 362], SNT: [296, 305], RPH: [322, 258], NHT: [345, 212],
+  NFK: [412, 248],
+  // Katwa–Azimganj
+  KWAE: [372, 458], AZ: [450, 345],
+  // Sealdah main/north (right): SDAH-DDJ-BT-NH-RHA-KNJ-BPC-LGL + RHA branches
+  DDJ: [480, 665], BT: [448, 605], NH: [408, 545], RHA: [448, 488],
+  KNJ: [478, 438], BPC: [512, 392], LGL: [550, 362], BNJ: [492, 525],
+  STB: [472, 470],
+  // North Bengal + Dooars loop (top): NFK-MLDT-NJP-(SGUJ-NMZ-HSA-APDJ-NCB-NJP)
+  MLDT: [425, 170], NJP: [452, 108], SGUJ: [402, 76], NMZ: [352, 66],
+  HSA: [342, 116], APDJ: [382, 156], NCB: [432, 132],
+};
+
+// Fully-labeled hubs on the WB map; every other station shows on hover.
+const WB_MAJOR = new Set([
+  "HWH", "SDAH", "BWN", "BDC", "ASN", "KGP", "ADRA", "UDL", "RHA", "NH",
+  "AZ", "KWAE", "NFK", "NHT", "SNT", "BPC", "PKU", "SRC", "DKAE", "NJP",
+  "MLDT", "APDJ",
+]);
+
+// One lookup across datasets; the code namespaces never collide.
 function fixedCoord(id) {
-  return FIXED_COORDS[id] || REAL_COORDS[id] || null;
+  return FIXED_COORDS[id] || REAL_COORDS[id] || WB_COORDS[id] || null;
 }
 
 // Palette for trains (index-based)
@@ -563,18 +606,23 @@ function trainPosition(stationTimes, t, coords) {
 // only rebuilt when snap changes
 // ============================================================
 let mapCoords = {};
-let mapCompact = false;   // dense network (real corridor): smaller dots, name-only labels
+let mapCompact = false;   // dense network: smaller dots, name labels (no codes)
+let mapWB = false;        // 50-station West Bengal mesh: hubs labeled, rest on hover
 
 function buildStaticMap(snap) {
   mapCoords = computeStationCoords(snap.stations);
-  // Dense corridors (the 27-station real network) render as a clean SCHEMATIC
-  // network diagram: small dots, NO seg-code labels, NO in-dot codes, names
-  // placed OUTWARD (trunk-left, loop-right) so all 27 stay legible and the
-  // Bina–Itarsi diamond reads as two branches. The 6-city map is unchanged.
+  // Dense networks render as a clean SCHEMATIC diagram (no India outline): small
+  // dots, NO seg-code labels, NO in-dot codes, names placed outward. The 6-city
+  // map is unchanged. West Bengal (50 stations) is denser still — only the major
+  // junctions are labeled; every other station shows its name on hover.
   mapCompact = snap.stations.length > 8;
+  mapWB = snap.dataset === 'wb';
 
-  // Drop the literal India silhouette for the schematic view (legibility over
-  // geography); keep it for the 6-city geographic map.
+  // Size the canvas to the active layout.
+  const svg = document.getElementById('map-svg');
+  if (svg) svg.setAttribute('viewBox', mapWB ? '0 0 660 780' : '0 0 620 660');
+
+  // Drop the literal India silhouette for the schematic views.
   const outline = document.getElementById('india-outline');
   if (outline) outline.style.display = mapCompact ? 'none' : '';
   const cap = document.getElementById('map-caption');
@@ -582,14 +630,18 @@ function buildStaticMap(snap) {
   if (cap) cap.textContent = mapCompact
     ? 'Schematic network diagram — not to geographic scale'
     : 'Illustrative network inspired by Indian Railways';
-  if (sub) sub.textContent = mapCompact
+  if (sub) sub.textContent = mapWB
+    ? 'West Bengal network (schematic). The Howrah–Barddhaman MAIN line and the '
+      + 'Dankuni CHORD run side by side — closing the main reroutes the Howrah '
+      + 'trains onto the chord. Hover any small station for its name.'
+    : mapCompact
     ? 'Two routes link Bina Jn and Itarsi Jn: the main line (down, via Bhopal) '
       + 'and the eastern loop (via Saugor–Damoh–Katni–Jabalpur). A closure on '
       + 'one route reroutes trains onto the other.'
     : '';
 
-  const dotR    = mapCompact ? 6 : 14;
-  const segW    = mapCompact ? 3 : 4;
+  const dotR    = mapWB ? 5 : mapCompact ? 6 : 14;
+  const segW    = mapWB ? 2.5 : mapCompact ? 3 : 4;
 
   // --- Segments (both corridors are drawn here; geography makes the trunk
   //     and the Bina–Katni–Jabalpur loop read as two lines + a diamond) ---
@@ -632,34 +684,38 @@ function buildStaticMap(snap) {
   // --- Stations ---
   clearGroup('station-group');
   const stG = document.getElementById('station-group');
+  const wbCenterX = 330;
   snap.stations.forEach((id, i) => {
     const c = mapCoords[id];
     if (!c) return;
+    const cityName = dn(id);   // ALWAYS the real name — never a raw code
+    // On the WB mesh, major junctions are larger/darker and labeled; minor
+    // stations are smaller/lighter and named on hover only.
+    const major = !mapWB || WB_MAJOR.has(id);
+    const r = mapWB ? (major ? 6 : 4) : dotR;
     const circle = svgEl('circle', {
-      cx: c[0], cy: c[1], r: dotR,
-      fill: '#10243e',
+      cx: c[0], cy: c[1], r: r,
+      fill: major ? '#10243e' : '#7b8794',
       class: 'station-circle'
     });
+    circle.appendChild(svgEl('title', {}, cityName));  // hover tooltip
     stG.appendChild(circle);
 
-    const cityName = dn(id);   // ALWAYS the real name — never a raw code
-
-    if (mapCompact) {
-      // Name label placed OUTWARD from each line: trunk (x=TRUNK_X) labels to
-      // the LEFT, loop (x=LOOP_X) labels to the RIGHT. Train labels go inward,
-      // so station names and train markers never overlap.
-      const onLoop = c[0] > (TRUNK_X + LOOP_X) / 2;
+    if (mapCompact && major) {
+      // Name label placed OUTWARD from the line so it clears train markers.
+      const right = mapWB ? (c[0] >= wbCenterX)
+                          : (c[0] > (TRUNK_X + LOOP_X) / 2);
       const lbl = svgEl('text', {
-        x: c[0] + (onLoop ? dotR + 6 : -(dotR + 6)),
+        x: c[0] + (right ? r + 6 : -(r + 6)),
         y: c[1] + 3,
         class: 'station-label-halo'
       }, cityName);
       // inline styles beat the .station-label-halo stylesheet rule
-      lbl.style.textAnchor = onLoop ? 'start' : 'end';
-      lbl.style.fontSize = '10.5px';
+      lbl.style.textAnchor = right ? 'start' : 'end';
+      lbl.style.fontSize = mapWB ? '9.5px' : '10.5px';
       lbl.style.dominantBaseline = 'auto';
       stG.appendChild(lbl);
-    } else {
+    } else if (!mapCompact) {
       // Sparse map: abbreviated id inside the dot + name below it.
       const dotLbl = svgEl('text', {
         x: c[0], y: c[1],
@@ -1137,7 +1193,7 @@ refreshState();
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"
-// "added_train_ids" "added-tag"
+// "added_train_ids" "added-tag" "WB_COORDS" "WB_MAJOR" "mapWB"
 </script>
 </body>
 </html>
