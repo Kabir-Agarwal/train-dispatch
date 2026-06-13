@@ -1,6 +1,31 @@
 # PROGRESS.md
 
-## West Bengal UI (branch real-railway) — schematic 50-station mesh wired in: DONE, awaiting visual pass
+## West Bengal UI — REAL GEOGRAPHIC layout (supersedes the schematic): DONE, awaiting visual pass
+Built 2026-06-13. Display layer ONLY — `engine/` byte-identical to the optimization commit e87dc10 (`git diff e87dc10 -- engine/` empty); `data/west_bengal.py` UNCHANGED; master untouched at cd37586. Suite: **196 passed** (190 + 6 WB UI gates). The only changed file this round is `app/static/index.html` (geographic layout + zoom/pan), plus the WB gate updated. Browser-verified: 50 stations geo-placed inside the WB outline (0 outside), zoom makes the Kolkata cluster legible, money-shot reroute drawn.
+
+### Geographic layout (replaces the metro/schematic WB layout)
+- Each of the 50 stations carries its real `[lat, lon]` (`WB_GEO`), projected (equirectangular: x∝lon, y∝−lat, `WB_PROJ`) onto a **stylized West Bengal state outline** (`#wb-outline`, world coords, projected by the same view transform). North bulge (NJP/Alipurduar) → narrow Malda neck → broad southern delta; west lobe extended so Purulia (WB's western tip) sits inside. India silhouette hidden in WB mode; viewBox 500×700.
+- Real names everywhere (hover `<title>` + labels); real line routing (the 11 chord/loop lines follow geography).
+
+### Zoom + pan for the dense Kolkata/Howrah cluster (the hard part)
+- The view transform `screen = world·viewK + (viewX,viewY)` is applied by **reprojecting** `mapCoords` each redraw, so dots and labels stay constant-size (not stretched) at any zoom. Scroll-to-zoom (toward cursor), drag-to-pan, and +/−/Reset-view buttons (`#zoom-controls`, shown only in WB). Pan is clamped to keep content on-canvas; zoom clamped to [1,6].
+- Labels: major junctions always labeled; the ~30 smaller stations show their name **on hover at full-state zoom, and as on-map labels once zoomed in** (`viewK ≥ 2.6`) — verified the packed Kolkata core (Howrah/Sealdah/Dankuni/Bally/Dum Dum/Barrackpore…) becomes readable when zoomed.
+- Reroute visibility: the rerouted train's path is the snapshot `station_times` the map traces; the closed segment is drawn red-dashed, and zoom resolves it even in the dense south.
+
+### Default demo anomaly (money-shot) — unchanged from the wiring commit
+`--wb` loads with the Memari–Barddhaman main (`MYM-BWN`) closed; the Howrah trains reroute onto the Dankuni chord (`SKG-BWN`). "Reset to baseline" clears it (the WB nominal timetable isn't conflict-free, so the baseline is the engine's collision-free deconfliction — see the wiring section below).
+
+### Everything from the corridor UI still works (regression-gated)
+7 labeled control rows, ghost preview, "How this works", legend, plain summary, real names (no raw codes), per-train restriction, add-train. The 6-city and real-corridor maps are unchanged (view transform is identity for them).
+
+### Gate (`tests/test_wb_ui.py`, 6 tests; updated for geographic)
+All 50 stations have a real lat/long in the page (`WB_GEO`), projected onto `#wb-outline`; zoom/pan UI present; Howrah ~22.58N/88.34E and NJP ~26.68N spot-checked; snapshot is `dataset:"wb"` with 50 unique names; the default closure draws a reroute onto the chord (`SKG-BWN`); reroute is collision-free + passenger-consistent; Reset clears it; corridor controls present.
+
+### STOPPED at the boundary — geographic WB UI built + gated; user's visual pass decides demo-readiness.
+
+---
+
+## West Bengal UI (branch real-railway) — schematic 50-station mesh wired in: SUPERSEDED by the geographic layout above
 Built 2026-06-13. Display layer ONLY — `engine/` is byte-identical to the optimization commit e87dc10 (`git diff e87dc10 -- engine/` empty); `data/west_bengal.py` UNCHANGED (probe + golden dataset intact); master untouched at cd37586. Suite: **196 passed** (190 + 6 WB UI gates). Browser-verified with the preview tool: 50 dots, **0 segment-line crossings**, 0 label overlaps, money-shot reroute animates onto the chord.
 
 ### Wiring (app layer)

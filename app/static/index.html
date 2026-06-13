@@ -148,6 +148,17 @@
            Q265,42 240,38
            Q220,34 195,38 Z"
         fill="#e8ecef" stroke="#cfd8e0" stroke-width="1.5"/>
+      <!-- West Bengal state outline (stylized; world coords, projected by the
+           same view transform as the stations). Hidden unless --wb. -->
+      <g id="wb-outline-wrap" style="display:none">
+        <path id="wb-outline"
+          d="M295,70 L360,50 L432,72 L470,120 L442,176 L360,168 L330,210
+             L332,285 L420,380 L462,520 L432,600 L380,668 L250,674 L200,662
+             L150,560 L78,478 L66,430 L118,358 L182,292 L232,232 L270,176
+             L262,110 Z"
+          fill="#e9eef3" stroke="#c2ccd6" stroke-width="1.5"
+          vector-effect="non-scaling-stroke"/>
+      </g>
       <g id="seg-group"></g>
       <g id="ghost-seg-group"></g>
       <g id="ghost-route-group"></g>
@@ -181,6 +192,12 @@
     <label for="time-slider">Time:</label>
     <input type="range" id="time-slider" min="0" max="120" value="0" oninput="onSliderInput(this.value)">
     <span id="time-readout">t = 0 min</span>
+    <span id="zoom-controls" style="display:none; margin-left:auto; gap:6px; align-items:center;">
+      <span class="muted" style="font-size:12px">Drag to pan, scroll to zoom &middot;</span>
+      <button onclick="zoomBy(1.5)" title="Zoom in">+</button>
+      <button onclick="zoomBy(1/1.5)" title="Zoom out">&minus;</button>
+      <button class="cancel-btn" onclick="resetView()">Reset view</button>
+    </span>
   </div>
   <div id="preview-panel">
     <h3>Predicted changes</h3>
@@ -471,46 +488,53 @@ const REAL_COORDS = {
 };
 
 // ============================================================
-// WEST BENGAL (--wb): a SCHEMATIC metro-map layout for the 50-station mesh
-// (legibility over geography — the India outline is hidden for this view).
-// Lines are drawn as clean straight runs between hubs; the Howrah–Barddhaman
-// MAIN line is the right arc and the Dankuni CHORD the left arc, so closing the
-// main reroutes the Howrah trains onto the chord as a visible lens. The 11
-// loop/chord lines each read as a distinct branch. Major junctions are labeled;
-// smaller stations show their name on hover (SVG <title>).
-const WB_COORDS = {
-  // Kolkata terminals (bottom)
-  HWH: [300, 735], SDAH: [505, 715],
-  // Howrah–Barddhaman MAIN (right arc): HWH-BLY-SRP-CGR-BDC-MYM-BWN
-  BLY: [330, 685], SRP: [348, 630], CGR: [348, 572], BDC: [330, 520],
-  MYM: [315, 470], BWN: [300, 418],
-  // Howrah–Barddhaman CHORD (left arc): HWH-DKAE-SKG-BWN
-  DKAE: [235, 660], SKG: [250, 515],
-  // Howrah–Kharagpur + Adra/Purulia/Bankura (lower-left / west)
-  SRC: [245, 700], ULB: [205, 668], MCA: [172, 632], PKU: [140, 592],
-  KGP: [118, 545], TMZ: [95, 645], DGH: [72, 688], HLZ: [185, 558],
-  JGM: [60, 575], MDN: [112, 492], ADRA: [140, 445], BQA: [185, 425],
-  BPRS: [220, 408], PRR: [95, 420], ASN: [180, 400], UDL: [222, 372],
-  DGR: [262, 395],
-  // Rampurhat loop (up from Barddhaman): BWN-BHP-SNT-RPH-NHT-NFK ; UDL-SNT link
-  BHP: [302, 362], SNT: [296, 305], RPH: [322, 258], NHT: [345, 212],
-  NFK: [412, 248],
-  // Katwa–Azimganj
-  KWAE: [372, 458], AZ: [450, 345],
-  // Sealdah main/north (right): SDAH-DDJ-BT-NH-RHA-KNJ-BPC-LGL + RHA branches
-  DDJ: [480, 665], BT: [448, 605], NH: [408, 545], RHA: [448, 488],
-  KNJ: [478, 438], BPC: [512, 392], LGL: [550, 362], BNJ: [492, 525],
-  STB: [472, 470],
-  // North Bengal + Dooars loop (top): NFK-MLDT-NJP-(SGUJ-NMZ-HSA-APDJ-NCB-NJP)
-  MLDT: [425, 170], NJP: [452, 108], SGUJ: [402, 76], NMZ: [352, 66],
-  HSA: [342, 116], APDJ: [382, 156], NCB: [432, 132],
+// WEST BENGAL (--wb): a REAL GEOGRAPHIC layout. Each station's real
+// [latitude, longitude] is projected onto a stylized West Bengal state outline
+// (equirectangular: x ∝ lon, y ∝ -lat). The dense Kolkata/Howrah cluster is
+// unreadable at full-state zoom, so the WB map is zoomable/pannable (scroll +
+// drag + buttons); minor-station labels appear once zoomed in (or on hover).
+const WB_GEO = {
+  // Kolkata / Howrah cluster (packed — needs zoom)
+  HWH: [22.585, 88.342], SDAH: [22.567, 88.370], DDJ: [22.620, 88.420],
+  BT: [22.760, 88.370], NH: [22.900, 88.420], BLY: [22.651, 88.340],
+  SRC: [22.600, 88.270], DKAE: [22.680, 88.300],
+  // Howrah–Barddhaman MAIN (via Bandel) + CHORD (via Dankuni–Saktigarh)
+  SRP: [22.750, 88.340], CGR: [22.870, 88.380], BDC: [22.930, 88.400],
+  MYM: [23.190, 88.130], BWN: [23.240, 87.860], SKG: [23.260, 88.010],
+  // Howrah–Kharagpur + south branches
+  ULB: [22.470, 88.110], MCA: [22.390, 87.860], PKU: [22.420, 87.700],
+  KGP: [22.340, 87.320], TMZ: [22.300, 87.920], DGH: [21.680, 87.550],
+  HLZ: [22.060, 88.110], JGM: [22.450, 86.990], MDN: [22.420, 87.320],
+  // Adra / Purulia / Bankura / Asansol–Durgapur–Andal (west)
+  ADRA: [23.490, 86.670], BQA: [23.240, 87.070], BPRS: [23.080, 87.320],
+  PRR: [23.330, 86.360], ASN: [23.680, 86.990], UDL: [23.590, 87.240],
+  DGR: [23.520, 87.310],
+  // Bolpur–Sainthia–Rampurhat–Nalhati–New Farakka + Katwa / Azimganj
+  BHP: [23.660, 87.690], SNT: [23.950, 87.670], RPH: [24.180, 87.780],
+  NHT: [24.300, 87.820], NFK: [24.800, 87.910], KWAE: [23.650, 88.130],
+  AZ: [24.230, 88.250],
+  // Sealdah north line + Lalgola / Berhampore
+  RHA: [23.180, 88.570], KNJ: [23.400, 88.500], BNJ: [23.070, 88.830],
+  STB: [23.250, 88.430], BPC: [24.100, 88.250], LGL: [24.420, 88.250],
+  // North Bengal (Malda → New Jalpaiguri → Dooars → Cooch Behar)
+  MLDT: [25.000, 88.140], NJP: [26.680, 88.430], SGUJ: [26.700, 88.420],
+  NMZ: [26.850, 88.740], HSA: [26.750, 89.360], APDJ: [26.490, 89.530],
+  NCB: [26.320, 89.460],
 };
 
-// Fully-labeled hubs on the WB map; every other station shows on hover.
+// Equirectangular projection onto the WB canvas (matches the outline above).
+const WB_PROJ = { lon0: 85.9, latTop: 27.2, k: 115, ox: 30, oy: 20 };
+const WB_COORDS = {};
+for (const code in WB_GEO) {
+  const [lat, lon] = WB_GEO[code];
+  WB_COORDS[code] = [(lon - WB_PROJ.lon0) * WB_PROJ.k + WB_PROJ.ox,
+                     (WB_PROJ.latTop - lat) * WB_PROJ.k + WB_PROJ.oy];
+}
+
+// Fully-labeled hubs on the WB map; every other station shows on hover / zoom.
 const WB_MAJOR = new Set([
   "HWH", "SDAH", "BWN", "BDC", "ASN", "KGP", "ADRA", "UDL", "RHA", "NH",
-  "AZ", "KWAE", "NFK", "NHT", "SNT", "BPC", "PKU", "SRC", "DKAE", "NJP",
-  "MLDT", "APDJ",
+  "AZ", "KWAE", "NFK", "BPC", "PKU", "SRC", "DKAE", "NJP", "MLDT", "APDJ",
 ]);
 
 // One lookup across datasets; the code namespaces never collide.
@@ -607,41 +631,59 @@ function trainPosition(stationTimes, t, coords) {
 // ============================================================
 let mapCoords = {};
 let mapCompact = false;   // dense network: smaller dots, name labels (no codes)
-let mapWB = false;        // 50-station West Bengal mesh: hubs labeled, rest on hover
+let mapWB = false;        // 50-station West Bengal mesh: geographic + zoom/pan
+// View transform for the geographic WB map (identity for the other maps):
+// screen = world * viewK + (viewX, viewY).
+let viewK = 1, viewX = 0, viewY = 0;
 
 function buildStaticMap(snap) {
-  mapCoords = computeStationCoords(snap.stations);
-  // Dense networks render as a clean SCHEMATIC diagram (no India outline): small
-  // dots, NO seg-code labels, NO in-dot codes, names placed outward. The 6-city
-  // map is unchanged. West Bengal (50 stations) is denser still — only the major
-  // junctions are labeled; every other station shows its name on hover.
+  // Dense networks render without the India silhouette. West Bengal uses a REAL
+  // geographic projection on a WB outline, zoomable/pannable for the dense
+  // Kolkata cluster; only major junctions are labeled until zoomed in.
   mapCompact = snap.stations.length > 8;
   mapWB = snap.dataset === 'wb';
 
-  // Size the canvas to the active layout.
-  const svg = document.getElementById('map-svg');
-  if (svg) svg.setAttribute('viewBox', mapWB ? '0 0 660 780' : '0 0 620 660');
+  // World coords -> screen coords through the current view transform.
+  const world = computeStationCoords(snap.stations);
+  mapCoords = {};
+  for (const id in world) {
+    mapCoords[id] = [world[id][0] * viewK + viewX, world[id][1] * viewK + viewY];
+  }
 
-  // Drop the literal India silhouette for the schematic views.
+  // Size the canvas + show the WB outline (transformed by the same view).
+  const svg = document.getElementById('map-svg');
+  if (svg) svg.setAttribute('viewBox', mapWB ? '0 0 500 700' : '0 0 620 660');
+  const wbWrap = document.getElementById('wb-outline-wrap');
+  if (wbWrap) {
+    wbWrap.style.display = mapWB ? '' : 'none';
+    wbWrap.setAttribute('transform',
+      `matrix(${viewK} 0 0 ${viewK} ${viewX} ${viewY})`);
+  }
+  const zc = document.getElementById('zoom-controls');
+  if (zc) zc.style.display = mapWB ? 'inline-flex' : 'none';
+
+  // Drop the literal India silhouette for the dense views.
   const outline = document.getElementById('india-outline');
   if (outline) outline.style.display = mapCompact ? 'none' : '';
   const cap = document.getElementById('map-caption');
   const sub = document.getElementById('map-subcaption');
-  if (cap) cap.textContent = mapCompact
+  if (cap) cap.textContent = mapWB
+    ? 'West Bengal — real geographic layout (stations at their lat/long)'
+    : mapCompact
     ? 'Schematic network diagram — not to geographic scale'
     : 'Illustrative network inspired by Indian Railways';
   if (sub) sub.textContent = mapWB
-    ? 'West Bengal network (schematic). The Howrah–Barddhaman MAIN line and the '
-      + 'Dankuni CHORD run side by side — closing the main reroutes the Howrah '
-      + 'trains onto the chord. Hover any small station for its name.'
+    ? 'Drag to pan, scroll to zoom into the dense Kolkata cluster; small-station '
+      + 'names appear on hover or when zoomed in. Closing the Memari–Barddhaman '
+      + 'main reroutes the Howrah trains onto the Dankuni chord.'
     : mapCompact
     ? 'Two routes link Bina Jn and Itarsi Jn: the main line (down, via Bhopal) '
       + 'and the eastern loop (via Saugor–Damoh–Katni–Jabalpur). A closure on '
       + 'one route reroutes trains onto the other.'
     : '';
 
-  const dotR    = mapWB ? 5 : mapCompact ? 6 : 14;
-  const segW    = mapWB ? 2.5 : mapCompact ? 3 : 4;
+  const dotR    = mapWB ? 4 : mapCompact ? 6 : 14;
+  const segW    = mapWB ? 2 : mapCompact ? 3 : 4;
 
   // --- Segments (both corridors are drawn here; geography makes the trunk
   //     and the Bina–Katni–Jabalpur loop read as two lines + a diamond) ---
@@ -684,13 +726,13 @@ function buildStaticMap(snap) {
   // --- Stations ---
   clearGroup('station-group');
   const stG = document.getElementById('station-group');
-  const wbCenterX = 330;
+  const wbCenterX = 250;   // WB viewBox is 500 wide
   snap.stations.forEach((id, i) => {
     const c = mapCoords[id];
     if (!c) return;
     const cityName = dn(id);   // ALWAYS the real name — never a raw code
     // On the WB mesh, major junctions are larger/darker and labeled; minor
-    // stations are smaller/lighter and named on hover only.
+    // stations are smaller/lighter and named on hover (or once zoomed in).
     const major = !mapWB || WB_MAJOR.has(id);
     const r = mapWB ? (major ? 6 : 4) : dotR;
     const circle = svgEl('circle', {
@@ -701,7 +743,10 @@ function buildStaticMap(snap) {
     circle.appendChild(svgEl('title', {}, cityName));  // hover tooltip
     stG.appendChild(circle);
 
-    if (mapCompact && major) {
+    // Label hubs always; on WB also label minor stations once zoomed in, so a
+    // full-state view stays uncluttered but a zoomed view names everything.
+    const showLabel = mapCompact && (major || (mapWB && viewK >= 2.6));
+    if (showLabel) {
       // Name label placed OUTWARD from the line so it clears train markers.
       const right = mapWB ? (c[0] >= wbCenterX)
                           : (c[0] > (TRUNK_X + LOOP_X) / 2);
@@ -712,7 +757,7 @@ function buildStaticMap(snap) {
       }, cityName);
       // inline styles beat the .station-label-halo stylesheet rule
       lbl.style.textAnchor = right ? 'start' : 'end';
-      lbl.style.fontSize = mapWB ? '9.5px' : '10.5px';
+      lbl.style.fontSize = mapWB ? (major ? '9.5px' : '8px') : '10.5px';
       lbl.style.dominantBaseline = 'auto';
       stG.appendChild(lbl);
     } else if (!mapCompact) {
@@ -943,6 +988,68 @@ function updateSliderMax(max) {
   slider.value = simTime;
   document.getElementById('time-readout').textContent = 't = ' + Math.round(simTime) + ' min';
 }
+
+// ============================================================
+// Geographic WB map: zoom + pan (reprojects, so dots/labels stay readable)
+// ============================================================
+function redrawMap() {
+  if (!currentSnap) return;
+  buildStaticMap(currentSnap);
+  const colorMap = buildColorMap(currentSnap.trains);
+  drawTrains(currentSnap.trains, simTime, mapCoords, colorMap);
+  if (pendingPreview) drawGhostOverlays(pendingPreview.preview, currentSnap, mapCoords);
+}
+
+function svgPoint(evt) {  // client px -> viewBox coords
+  const svg = document.getElementById('map-svg');
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX; pt.y = evt.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function clampPan() {
+  if (viewK <= 1) { viewX = 0; viewY = 0; return; }
+  const W = 500, H = 700;  // WB viewBox
+  viewX = Math.min(0, Math.max(W - W * viewK, viewX));
+  viewY = Math.min(0, Math.max(H - H * viewK, viewY));
+}
+
+function applyZoom(factor, cx, cy) {
+  const newK = Math.min(6, Math.max(1, viewK * factor));
+  if (newK === viewK) return;
+  const wx = (cx - viewX) / viewK, wy = (cy - viewY) / viewK;  // world point under cursor
+  viewK = newK;
+  viewX = cx - wx * viewK;
+  viewY = cy - wy * viewK;
+  clampPan();
+  redrawMap();
+}
+
+function zoomBy(factor) { applyZoom(factor, 250, 350); }   // toward canvas centre
+function resetView() { viewK = 1; viewX = 0; viewY = 0; redrawMap(); }
+
+(function setupMapInteract() {
+  const wrap = document.getElementById('map-svg-wrap');
+  if (!wrap) return;
+  wrap.addEventListener('wheel', (e) => {
+    if (!mapWB) return;
+    e.preventDefault();
+    const p = svgPoint(e);
+    applyZoom(e.deltaY < 0 ? 1.18 : 1 / 1.18, p.x, p.y);
+  }, { passive: false });
+  let dragging = false, last = null;
+  wrap.addEventListener('mousedown', (e) => {
+    if (!mapWB) return;
+    dragging = true; last = svgPoint(e); wrap.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const p = svgPoint(e);
+    viewX += p.x - last.x; viewY += p.y - last.y; last = p;
+    clampPan(); redrawMap();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; wrap.style.cursor = ''; });
+})();
 
 // ============================================================
 // Render full state (existing behavior, extended for map + display_names)
@@ -1193,7 +1300,8 @@ refreshState();
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"
-// "added_train_ids" "added-tag" "WB_COORDS" "WB_MAJOR" "mapWB"
+// "added_train_ids" "added-tag" "WB_COORDS" "WB_GEO" "WB_MAJOR" "mapWB"
+// "wb-outline" "zoom-controls" "Reset view"
 </script>
 </body>
 </html>

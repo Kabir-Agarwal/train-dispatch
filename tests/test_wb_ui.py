@@ -1,6 +1,7 @@
-"""Gate (West Bengal UI): the WB mode renders all 50 stations on the schematic
-map and the default money-shot reroute is drawn. Display layer only — engine
-untouched; these tests hit the served page and the snapshot it renders from.
+"""Gate (West Bengal UI): the WB mode renders all 50 stations on a REAL
+GEOGRAPHIC layout (lat/long on a WB outline, zoomable/pannable) and the default
+money-shot reroute is drawn. Display layer only — engine untouched; these tests
+hit the served page and the snapshot it renders from.
 """
 
 import json
@@ -26,13 +27,19 @@ def _get(url, path):
         return r.read().decode("utf-8")
 
 
-def test_page_places_all_50_wb_stations(wb_url):
-    """Every WB station has a schematic coordinate baked into the page."""
+def test_page_geo_positions_all_50_wb_stations(wb_url):
+    """Every WB station has a real lat/long baked into the page, projected onto
+    the WB state outline; the map is zoomable/pannable."""
     html = _get(wb_url, "/")
-    assert "WB_COORDS" in html and "WB_MAJOR" in html and "mapWB" in html
+    assert "WB_GEO" in html and "WB_MAJOR" in html and "mapWB" in html
+    assert "wb-outline" in html               # the WB state outline is present
+    assert "zoom-controls" in html and "Reset view" in html  # zoom/pan UI
     assert len(STATIONS) == 50
     for code in STATIONS:
-        assert f"{code}:" in html, f"no WB map coordinate for {code}"
+        assert f"{code}:" in html, f"no WB lat/long for {code}"
+    # spot-check real geography: Howrah ~22.58N 88.34E, NJP far north ~26.68N
+    assert "22.585" in html and "88.342" in html   # Howrah
+    assert "26.680" in html                        # New Jalpaiguri (north)
 
 
 def test_wb_snapshot_has_50_stations_and_is_wb_mode(wb_url):
