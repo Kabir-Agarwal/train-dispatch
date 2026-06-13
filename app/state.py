@@ -5,6 +5,8 @@ RecomputeResult — they cannot disagree (and a gate proves it).
 The admin is the only anomaly source; anomalies accumulate until reset.
 """
 
+import re
+
 import data.baseline
 import data.real_corridor
 from engine.anomalies import (
@@ -13,6 +15,8 @@ from engine.anomalies import (
     TrackClosed,
     TrainCancelled,
     TrainDelayed,
+    TrainRestricted,
+    apply_anomalies,
 )
 from engine.decision_log import (
     build_decision_log,
@@ -20,6 +24,8 @@ from engine.decision_log import (
     fact_entries_for_all_trains,
 )
 from engine.errors import DispatchError, ValidationError
+from engine.model import Train
+from engine.routes import all_open_paths
 from engine.phrasing import (
     get_phraser,
     safe_phrase_log_entry,
@@ -37,6 +43,7 @@ _ANOMALY_TYPES = {
     "reduced_speed": lambda d: ReducedSpeed(d["segment"], float(d["factor"])),
     "train_cancelled": lambda d: TrainCancelled(d["train"]),
     "train_delayed": lambda d: TrainDelayed(d["train"], int(d["minutes"])),
+    "train_restricted": lambda d: TrainRestricted(d["train"], d["segment"]),
 }
 
 
@@ -49,6 +56,17 @@ def parse_anomaly(payload):
         return _ANOMALY_TYPES[kind](payload)
     except (KeyError, TypeError, ValueError) as exc:
         raise ValidationError(f"bad parameters for {kind}: {exc}") from exc
+
+
+def _next_train_id(existing_ids):
+    """Deterministic next 'T<n>' id not already taken (keeps the drift guard's
+    T-id grammar). Baseline -> T6.., real corridor -> T109.."""
+    nums = [int(m.group(1)) for tid in existing_ids
+            if (m := re.fullmatch(r"T(\d+)", tid))]
+    n = (max(nums) + 1) if nums else 1
+    while f"T{n}" in existing_ids:
+        n += 1
+    return f"T{n}"
 
 
 def _train_view(a):
@@ -107,28 +125,75 @@ class AppState:
 
     def reset(self):
         self.anomalies = []
+        self.added_trains = []  # admin-added live trains (cleared on reset)
         self.result = _baseline_result(self.network, self.trains)
         self.log = None
         self._facts = fact_entries_for_all_trains(
             self.network, self.trains, [], self.result
         )
 
-    def inject(self, payloads):
-        """Admin injects one or more anomalies (the ONLY anomaly source).
-        On any error the previous state is kept and the error re-raised."""
+    def _all_trains(self):
+        return self.trains + self.added_trains
+
+    def _make_train(self, spec, anomalies, already_added):
+        """Validate an add-train spec and build a Train with a fastest currently-
+        open path. Raises (and mutates nothing) on a bad/unreachable request —
+        the engine then schedules it collision-free (hold/reroute) on recompute.
+        """
+        try:
+            origin = spec["origin"]
+            destination = spec["destination"]
+            departure = int(spec["departure"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValidationError(f"bad new-train spec: {exc}") from exc
+        if origin not in self.network.stations:
+            raise ValidationError(f"unknown origin station '{origin}'")
+        if destination not in self.network.stations:
+            raise ValidationError(f"unknown destination station '{destination}'")
+        if origin == destination:
+            raise ValidationError("a new train's origin and destination must differ")
+        if departure < 0:
+            raise ValidationError("a new train's departure minute must be >= 0")
+        effective = apply_anomalies(self.network, anomalies) if anomalies \
+            else self.network
+        candidates = all_open_paths(effective, origin, destination)
+        if not candidates:
+            raise DispatchError(
+                f"cannot place a train from {origin} to {destination}: "
+                f"no available route"
+            )
+        existing = {t.id for t in self.trains} | {t.id for t in already_added}
+        return Train(_next_train_id(existing), origin, destination,
+                     candidates[0], departure)
+
+    def inject(self, payloads, new_trains=None):
+        """Admin applies anomalies and/or adds new trains (the ONLY mutation
+        source). All-or-nothing: on any error the previous state is kept and
+        the error re-raised."""
         new_anomalies = list(self.anomalies)
-        for p in payloads:
+        for p in payloads or []:
             anomaly = parse_anomaly(p)
             if anomaly not in new_anomalies:  # dedupe repeated injections
                 new_anomalies.append(anomaly)
-        result = recompute_schedule(self.network, self.trains, new_anomalies)
+        new_added = list(self.added_trains)
+        for spec in (new_trains or []):
+            new_added.append(self._make_train(spec, new_anomalies, new_added))
+        all_trains = self.trains + new_added
+        if new_anomalies:
+            result = recompute_schedule(self.network, all_trains, new_anomalies)
+        elif new_added:
+            # added trains, no active anomaly: re-plan against an untouched net
+            result = recompute_schedule(self.network, all_trains, [])
+        else:
+            raise ValidationError("no anomalies given")
         self.anomalies = new_anomalies
+        self.added_trains = new_added
         self.result = result
         self.log = build_decision_log(
-            self.network, self.trains, new_anomalies, result
+            self.network, all_trains, new_anomalies, result
         )
         self._facts = fact_entries_for_all_trains(
-            self.network, self.trains, new_anomalies, result
+            self.network, all_trains, new_anomalies, result
         )
 
     def _effective_segments(self):
@@ -172,9 +237,10 @@ class AppState:
             "display_names": dict(self.display_names),
             "train_attrs": {k: dict(v) for k, v in self.train_attrs.items()},
             "summary_text": safe_summary(self.result.actions)
-            if self.anomalies else "",
+            if (self.anomalies or self.added_trains) else "",
             "segments": self._effective_segments(),
             "anomalies": [describe_anomaly(a) for a in self.anomalies],
+            "added_train_ids": [t.id for t in self.added_trains],
             "trigger_text": trigger_text,
             "trains": trains,
             "decision_log": log_lines,
@@ -197,19 +263,26 @@ class AppState:
         }
 
 
-    def preview(self, payloads):
+    def preview(self, payloads, new_trains=None):
         """GHOST PREVIEW: what WOULD happen if these anomalies were injected
-        on top of the active ones. Runs the SAME engine recompute as inject()
-        but mutates nothing. Returns predicted segments/trains/log + a delta
-        table against the current state."""
+        and/or these new trains added on top of the active state. Runs the SAME
+        engine recompute as inject() but mutates nothing. Returns predicted
+        segments/trains/log + a delta table against the current state."""
         candidate = list(self.anomalies)
-        for p in payloads:
+        for p in payloads or []:
             anomaly = parse_anomaly(p)
             if anomaly not in candidate:
                 candidate.append(anomaly)
-        result = recompute_schedule(self.network, self.trains, candidate)
-        log = build_decision_log(self.network, self.trains, candidate, result)
+        candidate_added = list(self.added_trains)
+        for spec in (new_trains or []):
+            candidate_added.append(
+                self._make_train(spec, candidate, candidate_added)
+            )
+        all_trains = self.trains + candidate_added
+        result = recompute_schedule(self.network, all_trains, candidate)
+        log = build_decision_log(self.network, all_trains, candidate, result)
         current = self.result
+        dest_by_id = {t.id: t.destination for t in all_trains}
         deltas = []
         seg_changes = {}
         from engine.anomalies import apply_anomalies as _apply
@@ -222,16 +295,16 @@ class AppState:
                 seg_changes[seg_id] = new_seg.status
         for tid in sorted(result.actions):
             new = result.actions[tid]
-            old = current.actions[tid]
-            old_arr = None if old.arrivals is None \
-                else old.arrivals[ [t for t in self.trains if t.id == tid][0].destination ]
-            new_arr = None if new.arrivals is None \
-                else new.arrivals[ [t for t in self.trains if t.id == tid][0].destination ]
-            changed = (new.action != old.action or new.path != old.path
-                       or new.arrivals != old.arrivals)
+            old = current.actions.get(tid)  # None => a brand-new previewed train
+            dest = dest_by_id[tid]
+            old_arr = None if old is None or old.arrivals is None \
+                else old.arrivals[dest]
+            new_arr = None if new.arrivals is None else new.arrivals[dest]
+            changed = (old is None or new.action != old.action
+                       or new.path != old.path or new.arrivals != old.arrivals)
             deltas.append({
                 "id": tid,
-                "old_action": old.action,
+                "old_action": None if old is None else old.action,
                 "new_action": new.action,
                 "old_arrival": old_arr,
                 "new_arrival": new_arr,
@@ -244,6 +317,7 @@ class AppState:
         return {
             "preview": True,
             "anomalies": [describe_anomaly(a) for a in candidate],
+            "added_train_ids": [t.id for t in candidate_added],
             "segment_changes": seg_changes,
             "trains": [_train_view(result.actions[tid])
                        for tid in sorted(result.actions)],

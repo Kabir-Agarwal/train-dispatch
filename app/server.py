@@ -63,7 +63,10 @@ def make_handler(state):
             if self.path == "/api/preview":
                 try:
                     payload = json.loads(raw)
-                    self._send_json(state.preview(payload.get("anomalies", [])))
+                    self._send_json(state.preview(
+                        payload.get("anomalies", []),
+                        payload.get("new_trains", []),
+                    ))
                 except DispatchError as exc:
                     self._send_json({"error": str(exc)}, 400)
                 except (json.JSONDecodeError, AttributeError) as exc:
@@ -71,7 +74,10 @@ def make_handler(state):
             elif self.path == "/api/inject":
                 try:
                     payload = json.loads(raw)
-                    state.inject(payload.get("anomalies", []))
+                    state.inject(
+                        payload.get("anomalies", []),
+                        payload.get("new_trains", []),
+                    )
                     self._send_json(state.snapshot())
                 except DispatchError as exc:
                     self._send_json({"error": str(exc)}, 400)

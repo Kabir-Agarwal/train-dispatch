@@ -8,9 +8,14 @@ first candidate is always the fastest currently-available route.
 from .model import CLOSED, Network
 
 
-def all_open_paths(network, origin, destination):
+def all_open_paths(network, origin, destination, forbidden=frozenset()):
     """Return every simple path origin->destination as a tuple of segment ids,
-    skipping closed segments, sorted fastest-first. Empty list = unreachable."""
+    skipping closed segments, sorted fastest-first. Empty list = unreachable.
+
+    `forbidden` is an optional set of segment ids this particular train may not
+    use (a per-train path restriction); those segments are skipped exactly like
+    closed ones, but ONLY for this call — other trains route over them normally.
+    """
     paths = []
 
     def dfs(at, visited, acc):
@@ -19,7 +24,7 @@ def all_open_paths(network, origin, destination):
             return
         for seg_id in network.segment_ids():
             seg = network.segment(seg_id)
-            if seg.status == CLOSED or at not in seg.endpoints:
+            if seg.status == CLOSED or seg_id in forbidden or at not in seg.endpoints:
                 continue
             nxt = Network.other_end(seg, at)
             if nxt in visited:

@@ -22,6 +22,7 @@ from .anomalies import (
     cancelled_train_ids,
     closed_segment_ids,
     delay_minutes,
+    restricted_segments,
     validate_anomalies,
 )
 from .collision import find_conflicts
@@ -109,12 +110,19 @@ def _choose(network, train, base_dep, candidates, table):
 
 def recompute_schedule(network, trains, anomalies):
     """Produce a collision-free, delay-minimized schedule after anomalies.
-    Every number in every reason string originates here, in the engine."""
-    validate_anomalies(network, trains, anomalies)
+    Every number in every reason string originates here, in the engine.
+
+    `anomalies` may be empty: that path re-plans the given train set against an
+    untouched network (used when a train is added live with no active anomaly).
+    The empty case is the ONLY one that skips validate_anomalies, which by
+    contract rejects an empty list elsewhere."""
+    if anomalies:
+        validate_anomalies(network, trains, anomalies)
     effective = apply_anomalies(network, anomalies)
     closed = closed_segment_ids(anomalies)
     cancelled = cancelled_train_ids(anomalies)
     delays = delay_minutes(anomalies)
+    restricted = restricted_segments(anomalies)
     baseline_schedule, _ = build_schedule(network, trains)
 
     actions = {}
@@ -129,16 +137,22 @@ def recompute_schedule(network, trains, anomalies):
             continue
         admin_delay = delays.get(train.id, 0)
         base_dep = train.departure + admin_delay
-        candidates = all_open_paths(effective, train.origin, train.destination)
+        forbidden = restricted.get(train.id, frozenset())
+        candidates = all_open_paths(
+            effective, train.origin, train.destination, forbidden
+        )
         if not candidates:
+            barred = [s for s in train.path if s in forbidden]
+            note = f" (barred from {', '.join(barred)})" if barred else ""
             actions[train.id] = Action(
                 train.id, STRANDED, None, None, None, None,
-                f"no remaining route from {train.origin} to {train.destination}; "
-                f"cannot complete",
+                f"no remaining route from {train.origin} to {train.destination}"
+                f"{note}; cannot complete",
             )
             continue
 
-        original_open = not any(s in closed for s in train.path)
+        original_open = (not any(s in closed for s in train.path)
+                         and not any(s in forbidden for s in train.path))
         chosen = None
         if original_open:
             as_planned = try_schedule(effective, train, train.path, base_dep, table)
@@ -156,7 +170,7 @@ def recompute_schedule(network, trains, anomalies):
         depart_at = base_dep + hold
         actions[train.id] = _describe(
             network, effective, train, path, depart_at, arrivals, added,
-            admin_delay, hold, closed, table,
+            admin_delay, hold, closed, forbidden, table,
         )
 
     conflicts = find_conflicts(table)
@@ -172,15 +186,19 @@ def recompute_schedule(network, trains, anomalies):
 
 
 def _describe(network, effective, train, path, depart_at, arrivals, added,
-              admin_delay, hold, closed, table):
+              admin_delay, hold, closed, forbidden, table):
     """Build the per-train Action with an engine-sourced reason."""
     dest = train.destination
     arr = arrivals[dest]
     if path != tuple(train.path):
         via = "-".join(path_stations(effective, train.origin, path))
         closed_used = [s for s in train.path if s in closed]
+        restricted_used = [s for s in train.path if s in forbidden]
         if closed_used:
             why = f"planned path uses closed segment(s) {', '.join(closed_used)}"
+        elif restricted_used:
+            why = (f"this train is barred from segment(s) "
+                   f"{', '.join(restricted_used)}")
         else:
             others = blocking_trains(
                 effective, train, train.path, train.departure + admin_delay,

@@ -1,5 +1,31 @@
 # PROGRESS.md
 
+## Live actions (branch real-railway) — per-train restriction + add-train + one-action-per-row controls: DONE, awaiting visual pass
+Built 2026-06-13. Full suite: **185 passed** (165 prior + 9 engine gates + 11 app/UI gates). Determinism re-checked (5 identical recompute runs); browser-verified end-to-end with the preview tool (add-train and restrict: preview → apply, ghost reroute, board "added" tag, humanized anomaly line, schematic map intact: 21 trunk + 6 loop dots).
+
+### THIS ROUND TOUCHES THE ENGINE (intentional — a relaxation of the prior "engine zero-diff" rule)
+master is untouched and **still at cd37586**; the real-railway branch now diverges from master in `engine/` ON PURPOSE because features 2 and 3 are genuinely engine features. `git diff master -- engine/`: 4 files, +62/-11.
+- **`engine/routes.py`** — `all_open_paths(net, o, d, forbidden=frozenset())`: optional per-train forbidden segment set, skipped exactly like a closure but only for that call. Default empty ⇒ every existing caller is unchanged.
+- **`engine/anomalies.py`** — new `TrainRestricted(train_id, segment_id)` (does NOT change global segment status — `apply_anomalies` leaves it open for everyone else); `restricted_segments()`; validation branch.
+- **`engine/recompute.py`** — per-train `forbidden = restricted.get(id)`, passed to `all_open_paths`; `original_open` also fails on a forbidden planned segment; reroute reason "this train is barred from segment(s) …"; strand note when a restriction cuts all routes. Plus: `recompute_schedule` now skips `validate_anomalies` ONLY when the anomaly list is empty (the add-train path), reproducing the conflict-free baseline. `validate_anomalies` itself still rejects an empty list (its direct test stays green).
+- **`engine/decision_log.py`** — `describe_anomaly` for `TrainRestricted`.
+Determinism preserved: forbidden is membership-checked, reason lists follow `train.path` order, `_next_train_id` uses `max()` (order-independent). The whole-table collision re-check is unchanged — collision-free stays absolute.
+
+### Feature 2 — per-train path restriction (gated, `tests/test_restrictions_and_addtrain.py`)
+Restricted train avoids the segment and reroutes via an allowed path; an unrestricted train still uses that segment; restricted train strands when no allowed path remains; restriction is per-train, never a global closure; real-corridor case reroutes T101 onto the Bina–Itarsi loop while T102 keeps the trunk. All conflict-free.
+
+### Feature 3 — add a train live (gated)
+Admin gives origin/destination/departure; the engine builds a fastest open path and schedules it collision-free against existing traffic (the new train holds/reroutes as needed — existing higher-priority trains keep their plans). A train that fits runs unchanged; one that contends adapts; one with no route is **reported (DispatchError "no available route"), not forced** — caught before commit, state untouched. New ids are deterministic `T<n>` (baseline → T6, real → T109). Cleared on reset.
+
+### App + UI (`app/state.py`, `app/server.py`, `app/static/index.html`; gated in `tests/test_live_actions_ui.py`)
+- `inject(payloads, new_trains=[])` and `preview(payloads, new_trains=[])` are the single mutation/preview path for anomalies AND added trains (all-or-nothing). `/api/inject` and `/api/preview` accept a `new_trains` channel. Snapshot exposes `added_train_ids`.
+- **Controls redesigned (feature 1):** "Report a problem" is now ONE labeled action per row, vertically stacked, generously spaced — Close / Block / Reduce-speed (factor labeled "0.5 = half speed") / Delay / Cancel / **Restrict a train from a track** / **Add a new train** / Reset, each with its own plain-name dropdown(s) and a one-line caption. No raw codes anywhere (segment dropdowns read "Agra Cantt – Dhaulpur"; trains read "T101 · New Delhi → Nagpur").
+- Ghost preview, "How this works", legend, plain summary, real names, and the schematic real-corridor map all keep working for the new actions (added trains get an "added" badge on the board; the anomaly line is humanized via the generalized `withNames`).
+
+### STOPPED at the boundary — engine + app + UI built and gated; user does the visual pass.
+
+---
+
 ## Phase C (branch real-railway) — real-corridor UI / display skin: DONE, awaiting visual pass
 Built 2026-06-13. Full suite: **165 passed** (159 from Phase B + 6 new UI gates). master untouched; `engine/` **zero diffs in history and working tree** — verified again this round (`git diff master -- engine/` empty). Phase C is display-layer ONLY: the only real content changes are `app/static/index.html`, one line in `run_ui.py`, and the new gate `tests/test_real_corridor_ui.py`. No engine, scheduler, anomaly, state, or data change.
 

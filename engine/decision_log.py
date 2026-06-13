@@ -15,6 +15,7 @@ from .anomalies import (
     TrackClosed,
     TrainCancelled,
     TrainDelayed,
+    TrainRestricted,
     delay_minutes,
 )
 
@@ -33,6 +34,8 @@ def describe_anomaly(a):
         return f"train_cancelled({a.train_id})"
     if isinstance(a, TrainDelayed):
         return f"train_delayed({a.train_id}, {a.minutes} min)"
+    if isinstance(a, TrainRestricted):
+        return f"train_restricted({a.train_id}, {a.segment_id})"
     raise ValueError(f"unknown anomaly: {a!r}")
 
 

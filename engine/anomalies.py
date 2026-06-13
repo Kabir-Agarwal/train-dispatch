@@ -50,6 +50,17 @@ class TrainDelayed:
     kind = "train_delayed"
 
 
+@dataclass(frozen=True)
+class TrainRestricted:
+    """Per-train path restriction: train_id may NOT use segment_id, while every
+    other train still can. Consumed by the recompute as a per-train forbidden
+    set; it does NOT change the segment's global status (apply_anomalies leaves
+    the segment open for everyone else)."""
+    train_id: str
+    segment_id: str
+    kind = "train_restricted"
+
+
 SEGMENT_ANOMALIES = (TrackClosed, TrackBlocked, ReducedSpeed)
 TRAIN_ANOMALIES = (TrainCancelled, TrainDelayed)
 
@@ -65,6 +76,10 @@ def validate_anomalies(network, trains, anomalies):
         elif isinstance(a, TRAIN_ANOMALIES):
             if a.train_id not in train_ids:
                 raise UnknownTrainError(f"train '{a.train_id}' does not exist")
+        elif isinstance(a, TrainRestricted):
+            if a.train_id not in train_ids:
+                raise UnknownTrainError(f"train '{a.train_id}' does not exist")
+            network.segment(a.segment_id)  # raises UnknownSegmentError
         else:
             raise ValidationError(f"unknown anomaly type: {a!r}")
         if isinstance(a, ReducedSpeed) and not (0 < a.factor < 1):
@@ -89,6 +104,16 @@ def reduced_segments(anomalies):
 
 def cancelled_train_ids(anomalies):
     return {a.train_id for a in anomalies if isinstance(a, TrainCancelled)}
+
+
+def restricted_segments(anomalies):
+    """train_id -> set of segment ids that train may not use (per-train forbidden
+    routes). Other trains are unaffected."""
+    out = {}
+    for a in anomalies:
+        if isinstance(a, TrainRestricted):
+            out.setdefault(a.train_id, set()).add(a.segment_id)
+    return out
 
 
 def delay_minutes(anomalies):

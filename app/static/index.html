@@ -23,26 +23,20 @@
   .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
   .controls select, .controls input { padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; width:auto; }
   .controls input[type=number] { width:74px; }
-  /* Report-a-problem two-step flow */
+  /* Report-a-problem: one labeled action per row, vertically stacked */
   .report-intro { font-size:13px; color:#5a6779; margin:0 0 12px; line-height:1.5; }
-  .step { border:1px solid #e2e7ee; border-radius:8px; padding:10px 12px 12px; margin-bottom:12px; background:#fafbfc; }
-  .step-head { font-size:13px; font-weight:700; color:#10243e; margin-bottom:9px; display:flex; align-items:center; gap:7px; }
-  .step-num { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
-              border-radius:50%; background:#10243e; color:#fff; font-size:12px; font-weight:700; }
-  .field { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-  .field:last-child { margin-bottom:0; }
-  .field > label { font-size:13px; color:#3c4858; min-width:96px; }
-  .field select { flex:1; max-width:340px; padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; background:#fff; }
-  .action-group { margin-bottom:10px; }
-  .action-group:last-of-type { margin-bottom:0; }
-  .action-group-title { font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:#7b8794; font-weight:700; margin:4px 0 7px; }
-  .action-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
-  .action-row:last-child { margin-bottom:0; }
-  .action-row > button { min-width:118px; }
+  .action-list { display:flex; flex-direction:column; }
+  .act { padding:10px 0; border-bottom:1px solid #eef1f5; }
+  .act:last-child { border-bottom:0; }
+  .act-line { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .act-name { font-weight:700; font-size:13px; color:#10243e; min-width:188px; }
+  .act-line select { padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; background:#fff; max-width:230px; }
+  .act-line input[type=number] { width:66px; padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; }
+  .act-line button { margin-left:auto; min-width:104px; }
   .inline-field { font-size:12.5px; color:#5a6779; }
-  .action-row input[type=number] { width:70px; padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; }
-  .action-cap { font-size:12px; color:#8a96a5; flex:1; min-width:160px; }
-  .reset-row { margin-top:10px; padding-top:10px; border-top:1px dashed #e2e7ee; }
+  .act-cap { font-size:12px; color:#8a96a5; margin-top:5px; margin-left:188px; line-height:1.45; }
+  .reset-act { margin-top:4px; }
+  @media (max-width:760px) { .act-cap { margin-left:0; } .act-line button { margin-left:0; } }
   button { background:#10243e; color:#fff; border:0; border-radius:6px; padding:7px 12px; font-size:13px; cursor:pointer; }
   button:hover { background:#1d3a5f; }
   button.warn { background:#c62828; }
@@ -60,6 +54,8 @@
   .muted { color:#8a96a5; font-size:12.5px; }
   .train-attr { display:block; font-size:11px; color:#7b8794; font-weight:600;
                 margin-top:2px; letter-spacing:.02em; }
+  .added-tag { display:inline-block; margin-left:6px; padding:1px 6px; border-radius:99px;
+               background:#0891b2; color:#fff; font-size:10px; font-weight:700; vertical-align:middle; }
   td.num { font-variant-numeric:tabular-nums; }
   /* Network map section: full-width above the grid */
   #map-section { background:#fff; border-radius:10px; padding:14px 16px; box-shadow:0 1px 3px rgba(16,36,62,.12); margin:16px 22px 0; }
@@ -212,61 +208,88 @@
 
   <section>
     <h2>Report a problem</h2>
-    <p class="report-intro">Pick what's affected, then say what happened. The
-      system previews a safe new plan before you apply it.</p>
+    <p class="report-intro">Each row is one action: choose the track or train it
+      applies to, then click. The system previews a safe new plan before you apply it.</p>
 
-    <!-- STEP 1: pick what's affected (a track or a train) -->
-    <div class="step">
-      <div class="step-head"><span class="step-num">1</span> Pick what's affected</div>
-      <div class="field">
-        <label for="seg-pick">A track:</label>
-        <select id="seg-pick"></select>
-      </div>
-      <div class="field">
-        <label for="train-pick">&hellip; or a train:</label>
-        <select id="train-pick"></select>
-      </div>
-    </div>
-
-    <!-- STEP 2: choose what happened -->
-    <div class="step">
-      <div class="step-head"><span class="step-num">2</span> Choose what happened</div>
-
-      <div class="action-group">
-        <div class="action-group-title">To the selected track</div>
-        <div class="action-row">
-          <button onclick="triggerPreview({type:'track_closed', segment: seg()})">Close track</button>
-          <span class="action-cap">Track is shut &mdash; trains reroute around it or wait.</span>
+    <div class="action-list">
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Close a track</span>
+          <select class="seg-sel" id="seg-close"></select>
+          <button onclick="triggerPreview({anomalies:[{type:'track_closed', segment: v('seg-close')}]})">Close track</button>
         </div>
-        <div class="action-row">
-          <button onclick="triggerPreview({type:'track_blocked', segment: seg()})">Block track</button>
-          <span class="action-cap">Temporary obstruction &mdash; same effect as a closure until cleared.</span>
+        <div class="act-cap">Shuts this track completely &mdash; trains reroute around it or wait.</div>
+      </div>
+
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Block a track</span>
+          <select class="seg-sel" id="seg-block"></select>
+          <button onclick="triggerPreview({anomalies:[{type:'track_blocked', segment: v('seg-block')}]})">Block track</button>
         </div>
-        <div class="action-row">
-          <button onclick="triggerPreview({type:'reduced_speed', segment: seg(), factor: parseFloat(factorEl.value)})">Reduce speed</button>
-          <label class="inline-field" for="factor">speed factor (e.g. 0.5 = half speed):</label>
+        <div class="act-cap">Temporary obstruction &mdash; same routing effect as a closure until cleared.</div>
+      </div>
+
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Reduce speed on a track</span>
+          <select class="seg-sel" id="seg-speed"></select>
+          <label class="inline-field" for="factor">speed factor (0.5 = half speed):</label>
           <input type="number" id="factor" value="0.5" step="0.1" min="0.1" max="0.9">
-          <span class="action-cap">Trains cross this track slower, so they arrive later.</span>
+          <button onclick="triggerPreview({anomalies:[{type:'reduced_speed', segment: v('seg-speed'), factor: parseFloat(byId('factor').value)}]})">Reduce speed</button>
         </div>
+        <div class="act-cap">Trains cross this track slower, so they arrive later.</div>
       </div>
 
-      <div class="action-group">
-        <div class="action-group-title">To the selected train</div>
-        <div class="action-row">
-          <button onclick="triggerPreview({type:'train_delayed', train: trainPick(), minutes: parseInt(minutesEl.value)})">Delay train</button>
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Delay a train</span>
+          <select class="train-sel" id="train-delay"></select>
           <label class="inline-field" for="minutes">by (minutes):</label>
           <input type="number" id="minutes" value="5" min="1">
-          <span class="action-cap">Train departs later than planned.</span>
+          <button onclick="triggerPreview({anomalies:[{type:'train_delayed', train: v('train-delay'), minutes: parseInt(byId('minutes').value)}]})">Delay train</button>
         </div>
-        <div class="action-row">
-          <button onclick="triggerPreview({type:'train_cancelled', train: trainPick()})">Cancel train</button>
-          <span class="action-cap">Train does not run at all.</span>
-        </div>
+        <div class="act-cap">This train departs later than planned.</div>
       </div>
 
-      <div class="action-row reset-row">
-        <button class="warn" onclick="resetAll()">Reset to baseline</button>
-        <span class="action-cap">Clear all reported problems and return to the original plan.</span>
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Cancel a train</span>
+          <select class="train-sel" id="train-cancel"></select>
+          <button onclick="triggerPreview({anomalies:[{type:'train_cancelled', train: v('train-cancel')}]})">Cancel train</button>
+        </div>
+        <div class="act-cap">This train does not run at all.</div>
+      </div>
+
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Restrict a train from a track</span>
+          <select class="train-sel" id="train-restrict"></select>
+          <select class="seg-sel" id="seg-restrict"></select>
+          <button onclick="triggerPreview({anomalies:[{type:'train_restricted', train: v('train-restrict'), segment: v('seg-restrict')}]})">Restrict</button>
+        </div>
+        <div class="act-cap">Only this train avoids that track (it reroutes, or strands if it has no other route). Other trains keep using it.</div>
+      </div>
+
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Add a new train</span>
+          <label class="inline-field" for="add-origin">from</label>
+          <select class="stn-sel" id="add-origin"></select>
+          <label class="inline-field" for="add-dest">to</label>
+          <select class="stn-sel" id="add-dest"></select>
+          <label class="inline-field" for="add-dep">depart (min):</label>
+          <input type="number" id="add-dep" value="0" min="0">
+          <button onclick="triggerAddTrain()">Add train</button>
+        </div>
+        <div class="act-cap">Schedules a brand-new train collision-free against existing traffic (holding or rerouting as needed), or reports if it cannot be placed.</div>
+      </div>
+
+      <div class="act reset-act">
+        <div class="act-line">
+          <button class="warn" onclick="resetAll()">Reset to baseline</button>
+        </div>
+        <div class="act-cap">Clears all reported problems and added trains, returning to the original plan.</div>
       </div>
     </div>
 
@@ -310,13 +333,9 @@
 // ============================================================
 // Element refs
 // ============================================================
-const segPickEl   = document.getElementById('seg-pick');
-const trainPickEl = document.getElementById('train-pick');
-const passPickEl  = document.getElementById('pass-pick');
-const factorEl    = document.getElementById('factor');
-const minutesEl   = document.getElementById('minutes');
-const seg        = () => segPickEl.value;
-const trainPick  = () => trainPickEl.value;
+const passPickEl = document.getElementById('pass-pick');
+const byId = (id) => document.getElementById(id);
+const v    = (id) => byId(id).value;   // current value of a select/input
 
 // ============================================================
 // Display names: populated from /api/state display_names
@@ -343,33 +362,57 @@ function dn(id) {
 // ============================================================
 // Utility: fill selects once
 // ============================================================
-// Populate segment picker with PLAIN names only ("Station A – Station B"),
-// never the raw segment code.
-function fillSegPickOnce(segments) {
-  if (segPickEl.options.length) return;
-  for (const s of segments) {
-    const o = document.createElement('option');
-    o.value = s.id;
-    const [a, b] = s.endpoints;
-    o.textContent = dn(a) + ' – ' + dn(b);
-    segPickEl.appendChild(o);
+// Every track dropdown shows PLAIN names only ("Station A – Station B"),
+// never the raw segment code. Segments never change in count -> fill once.
+function fillSegSelects(segments) {
+  for (const sel of document.querySelectorAll('select.seg-sel')) {
+    if (sel.options.length) continue;
+    for (const s of segments) {
+      const o = document.createElement('option');
+      o.value = s.id;
+      const [a, b] = s.endpoints;
+      o.textContent = dn(a) + ' – ' + dn(b);
+      sel.appendChild(o);
+    }
   }
 }
 
-// Populate a train picker with a readable route label ("T101 · Origin → Dest")
-// derived from the train's own station walk; falls back to the bare id.
-function fillTrainPickOnce(sel, trains) {
-  if (sel.options.length) return;
-  for (const t of trains) {
-    const o = document.createElement('option');
-    o.value = t.id;
-    const st = t.station_times;
-    if (st && st.length >= 2) {
-      o.textContent = t.id + ' · ' + dn(st[0][0]) + ' → ' + dn(st[st.length - 1][0]);
-    } else {
-      o.textContent = t.id;
+// Every train dropdown shows a readable route label ("T101 · Origin → Dest").
+// Trains CAN grow (live add), so rebuild when the count changes, preserving the
+// current selection. #pass-pick (passenger view) is filled the same way.
+function fillTrainSelects(trains) {
+  for (const sel of document.querySelectorAll('select.train-sel, #pass-pick')) {
+    if (sel.options.length === trains.length) continue;
+    const cur = sel.value;
+    sel.innerHTML = '';
+    for (const t of trains) {
+      const o = document.createElement('option');
+      o.value = t.id;
+      const st = t.station_times;
+      o.textContent = (st && st.length >= 2)
+        ? t.id + ' · ' + dn(st[0][0]) + ' → ' + dn(st[st.length - 1][0])
+        : t.id;
+      sel.appendChild(o);
     }
-    sel.appendChild(o);
+    if (cur) sel.value = cur;
+  }
+}
+
+// Origin/destination dropdowns for "add a train": plain station names, once.
+function fillStationSelects(stations) {
+  for (const sel of document.querySelectorAll('select.stn-sel')) {
+    if (sel.options.length) continue;
+    for (const id of stations) {
+      const o = document.createElement('option');
+      o.value = id;
+      o.textContent = dn(id);
+      sel.appendChild(o);
+    }
+  }
+  // default destination to the last station so origin != destination by default
+  const dest = byId('add-dest');
+  if (dest && dest.options.length > 1 && dest.selectedIndex === 0) {
+    dest.selectedIndex = dest.options.length - 1;
   }
 }
 
@@ -856,17 +899,21 @@ function render(snap) {
     displayNames = snap.display_names;
   }
 
-  // Populate pickers with plain-language labels (only once)
-  fillSegPickOnce(snap.segments);
-  fillTrainPickOnce(trainPickEl, snap.trains);
-  fillTrainPickOnce(passPickEl, snap.trains);
+  // Populate every row's pickers with plain-language labels
+  fillSegSelects(snap.segments);
+  fillTrainSelects(snap.trains);
+  fillStationSelects(snap.stations);
 
   document.getElementById('total-delay').textContent =
     'Total added delay: ' + snap.total_added_delay + ' min';
-  document.getElementById('active-anomalies').textContent =
-    snap.anomalies.length
-      ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
-      : 'No active anomalies.';
+  let activeTxt = snap.anomalies.length
+    ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
+    : 'No active anomalies.';
+  if ((snap.added_train_ids || []).length) {
+    activeTxt += '   Added trains: ' + snap.added_train_ids.join(', ');
+  }
+  // humanize any station/segment codes in the anomaly descriptions
+  document.getElementById('active-anomalies').textContent = withNames(activeTxt);
 
   // Plain-language summary banner
   const summaryEl = document.getElementById('plain-summary');
@@ -893,6 +940,7 @@ function render(snap) {
   const board = document.querySelector('#board tbody');
   board.innerHTML = '';
   const attrsAll = snap.train_attrs || {};
+  const addedSet = new Set(snap.added_train_ids || []);
   for (const t of snap.trains) {
     const arr = t.arrivals
       ? Object.entries(t.arrivals).map(([st, m]) => dn(st) + '@' + m).join('  ')
@@ -907,8 +955,9 @@ function render(snap) {
         `${at.loco_class && at.driver_employee_no ? ' &middot; ' : ''}` +
         `${at.driver_employee_no || ''}</span>`
       : '';
+    const addedTag = addedSet.has(t.id) ? '<span class="added-tag">added</span>' : '';
     board.insertAdjacentHTML('beforeend',
-      `<tr><td><b>${t.id}</b>${attrLine}</td><td><span class="pill ${t.action}">${t.action.replace('_',' ')}</span></td>` +
+      `<tr><td><b>${t.id}</b>${addedTag}${attrLine}</td><td><span class="pill ${t.action}">${t.action.replace('_',' ')}</span></td>` +
       `<td class="num">${t.depart_at ?? '&mdash;'}</td><td class="num">${arr}</td>` +
       `<td class="num">${delay}</td><td class="muted">${withNames(t.reason)}</td></tr>`);
   }
@@ -954,22 +1003,24 @@ async function refreshPassenger() {
 }
 
 // ============================================================
-// GHOST PREVIEW: triggerPreview replaces inject for all buttons
+// GHOST PREVIEW: every action row previews first. `requestBody` is the exact
+// body posted to /api/preview AND later /api/inject — {anomalies:[...]} for the
+// five anomaly rows + the restriction row, or {new_trains:[...]} for add-train.
 // ============================================================
-async function triggerPreview(anomaly) {
+async function triggerPreview(requestBody) {
   document.getElementById('error').textContent = '';
   try {
     const r = await fetch('/api/preview', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({anomalies: [anomaly]})
+      body: JSON.stringify(requestBody)
     });
     const body = await r.json();
     if (!r.ok) {
       document.getElementById('error').textContent = body.error || 'Preview failed';
       return;
     }
-    pendingPreview = { anomaly, preview: body };
+    pendingPreview = { body: requestBody, preview: body };
     showPreviewPanel(body);
     if (currentSnap) {
       drawGhostOverlays(body, currentSnap, mapCoords);
@@ -977,6 +1028,18 @@ async function triggerPreview(anomaly) {
   } catch (e) {
     document.getElementById('error').textContent = 'Preview error: ' + e.message;
   }
+}
+
+// Add-a-train row: validate locally then preview a new_trains request.
+function triggerAddTrain() {
+  const origin = v('add-origin'), destination = v('add-dest');
+  const departure = parseInt(byId('add-dep').value);
+  if (origin === destination) {
+    document.getElementById('error').textContent =
+      'Choose two different stations for the new train.';
+    return;
+  }
+  triggerPreview({ new_trains: [{ origin, destination, departure }] });
 }
 
 function showPreviewPanel(preview) {
@@ -1027,11 +1090,11 @@ async function applyPreview() {
     const r = await fetch('/api/inject', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({anomalies: [pendingPreview.anomaly]})
+      body: JSON.stringify(pendingPreview.body)
     });
     const body = await r.json();
     if (!r.ok) {
-      document.getElementById('error').textContent = body.error || 'Inject failed';
+      document.getElementById('error').textContent = body.error || 'Apply failed';
       return;
     }
     pendingPreview = null;
@@ -1049,19 +1112,6 @@ function cancelPreview() {
   document.getElementById('preview-panel').style.display = 'none';
   clearGroup('ghost-seg-group');
   clearGroup('ghost-route-group');
-}
-
-// Legacy inject kept for direct use (reset flow calls render directly)
-async function inject(anomaly) {
-  document.getElementById('error').textContent = '';
-  const r = await fetch('/api/inject', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({anomalies: [anomaly]})
-  });
-  const body = await r.json();
-  if (!r.ok) { document.getElementById('error').textContent = body.error; return; }
-  render(body);
 }
 
 async function resetAll() {
@@ -1086,6 +1136,8 @@ refreshState();
 // "Passenger view" "pass-eta" "How this works" "Report a problem"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
+// "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"
+// "added_train_ids" "added-tag"
 </script>
 </body>
 </html>
