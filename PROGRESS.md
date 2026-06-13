@@ -1,5 +1,32 @@
 # PROGRESS.md
 
+## West Bengal PERFORMANCE PROBE (branch real-railway) — data layer only, NO UI: result = STOP
+Built 2026-06-13. Data layer only; `engine/` and the UI are UNCHANGED; master untouched at cd37586. Suite: **189 passed** (185 + 4 WB data gates). NO WB UI was built — the probe verdict is STOP (see below).
+
+### Dataset (`data/west_bengal.py`, gated in `tests/test_west_bengal_data.py`)
+A faithful-but-approximate WB state network assembled from public IR route knowledge (en.wikipedia Howrah/Asansol/Kharagpur Jn + Sealdah-section articles): Howrah–Bardhaman MAIN (via Bandel) + CHORD (via Dankuni); Sealdah main/north + Naihati–Bandel chord; Bardhaman–Asansol + Andal–Sainthia link; Katwa–Azimganj–Nalhati–New Farakka loops; Sahibganj/Rampurhat loop; Howrah–Kharagpur; Kharagpur/Adra/Purulia/Bankura; northern Malda–NJP–Alipurduar–New Cooch Behar + Dooars loop. Same engine model, same minutes==km convention as the real corridor — no engine change.
+
+### 2) Size + density
+**50 stations, 58 segments, 12 representative trains. Densest junction = Barddhaman Jn (BWN), degree 5** (Bandel, Panskura, Ranaghat, Azimganj next at degree 4). ~11 independent cycles (chords/loops) — a genuinely meshy state graph.
+
+### 3) Worst-case closure recompute (probe_wb.py)
+Closed the busiest BWN-incident segment **MYM–BWN** (used by 3 trains) and timed one full `recompute_schedule`. Stable across runs: **~2.6–3.6 s** (4 reroutes, 0 stranded, 0 conflicts).
+
+### 4) VERDICT: OVER the ~500 ms ceiling by 5–7× → **STOP. Do not wire WB into the UI yet.**
+
+### Where the time goes (cProfile — NOT the DFS)
+The user's guess (A*/pruning to replace full DFS) is **not** the bottleneck: route enumeration (`all_open_paths`/DFS) is only ~0.8 s and path counts are modest (≤106 per OD). The cost is the **placement/hold search**: `_choose` evaluates every candidate path, and `min_hold_schedule` scans holds minute-by-minute, each step re-running `find_conflicts` over the ENTIRE growing occupancy table — **~29,000 full-table conflict scans** (`find_conflicts` 2.6 s tottime, `compute_train_schedule` 2.4 s). Quadratic-to-cubic blow-up that scales with route length (WB routes reach minute ~900) × candidate count × train count.
+
+### Proposed engine change (for a separate, authorized step — NOT done here)
+1. **Incremental conflict index instead of full rescans.** Index the committed table once per placement (segment_id → sorted intervals); test only the candidate's own segments against it. Removes the 29k O(N²) `find_conflicts` rebuilds — the single biggest win.
+2. **Analytic min-hold, not a minute-by-minute loop.** For a path, compute the earliest conflict-free departure directly (max over its segments of "latest overlapping committed end + 1"); jump there instead of looping +1 min up to ~900.
+3. **Branch-and-bound / top-K candidates in `_choose`.** Candidates are already sorted fastest-first; stop once a candidate's no-hold arrival can't beat the best found, and cap to the K shortest (a 12th-fastest 900-min detour can never win).
+(1)+(2) alone should bring this comfortably under 500 ms; collision-free stays a hard constraint throughout. Determinism preserved (tie-breaks unchanged). This would be an `engine/` change on real-railway only — master stays at cd37586.
+
+### STOPPED at the probe boundary — number reported, fix proposed; WB UI not started, awaiting go-ahead.
+
+---
+
 ## Live actions (branch real-railway) — per-train restriction + add-train + one-action-per-row controls: DONE, awaiting visual pass
 Built 2026-06-13. Full suite: **185 passed** (165 prior + 9 engine gates + 11 app/UI gates). Determinism re-checked (5 identical recompute runs); browser-verified end-to-end with the preview tool (add-train and restrict: preview → apply, ghost reroute, board "added" tag, humanized anomaly line, schematic map intact: 21 trunk + 6 loop dots).
 
