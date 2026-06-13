@@ -679,31 +679,36 @@ function clearGroup(id) {
   while (g.firstChild) g.removeChild(g.firstChild);
 }
 
-// Interpolate train position along station_times at simTime t
-// station_times: [[station, minute], ...]
-// Returns [x, y] or null if no station_times
-function trainPosition(stationTimes, t, coords) {
+// Place a train at simTime t along its station_times walk.
+// station_times: [[station, minute], ...] — adjacent, minute-ascending.
+// Returns { pos:[x,y], dir:[dx,dy]|null, moving:bool } or null.
+//   - Before its departure minute  -> parked at origin      (moving:false)
+//   - At/after its arrival minute   -> parked at destination (moving:false) <- STOPS
+//   - In between                    -> interpolated EXACTLY on the current
+//     segment, with dir = that segment's own direction (so a train is never off
+//     its track and a moving marker points precisely along the line it is on).
+function trainPlace(stationTimes, t, coords) {
   if (!stationTimes || stationTimes.length === 0) return null;
-
   const first = stationTimes[0];
-  const last  = stationTimes[stationTimes.length - 1];
-
+  const last = stationTimes[stationTimes.length - 1];
   if (t <= first[1]) {
-    return coords[first[0]] ? [...coords[first[0]]] : null;
+    const c = coords[first[0]];
+    return c ? { pos: [c[0], c[1]], dir: null, moving: false } : null;
   }
-  if (t >= last[1]) {
-    return coords[last[0]] ? [...coords[last[0]]] : null;
+  if (t >= last[1]) {                       // arrived -> rest at destination
+    const c = coords[last[0]];
+    return c ? { pos: [c[0], c[1]], dir: null, moving: false } : null;
   }
-
   for (let i = 0; i < stationTimes.length - 1; i++) {
     const [stA, tA] = stationTimes[i];
     const [stB, tB] = stationTimes[i + 1];
     if (t >= tA && t <= tB) {
-      const frac = tB === tA ? 0 : (t - tA) / (tB - tA);
-      const cA = coords[stA];
-      const cB = coords[stB];
+      const cA = coords[stA], cB = coords[stB];
       if (!cA || !cB) return null;
-      return [cA[0] + frac * (cB[0] - cA[0]), cA[1] + frac * (cB[1] - cA[1])];
+      const frac = tB === tA ? 0 : (t - tA) / (tB - tA);
+      const pos = [cA[0] + frac * (cB[0] - cA[0]), cA[1] + frac * (cB[1] - cA[1])];
+      const dx = cB[0] - cA[0], dy = cB[1] - cA[1];   // exact current-segment heading
+      return { pos, dir: (dx || dy) ? [dx, dy] : null, moving: true };
     }
   }
   return null;
@@ -1031,42 +1036,36 @@ function drawTrains(trains, t, coords, colorMap) {
   const tG = document.getElementById('train-group');
 
   for (const train of trains) {
-    if (!train.station_times) continue; // cancelled/stranded: skip dot
+    if (!train.station_times) continue; // cancelled/stranded: no marker
 
-    const pos = trainPosition(train.station_times, t, coords);
-    if (!pos) continue;
+    const place = trainPlace(train.station_times, t, coords);
+    if (!place) continue;
+    const [px, py] = place.pos;          // always exactly on a track segment
 
     const color = colorMap[train.id] || '#888';
-    const lastMinute = train.station_times[train.station_times.length - 1][1];
-    const faded = t > lastMinute;
     const tr = mapWB ? 5.5 : mapCompact ? 6 : 9;
-    const op = faded ? '0.35' : '1';
 
     // Train markers carry NO on-map text label (the side legend maps colour ->
     // train), so they never collide with station names.
     let marker;
-    if (mapCompact) {
-      // Railway iconography: a small ARROW pointing the way the train travels
-      // along its track. Heading from the current movement direction (no extra
-      // animation — just rotates with the existing per-frame position update).
-      const ahead = trainPosition(train.station_times, t + 0.5, coords);
-      const behind = trainPosition(train.station_times, Math.max(0, t - 0.5), coords);
-      let dx = 0, dy = 0;
-      if (ahead) { dx = ahead[0] - pos[0]; dy = ahead[1] - pos[1]; }
-      if (!dx && !dy && behind) { dx = pos[0] - behind[0]; dy = pos[1] - behind[1]; }
-      const ang = (dx || dy) ? Math.atan2(dy, dx) * 180 / Math.PI : 0;
+    if (mapCompact && place.moving && place.dir) {
+      // Moving: a small ARROW lying ALONG the exact segment it is on, pointing
+      // the way it travels. (Heading is the current segment's own direction, so
+      // it always sits on the line — never angled off it.)
+      const ang = Math.atan2(place.dir[1], place.dir[0]) * 180 / Math.PI;
       const s = tr + 1.5;
-      // arrowhead pointing +x, then rotated to the heading
       marker = svgEl('path', {
         d: `M ${s} 0 L ${-s * 0.8} ${s * 0.72} L ${-s * 0.4} 0 L ${-s * 0.8} ${-s * 0.72} Z`,
-        fill: color, stroke: '#fff', 'stroke-width': 1.4, opacity: op,
+        fill: color, stroke: '#fff', 'stroke-width': 1.4,
         class: 'train-arrow',
-        transform: `translate(${pos[0]} ${pos[1]}) rotate(${ang})`
+        transform: `translate(${px} ${py}) rotate(${ang})`
       });
     } else {
+      // Parked: at its origin (not yet departed) or rest at its destination
+      // (arrived -> STOPPED). A clean resting dot sitting on the station.
       marker = svgEl('circle', {
-        cx: pos[0], cy: pos[1], r: tr, fill: color, stroke: '#fff',
-        'stroke-width': 2, opacity: op, class: 'train-dot'
+        cx: px, cy: py, r: tr, fill: color, stroke: '#fff', 'stroke-width': 2,
+        class: 'train-dot'
       });
       marker.style.r = tr + 'px';   // beats the .train-dot { r:9 } stylesheet rule
     }

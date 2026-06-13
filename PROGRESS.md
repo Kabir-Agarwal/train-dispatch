@@ -1,6 +1,21 @@
 # PROGRESS.md
 
-## WB map polish — labels, zoom UI, tiers, railway iconography: DONE, awaiting visual pass
+## WB train animation fix — on-track + stop-at-arrival: DONE, awaiting visual pass
+Built 2026-06-14. Display layer ONLY (`app/static/index.html`); engine + data untouched; master at cd37586. Suite: **215 passed** (unchanged). Station markers deliberately NOT changed (item 3 on hold per Kabir). Verified by reasoning through the coordinate math for two trains (not DOM measurement; screenshot tool down).
+
+Root cause (from the last commit's arrow change, not the position lerp — the data invariants hold: every consecutive `station_times` pair is adjacent and minutes are monotonic, verified): the arrow's heading was sampled from `trainPosition(t+0.5)`, which near a junction points along the NEXT segment (arrow angled OFF the line), and a stopped train had `dx=dy=0 → ang=0` so its arrow pointed EAST (looked adrift, "never stops").
+
+Fix — replaced `trainPosition` with `trainPlace(stationTimes, t, coords)` → `{pos, dir, moving}`:
+1. **On track:** position is the exact lerp between the two adjacent station coords of the current segment, and `dir` is THAT segment's own direction (`cB-cA`). A moving train is drawn as an arrow lying along the exact segment — never angled off it.
+2. **Stops at arrival:** `t >= last-minute` → `moving:false`, position = destination station; `t <= first-minute` → parked at origin. Parked trains render as a clean resting dot ON the station (not an east-pointing arrow), so an arrived train visibly halts and stays put. (The animation loop already caps `simTime` at `simMax` and halts — unchanged.)
+
+Math check: T9 (BWN→KWAE, arr 78) at t=51.5 → exact segment midpoint, ON SEGMENT, moving; at t=128 → KWAE exactly, stopped. T8 (NJP→…→APDJ, arr 148) at t=4 → on NJP→SGUJ; at t=198 → APDJ exactly, stopped.
+
+### STOPPED — awaiting your visual pass.
+
+---
+
+## WB map polish — labels, zoom UI, tiers, railway iconography: DONE, reviewed & approved
 Built 2026-06-14. Display layer ONLY (`app/static/index.html` is the only changed file); engine + data untouched this round; master at cd37586. Suite: **215 passed** (unchanged). No new animation system; behavior unchanged. (Read the frontend-design skill at its real plugins path this time; applied its refinement principles.) Verified via DOM geometry (preview screenshot tool still unresponsive this session).
 
 1. **Label overlap (Kolkata core)** — the existing `placeWbLabels` auto-placer now obstacle-matches the new square glyphs and uses a touch more padding (PAD 3.0). Verified **0 label↔label, 0 label↔station, 0 label↔line** overlaps at the default view (24 labels, 12 leaders) AND at 3× zoom (all 50, 16 leaders). Leader lines give every Kolkata name clear space.
