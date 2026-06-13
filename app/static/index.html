@@ -97,7 +97,14 @@
   .map-controls label { font-size:13px; color:#5a6779; }
   #time-slider { flex:1; min-width:160px; max-width:520px; accent-color:#1f3a5f; cursor:pointer; }
   #time-readout { font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); min-width:80px; }
-  #zoom-controls button { padding:4px 9px; font-size:13px; }
+  #zoom-controls { display:none; }
+  .zoom-hint { font-size:11.5px; font-style:italic; }
+  .zoom-btns { display:inline-flex; gap:4px; align-items:center; }
+  .zoom-btn { padding:5px 10px; font-size:14px; font-weight:700; line-height:1;
+              min-width:30px; background:#10243e; color:#fff; border:0; border-radius:6px; cursor:pointer; }
+  .zoom-btn:hover { background:#1d3a5f; }
+  .zoom-btn.zoom-reset { font-size:12px; font-weight:600; background:#5a6779; }
+  .zoom-btn.zoom-reset:hover { background:#3c4858; }
   /* Map caption */
   .map-caption { font-size:11.5px; color:#9aa7b4; text-align:center; margin-top:8px; }
   .map-subcaption { font-size:12px; color:#5a6b7d; text-align:center; margin:4px 0 0; line-height:1.5; }
@@ -123,6 +130,8 @@
   .seg-line { stroke-width:4; fill:none; cursor:default; }
   .seg-label { font-size:10px; fill:#5a6779; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .station-circle { stroke:#fff; stroke-width:1.6; }
+  .station-glyph { stroke:#fff; stroke-width:1.4; }   /* square railway-station node */
+  .train-arrow { stroke-linejoin:round; }             /* directional train marker */
   .graticule { stroke:#dde4ec; stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
   .graticule-label { font-size:8.5px; fill:#b3bdc9; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .leader { stroke:#aab6c2; stroke-width:1; fill:none; }
@@ -225,8 +234,12 @@
       predicted reroute
     </span>
     <span class="legend-item">
-      <svg width="22" height="14"><circle cx="6" cy="7" r="5.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.6"/><circle cx="17" cy="7" r="3" fill="#aab6c2" stroke="#fff" stroke-width="1.4"/></svg>
-      major / minor station
+      <svg width="24" height="14"><rect x="1" y="2" width="10" height="10" rx="1.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.4"/><rect x="16" y="4" width="6" height="6" rx="1.2" fill="#5a6f86" stroke="#fff" stroke-width="1.2"/></svg>
+      station (major / minor)
+    </span>
+    <span class="legend-item">
+      <svg width="20" height="14"><path d="M 14 7 L 5 11 L 8 7 L 5 3 Z" fill="#2563eb" stroke="#fff" stroke-width="1.2"/></svg>
+      train (arrow = direction of travel)
     </span>
     <span class="legend-item">
       <svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#e0972a" stroke-width="8" stroke-linecap="round" opacity="0.5"/></svg>
@@ -239,10 +252,12 @@
     <input type="range" id="time-slider" min="0" max="120" value="0" oninput="onSliderInput(this.value)">
     <span id="time-readout">t = 0 min</span>
     <span id="zoom-controls" style="display:none; margin-left:auto; gap:6px; align-items:center;">
-      <span class="muted" style="font-size:12px">Drag to pan, scroll to zoom &middot;</span>
-      <button onclick="zoomBy(1.5)" title="Zoom in">+</button>
-      <button onclick="zoomBy(1/1.5)" title="Zoom out">&minus;</button>
-      <button class="cancel-btn" onclick="resetView()">Reset view</button>
+      <span class="muted zoom-hint">Zoom in to see all station names</span>
+      <span class="zoom-btns">
+        <button class="zoom-btn" onclick="zoomBy(1.5)" title="Zoom in" aria-label="Zoom in">+</button>
+        <button class="zoom-btn" onclick="zoomBy(1/1.5)" title="Zoom out" aria-label="Zoom out">&minus;</button>
+        <button class="zoom-btn zoom-reset" onclick="resetView()" title="Reset view">Reset</button>
+      </span>
     </span>
   </div>
   <div id="preview-panel">
@@ -850,17 +865,28 @@ function buildStaticMap(snap) {
       : WB_SECONDARY.has(id) ? 'secondary' : 'minor';
     const labeledByDefault = !mapWB || tier !== 'minor';
     // Dot size + fill by tier (major junctions read as hubs).
+    // Tier sizing/fill. Minor stations are kept clearly visible (a real marker,
+    // not a faint dot) and the gap to majors is modest so nothing looks "blank".
     let r, fill;
-    if (!mapWB)                    { r = dotR; fill = '#1f3a5f'; }
-    else if (tier === 'primary')   { r = 6.5;  fill = '#1f3a5f'; }
-    else if (tier === 'secondary') { r = 4.5;  fill = '#476084'; }
-    else                           { r = 3;    fill = '#aab6c2'; }
-    const circle = svgEl('circle', {
-      cx: c[0], cy: c[1], r: r, fill: fill, class: 'station-circle'
-    });
-    if (tier === 'primary') circle.setAttribute('stroke-width', '2.2');
-    circle.appendChild(svgEl('title', {}, cityName));  // hover tooltip
-    stG.appendChild(circle);
+    if (!mapWB)                    { r = dotR; fill = '#1f3a5f'; }   // real:6 / 6-city:14
+    else if (tier === 'primary')   { r = 6;    fill = '#1f3a5f'; }
+    else if (tier === 'secondary') { r = 4.5;  fill = '#3f5c7d'; }
+    else                           { r = 3.5;  fill = '#5a6f86'; }  // minor: clear, not washed
+    // Railway iconography: a small rounded-SQUARE station node on the dense maps
+    // (reads as a transit station); the 6-city geographic map keeps round dots.
+    let marker;
+    if (mapCompact) {
+      marker = svgEl('rect', {
+        x: c[0] - r, y: c[1] - r, width: r * 2, height: r * 2,
+        rx: 1.5, ry: 1.5, fill: fill, class: 'station-glyph'
+      });
+      if (tier === 'primary') marker.setAttribute('stroke-width', '2.2');
+    } else {
+      marker = svgEl('circle', { cx: c[0], cy: c[1], r: r, fill: fill,
+        class: 'station-circle' });
+    }
+    marker.appendChild(svgEl('title', {}, cityName));  // hover tooltip
+    stG.appendChild(marker);
 
     const showLabel = mapCompact && (labeledByDefault || (mapWB && viewK >= 2.6));
     if (mapWB) {
@@ -920,12 +946,12 @@ function _segRect(s, r) {
 }
 
 function placeWbLabels(labels, snap, stG, ldG) {
-  const PAD = 2.5;
-  // Obstacles: every station dot (so labels never sit on a dot)...
+  const PAD = 3.0;
+  // Obstacles: every station glyph (so labels never sit on a station marker)...
   const dotObs = [];
   for (const id in mapCoords) {
     const c = mapCoords[id];
-    const r = WB_PRIMARY.has(id) ? 6.5 : WB_SECONDARY.has(id) ? 4.5 : 3;
+    const r = WB_PRIMARY.has(id) ? 6 : WB_SECONDARY.has(id) ? 4.5 : 3.5;
     dotObs.push({ x0: c[0] - r - PAD, y0: c[1] - r - PAD,
                   x1: c[0] + r + PAD, y1: c[1] + r + PAD });
   }
@@ -1014,21 +1040,38 @@ function drawTrains(trains, t, coords, colorMap) {
     const lastMinute = train.station_times[train.station_times.length - 1][1];
     const faded = t > lastMinute;
     const tr = mapWB ? 5.5 : mapCompact ? 6 : 9;
+    const op = faded ? '0.35' : '1';
 
     // Train markers carry NO on-map text label (the side legend maps colour ->
-    // train), so they never collide with station names. A white ring keeps them
-    // legible over track lines.
-    const circle = svgEl('circle', {
-      cx: pos[0], cy: pos[1], r: tr,
-      fill: color,
-      stroke: '#fff',
-      'stroke-width': 2,
-      opacity: faded ? '0.35' : '1',
-      class: 'train-dot'
-    });
-    circle.style.r = tr + 'px';   // beats the .train-dot { r:9 } stylesheet rule
-    circle.appendChild(svgEl('title', {}, train.id));   // hover shows the id
-    tG.appendChild(circle);
+    // train), so they never collide with station names.
+    let marker;
+    if (mapCompact) {
+      // Railway iconography: a small ARROW pointing the way the train travels
+      // along its track. Heading from the current movement direction (no extra
+      // animation — just rotates with the existing per-frame position update).
+      const ahead = trainPosition(train.station_times, t + 0.5, coords);
+      const behind = trainPosition(train.station_times, Math.max(0, t - 0.5), coords);
+      let dx = 0, dy = 0;
+      if (ahead) { dx = ahead[0] - pos[0]; dy = ahead[1] - pos[1]; }
+      if (!dx && !dy && behind) { dx = pos[0] - behind[0]; dy = pos[1] - behind[1]; }
+      const ang = (dx || dy) ? Math.atan2(dy, dx) * 180 / Math.PI : 0;
+      const s = tr + 1.5;
+      // arrowhead pointing +x, then rotated to the heading
+      marker = svgEl('path', {
+        d: `M ${s} 0 L ${-s * 0.8} ${s * 0.72} L ${-s * 0.4} 0 L ${-s * 0.8} ${-s * 0.72} Z`,
+        fill: color, stroke: '#fff', 'stroke-width': 1.4, opacity: op,
+        class: 'train-arrow',
+        transform: `translate(${pos[0]} ${pos[1]}) rotate(${ang})`
+      });
+    } else {
+      marker = svgEl('circle', {
+        cx: pos[0], cy: pos[1], r: tr, fill: color, stroke: '#fff',
+        'stroke-width': 2, opacity: op, class: 'train-dot'
+      });
+      marker.style.r = tr + 'px';   // beats the .train-dot { r:9 } stylesheet rule
+    }
+    marker.appendChild(svgEl('title', {}, train.id));   // hover shows the id
+    tG.appendChild(marker);
   }
 }
 
@@ -1623,6 +1666,7 @@ refreshState();
 // "placeWbLabels" "leader-group" "maintenance_closure" "Predictive maintenance"
 // "Schedule maintenance" "maint-group" "cumulative-load heuristic"
 // "rule-based dynamic pricing" "pass-fare" "synthetic" "production would use real bookings"
+// "station-glyph" "train-arrow" "zoom-btn" "Zoom in to see all station names"
 </script>
 </body>
 </html>

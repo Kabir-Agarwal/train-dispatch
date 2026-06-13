@@ -1,5 +1,17 @@
 # PROGRESS.md
 
+## WB map polish — labels, zoom UI, tiers, railway iconography: DONE, awaiting visual pass
+Built 2026-06-14. Display layer ONLY (`app/static/index.html` is the only changed file); engine + data untouched this round; master at cd37586. Suite: **215 passed** (unchanged). No new animation system; behavior unchanged. (Read the frontend-design skill at its real plugins path this time; applied its refinement principles.) Verified via DOM geometry (preview screenshot tool still unresponsive this session).
+
+1. **Label overlap (Kolkata core)** — the existing `placeWbLabels` auto-placer now obstacle-matches the new square glyphs and uses a touch more padding (PAD 3.0). Verified **0 label↔label, 0 label↔station, 0 label↔line** overlaps at the default view (24 labels, 12 leaders) AND at 3× zoom (all 50, 16 leaders). Leader lines give every Kolkata name clear space.
+2. **Visible zoom** — clear `+` / `−` / `Reset` buttons (styled, not just scroll) plus an italic hint "Zoom in to see all station names". Minor names still appear once zoomed (viewK ≥ 2.6).
+3. **Tier clarity** — square half-sizes 6 / 4.5 / 3.5 (was r 6.5 / 4.5 / 3) with darker minor fill `#5a6f86` (was washed-out `#aab6c2`); every station shows a solid marker — no blank/broken dots, and a smaller major↔minor gap.
+4. **Railway iconography (SVG-only, no sprites/animation)** — stations are small rounded-**square** nodes (transit-station look); trains are small **arrows pointing the way they travel** (heading from the existing per-frame position delta — rotates with position, no extra animation). The 6-city geographic map keeps round dots. Color coding unchanged. Legend updated (square station, train-direction arrow).
+
+### STOPPED — polish built + DOM-verified; awaiting your visual pass.
+
+---
+
 ## Deployment prep (Render/Railway) — DONE, no app-logic change
 Built 2026-06-13. master untouched at cd37586. Suite: **215 passed** (unchanged). App is **stdlib-only** (verified: no third-party imports). Confirmed both run modes locally.
 
