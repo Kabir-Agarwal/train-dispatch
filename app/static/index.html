@@ -23,6 +23,26 @@
   .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
   .controls select, .controls input { padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; width:auto; }
   .controls input[type=number] { width:74px; }
+  /* Report-a-problem two-step flow */
+  .report-intro { font-size:13px; color:#5a6779; margin:0 0 12px; line-height:1.5; }
+  .step { border:1px solid #e2e7ee; border-radius:8px; padding:10px 12px 12px; margin-bottom:12px; background:#fafbfc; }
+  .step-head { font-size:13px; font-weight:700; color:#10243e; margin-bottom:9px; display:flex; align-items:center; gap:7px; }
+  .step-num { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+              border-radius:50%; background:#10243e; color:#fff; font-size:12px; font-weight:700; }
+  .field { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .field:last-child { margin-bottom:0; }
+  .field > label { font-size:13px; color:#3c4858; min-width:96px; }
+  .field select { flex:1; max-width:340px; padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; background:#fff; }
+  .action-group { margin-bottom:10px; }
+  .action-group:last-of-type { margin-bottom:0; }
+  .action-group-title { font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:#7b8794; font-weight:700; margin:4px 0 7px; }
+  .action-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .action-row:last-child { margin-bottom:0; }
+  .action-row > button { min-width:118px; }
+  .inline-field { font-size:12.5px; color:#5a6779; }
+  .action-row input[type=number] { width:70px; padding:6px 8px; border:1px solid #ccd4dd; border-radius:6px; font-size:13px; }
+  .action-cap { font-size:12px; color:#8a96a5; flex:1; min-width:160px; }
+  .reset-row { margin-top:10px; padding-top:10px; border-top:1px dashed #e2e7ee; }
   button { background:#10243e; color:#fff; border:0; border-radius:6px; padding:7px 12px; font-size:13px; cursor:pointer; }
   button:hover { background:#1d3a5f; }
   button.warn { background:#c62828; }
@@ -52,6 +72,8 @@
   #time-readout { font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); min-width:80px; }
   /* Map caption */
   .map-caption { font-size:11.5px; color:#8a96a5; text-align:center; margin-top:6px; font-style:italic; }
+  .map-subcaption { font-size:12px; color:#3c4858; text-align:center; margin:4px 0 0; }
+  .map-subcaption:empty { display:none; }
   /* Map legend */
   .map-legend { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-top:8px; font-size:12px; color:#5a6779; }
   .legend-item { display:flex; align-items:center; gap:5px; }
@@ -137,7 +159,8 @@
       <g id="train-group"></g>
     </svg>
   </div>
-  <p class="map-caption">Illustrative network inspired by Indian Railways</p>
+  <p class="map-caption" id="map-caption">Illustrative network inspired by Indian Railways</p>
+  <p class="map-subcaption" id="map-subcaption"></p>
   <!-- Map legend -->
   <div class="map-legend">
     <span class="legend-item">
@@ -189,20 +212,64 @@
 
   <section>
     <h2>Report a problem</h2>
-    <div class="controls">
-      <select id="seg-pick"></select>
-      <button onclick="triggerPreview({type:'track_closed', segment: seg()})">Close track</button>
-      <button onclick="triggerPreview({type:'track_blocked', segment: seg()})">Block track</button>
-      <input type="number" id="factor" value="0.5" step="0.1" min="0.1" max="0.9">
-      <button onclick="triggerPreview({type:'reduced_speed', segment: seg(), factor: parseFloat(factorEl.value)})">Reduce speed</button>
+    <p class="report-intro">Pick what's affected, then say what happened. The
+      system previews a safe new plan before you apply it.</p>
+
+    <!-- STEP 1: pick what's affected (a track or a train) -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">1</span> Pick what's affected</div>
+      <div class="field">
+        <label for="seg-pick">A track:</label>
+        <select id="seg-pick"></select>
+      </div>
+      <div class="field">
+        <label for="train-pick">&hellip; or a train:</label>
+        <select id="train-pick"></select>
+      </div>
     </div>
-    <div class="controls" style="margin-top:8px">
-      <select id="train-pick"></select>
-      <input type="number" id="minutes" value="5" min="1">
-      <button onclick="triggerPreview({type:'train_delayed', train: trainPick(), minutes: parseInt(minutesEl.value)})">Delay train</button>
-      <button onclick="triggerPreview({type:'train_cancelled', train: trainPick()})">Cancel train</button>
-      <button class="warn" onclick="resetAll()">Reset to baseline</button>
+
+    <!-- STEP 2: choose what happened -->
+    <div class="step">
+      <div class="step-head"><span class="step-num">2</span> Choose what happened</div>
+
+      <div class="action-group">
+        <div class="action-group-title">To the selected track</div>
+        <div class="action-row">
+          <button onclick="triggerPreview({type:'track_closed', segment: seg()})">Close track</button>
+          <span class="action-cap">Track is shut &mdash; trains reroute around it or wait.</span>
+        </div>
+        <div class="action-row">
+          <button onclick="triggerPreview({type:'track_blocked', segment: seg()})">Block track</button>
+          <span class="action-cap">Temporary obstruction &mdash; same effect as a closure until cleared.</span>
+        </div>
+        <div class="action-row">
+          <button onclick="triggerPreview({type:'reduced_speed', segment: seg(), factor: parseFloat(factorEl.value)})">Reduce speed</button>
+          <label class="inline-field" for="factor">speed factor (e.g. 0.5 = half speed):</label>
+          <input type="number" id="factor" value="0.5" step="0.1" min="0.1" max="0.9">
+          <span class="action-cap">Trains cross this track slower, so they arrive later.</span>
+        </div>
+      </div>
+
+      <div class="action-group">
+        <div class="action-group-title">To the selected train</div>
+        <div class="action-row">
+          <button onclick="triggerPreview({type:'train_delayed', train: trainPick(), minutes: parseInt(minutesEl.value)})">Delay train</button>
+          <label class="inline-field" for="minutes">by (minutes):</label>
+          <input type="number" id="minutes" value="5" min="1">
+          <span class="action-cap">Train departs later than planned.</span>
+        </div>
+        <div class="action-row">
+          <button onclick="triggerPreview({type:'train_cancelled', train: trainPick()})">Cancel train</button>
+          <span class="action-cap">Train does not run at all.</span>
+        </div>
+      </div>
+
+      <div class="action-row reset-row">
+        <button class="warn" onclick="resetAll()">Reset to baseline</button>
+        <span class="action-cap">Clear all reported problems and return to the original plan.</span>
+      </div>
     </div>
+
     <div id="error"></div>
     <div class="muted" id="active-anomalies"></div>
     <!-- Plain-language summary of latest anomaly effect -->
@@ -276,25 +343,33 @@ function dn(id) {
 // ============================================================
 // Utility: fill selects once
 // ============================================================
-function fillOnce(sel, values) {
-  if (sel.options.length) return;
-  for (const v of values) {
-    const o = document.createElement('option');
-    o.value = v;
-    o.textContent = v;
-    sel.appendChild(o);
-  }
-}
-
-// Populate segment picker with human-readable labels (SEG-xx (CityA-CityB))
+// Populate segment picker with PLAIN names only ("Station A – Station B"),
+// never the raw segment code.
 function fillSegPickOnce(segments) {
   if (segPickEl.options.length) return;
   for (const s of segments) {
     const o = document.createElement('option');
     o.value = s.id;
     const [a, b] = s.endpoints;
-    o.textContent = s.id + ' (' + dn(a) + '–' + dn(b) + ')';
+    o.textContent = dn(a) + ' – ' + dn(b);
     segPickEl.appendChild(o);
+  }
+}
+
+// Populate a train picker with a readable route label ("T101 · Origin → Dest")
+// derived from the train's own station walk; falls back to the bare id.
+function fillTrainPickOnce(sel, trains) {
+  if (sel.options.length) return;
+  for (const t of trains) {
+    const o = document.createElement('option');
+    o.value = t.id;
+    const st = t.station_times;
+    if (st && st.length >= 2) {
+      o.textContent = t.id + ' · ' + dn(st[0][0]) + ' → ' + dn(st[st.length - 1][0]);
+    } else {
+      o.textContent = t.id;
+    }
+    sel.appendChild(o);
   }
 }
 
@@ -328,24 +403,28 @@ const FIXED_COORDS = {
 };
 
 // ============================================================
-// REAL corridor (--real): the 27 Indian-Railways stations, geo-positioned
-// on the India outline at roughly their real locations. Derived from an
-// affine fit of (lon,lat) onto the Delhi/Bhopal/Nagpur anchors above, then
-// magnified about the corridor centroid and given a minimum spacing so all
-// 27 labels stay legible (the outline is illustrative, so spacing is
-// schematic — relative geography is preserved: Delhi north, the New Delhi–
-// Jhansi–Bina trunk running south to Nagpur, and the Bina–Saugor–Damoh–
-// Katni–Jabalpur–Pipariya loop bulging EAST so the BINA–ET diamond reads).
+// REAL corridor (--real): a clean SCHEMATIC (metro-map) layout — legibility
+// over geography. The India outline is hidden for this view (see
+// buildStaticMap). The trunk is one straight vertical line (x=200), evenly
+// spaced New Delhi (top) -> Nagpur (bottom). Between the two junctions
+// Bina Jn and Itarsi Jn the trunk runs straight DOWN (the main line via
+// Bhopal) while the eastern loop (Saugor–Damoh–Katni–Jabalpur–Narsinghpur–
+// Pipariya) branches off to a parallel line (x=395) and rejoins at Itarsi —
+// so the BINA–ET diamond reads as two obvious branches at a glance.
+// Station labels sit OUTWARD (trunk->left, loop->right); train labels sit
+// INWARD, so the two never collide.
+const TRUNK_X = 200, LOOP_X = 395;
 const REAL_COORDS = {
-  NDLS: [246, 65],   MTJ: [268, 134],  BFP: [280, 152],  AGC: [284, 169],
-  DHO:  [279, 186],  MRA: [285, 203],  GWL: [294, 220],  VGLJ:[313, 259],
-  BINA: [295, 332],  BAQ: [282, 351],  BHS: [276, 370],  BPL: [256, 387],
-  RKMP: [258, 404],  NDPM:[272, 421],  ET:  [274, 438],  GDYA:[287, 455],
-  BZU:  [281, 472],  AMLA:[293, 489],  PAR: [312, 506],  NRKR:[313, 523],
-  NGP:  [340, 540],
-  // loop (BINA -> ... -> ET), bulging east of the trunk:
-  PPI:  [303, 417],  NU:  [344, 409],  JBP: [382, 399],  KMZ: [403, 362],
-  DMO:  [356, 358],  SGO: [322, 355]
+  // trunk, top -> bottom, even 29px spacing:
+  NDLS: [200,  45],  MTJ:  [200,  74],  BFP:  [200, 103],  AGC:  [200, 132],
+  DHO:  [200, 161],  MRA:  [200, 190],  GWL:  [200, 219],  VGLJ: [200, 248],
+  BINA: [200, 277],  BAQ:  [200, 306],  BHS:  [200, 335],  BPL:  [200, 364],
+  RKMP: [200, 393],  NDPM: [200, 422],  ET:   [200, 451],  GDYA: [200, 480],
+  BZU:  [200, 509],  AMLA: [200, 538],  PAR:  [200, 567],  NRKR: [200, 596],
+  NGP:  [200, 625],
+  // eastern loop, evenly spaced between BINA(277) and ET(451) on a parallel line:
+  SGO:  [395, 302],  DMO:  [395, 327],  KMZ:  [395, 352],  JBP:  [395, 376],
+  NU:   [395, 401],  PPI:  [395, 426]
 };
 
 // One lookup for both datasets; real codes never collide with S1..S6.
@@ -445,13 +524,29 @@ let mapCompact = false;   // dense network (real corridor): smaller dots, name-o
 
 function buildStaticMap(snap) {
   mapCoords = computeStationCoords(snap.stations);
-  // Dense corridors (the 27-station real network) render schematically:
-  // small dots, NO seg-code labels, NO in-dot codes, names on alternating
-  // sides so all 27 stay legible. The 6-city map is unchanged.
+  // Dense corridors (the 27-station real network) render as a clean SCHEMATIC
+  // network diagram: small dots, NO seg-code labels, NO in-dot codes, names
+  // placed OUTWARD (trunk-left, loop-right) so all 27 stay legible and the
+  // Bina–Itarsi diamond reads as two branches. The 6-city map is unchanged.
   mapCompact = snap.stations.length > 8;
 
-  const dotR    = mapCompact ? 5 : 14;
-  const segW    = mapCompact ? 2.5 : 4;
+  // Drop the literal India silhouette for the schematic view (legibility over
+  // geography); keep it for the 6-city geographic map.
+  const outline = document.getElementById('india-outline');
+  if (outline) outline.style.display = mapCompact ? 'none' : '';
+  const cap = document.getElementById('map-caption');
+  const sub = document.getElementById('map-subcaption');
+  if (cap) cap.textContent = mapCompact
+    ? 'Schematic network diagram — not to geographic scale'
+    : 'Illustrative network inspired by Indian Railways';
+  if (sub) sub.textContent = mapCompact
+    ? 'Two routes link Bina Jn and Itarsi Jn: the main line (down, via Bhopal) '
+      + 'and the eastern loop (via Saugor–Damoh–Katni–Jabalpur). A closure on '
+      + 'one route reroutes trains onto the other.'
+    : '';
+
+  const dotR    = mapCompact ? 6 : 14;
+  const segW    = mapCompact ? 3 : 4;
 
   // --- Segments (both corridors are drawn here; geography makes the trunk
   //     and the Bina–Katni–Jabalpur loop read as two lines + a diamond) ---
@@ -507,17 +602,18 @@ function buildStaticMap(snap) {
     const cityName = dn(id);   // ALWAYS the real name — never a raw code
 
     if (mapCompact) {
-      // Name label beside the dot, alternating left/right so neighbours
-      // (close together along the near-vertical trunk) never collide.
-      const right = (i % 2 === 0);
+      // Name label placed OUTWARD from each line: trunk (x=TRUNK_X) labels to
+      // the LEFT, loop (x=LOOP_X) labels to the RIGHT. Train labels go inward,
+      // so station names and train markers never overlap.
+      const onLoop = c[0] > (TRUNK_X + LOOP_X) / 2;
       const lbl = svgEl('text', {
-        x: c[0] + (right ? dotR + 4 : -(dotR + 4)),
+        x: c[0] + (onLoop ? dotR + 6 : -(dotR + 6)),
         y: c[1] + 3,
         class: 'station-label-halo'
       }, cityName);
       // inline styles beat the .station-label-halo stylesheet rule
-      lbl.style.textAnchor = right ? 'start' : 'end';
-      lbl.style.fontSize = '9.5px';
+      lbl.style.textAnchor = onLoop ? 'start' : 'end';
+      lbl.style.fontSize = '10.5px';
       lbl.style.dominantBaseline = 'auto';
       stG.appendChild(lbl);
     } else {
@@ -571,10 +667,14 @@ function drawTrains(trains, t, coords, colorMap) {
     circle.style.r = tr + 'px';   // beats the .train-dot { r:9 } stylesheet rule
     tG.appendChild(circle);
 
+    // On the schematic, station names sit OUTWARD; put train labels INWARD
+    // (trunk train -> right, loop train -> left) so they never overlap names.
+    const onLoopSide = mapCompact && pos[0] > (TRUNK_X + LOOP_X) / 2;
     const lbl = svgEl('text', {
-      x: pos[0] + 13, y: pos[1] + 4,
+      x: pos[0] + (onLoopSide ? -(tr + 4) : (tr + 4)), y: pos[1] + 4,
       fill: color,
       opacity: faded ? '0.4' : '1',
+      'text-anchor': onLoopSide ? 'end' : 'start',
       class: 'train-label'
     }, train.id);
     tG.appendChild(lbl);
@@ -756,10 +856,10 @@ function render(snap) {
     displayNames = snap.display_names;
   }
 
-  // Populate segment picker with display names (only once)
+  // Populate pickers with plain-language labels (only once)
   fillSegPickOnce(snap.segments);
-  fillOnce(trainPickEl, snap.trains.map(t => t.id));
-  fillOnce(passPickEl, snap.trains.map(t => t.id));
+  fillTrainPickOnce(trainPickEl, snap.trains);
+  fillTrainPickOnce(passPickEl, snap.trains);
 
   document.getElementById('total-delay').textContent =
     'Total added delay: ' + snap.total_added_delay + ' min';

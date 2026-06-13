@@ -16,6 +16,13 @@ Ghost preview (`/api/preview`, Apply/Cancel), the "How this works" panel, the le
 ### The new gate (`tests/test_real_corridor_ui.py`, 6 tests)
 Serves `AppState(dataset="real")` over the real HTTP path and asserts: all 27 stations have a baked-in map coordinate; the loop/diamond stations are placed; `loco_class` + `driver_employee_no` are wired into the page; the `/api/state` snapshot exposes 27 stations + 8 trains' attrs (DRV-/WAP-WAG-WDM); every station code maps to a unique real name (so no raw codes leak through `withNames`); and the 6-city features survive.
 
+### Phase C cleanup (after the first visual pass) — DONE, awaiting second visual pass
+Two problems from the visual pass, both display-layer only. Suite still **165 passed**; `engine/` zero-diff vs master re-verified. Browser-verified with the preview tool (real + baseline servers, geometry queried in-page).
+
+**Problem 1 — real map cluttered, Bina–Katni diamond not legible.** Replaced the India-outline geographic layout (for >8-station networks) with a clean **schematic** metro-map: the trunk is one straight vertical line (New Delhi top → Nagpur bottom, even 29px spacing); between the junctions Bina Jn and Itarsi Jn the trunk runs straight DOWN (main line via Bhopal) while the eastern loop (Saugor–Damoh–Katni–Jabalpur–Narsinghpur–Pipariya) branches to a parallel line and rejoins at Itarsi — so the BINA–ET diamond reads as two obvious branches. The India silhouette is hidden for this view; a sub-caption explains the two routes. Station names sit OUTWARD (trunk-left, loop-right), train markers INWARD. Verified in-page: 27 labels, **0 label overlaps, 0 train↔station-name clashes**, 21 dots at x=200 + 6 at x=395. The 6-city geographic map is byte-for-byte unchanged (verified: outline shown, r=14 dots, in-dot S-codes, seg labels, original caption).
+
+**Problem 2 — "Report a problem" controls confusing.** Rebuilt as an explicit two-step flow: **Step 1** pick what's affected (a track *or* a train, labeled dropdowns), **Step 2** choose what happened (actions grouped "to the selected track" / "to the selected train", each button with a one-line plain caption). The speed input is now labeled "speed factor (e.g. 0.5 = half speed)"; delay input labeled "by (minutes)". The segment dropdown shows **plain names only** ("Agra Cantt – Dhaulpur"), no raw codes; train dropdowns show "T101 · New Delhi → Nagpur". (Dead `fillOnce` removed.)
+
 ### STOPPED at Phase C boundary — UI built + gated; user does the visual pass and records.
 
 ---
