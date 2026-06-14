@@ -18,7 +18,7 @@ demo at the Space URL. -->
 
 A railway dispatch and anomaly-recovery demo: a small 6-station network runs a live
 schedule; an admin injects an anomaly (track closed/blocked, reduced speed, train
-delayed/cancelled) and the system recomputes a safe, delay-minimized schedule —
+delayed/cancelled) and the system recomputes a safe schedule that greedily minimizes delay —
 showing the dispatcher's decisions with reasons, and each passenger's updated
 arrival time. Built for the Far Away hackathon (Railways theme).
 

@@ -139,6 +139,9 @@ class AppState:
         # Maintenance heuristic config (display layer): per-train load weight
         # (train length / coaches) and the inspection threshold.
         self.load_weights = dict(getattr(module, "LOAD_WEIGHTS", {}))
+        # Display-only real service names (e.g. WB corridor trains); engine never
+        # reads these. Empty for datasets that don't provide them.
+        self.train_names = dict(getattr(module, "TRAIN_NAMES", {}))
         self.maint_threshold = _MAINT_THRESHOLD.get(dataset, 2)
         self.phraser = phraser or get_phraser()
         self.reset()
@@ -360,6 +363,7 @@ class AppState:
             "dataset": self.dataset,
             "stations": list(self.network.stations),
             "display_names": dict(self.display_names),
+            "train_names": dict(self.train_names),
             "train_attrs": {k: dict(v) for k, v in self.train_attrs.items()},
             "summary_text": safe_summary(self.result.actions)
             if (self.anomalies or self.added_trains) else "",

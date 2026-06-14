@@ -1,6 +1,25 @@
 # PROGRESS.md
 
-## Phase D — Pricing ethics (emergency freeze + load-visibility reframe): DONE, awaiting review
+## Phase E — Honesty + factual fixes (display/docs only): DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **260 passed** (was 254; +6 Phase E gates). No engine logic change → recompute golden byte-identical. No console errors.
+
+**Terminology sweep (UI / README / PROGRESS / a docs-only docstring):**
+- "Predictive maintenance" → **"Cumulative-load wear flagging"** (UI `<h2>`, CSS/JS comments, page anchor; `engine/maintenance.py` docstring; PROGRESS Feature-1 title + panel name). The panel intro already said "cumulative-load heuristic … not an AI prediction" — kept.
+- README "a safe, delay-minimized schedule" → **"a safe schedule that greedily minimizes delay"** (no "optimal" claim).
+- "zero engine bugs / independent audit": **no such claim existed anywhere** (verified by grep), so nothing to replace — the prior audit is described as "review found no defects," not advertised. Left as-is.
+
+**Factual train-name fix (display-only):**
+- Added `data/west_bengal.py::TRAIN_NAMES` — every WB train now carries a real (or honest corridor-descriptor) **West Bengal** service matched to the route it actually runs: T1 Saraighat Express (HWH–Guwahati via NJP), T2 Gour Express (Sealdah–Malda), T3 Kamrup Express, T5 Rupasi Bangla Express (HWH–Purulia), T7 Bangaon–Sealdah Local, T11 Haldia–Howrah Local, T12 Barddhaman–Katwa Express, plus descriptors for T4/T6/T8/T9/T10. Surfaced via `snapshot.train_names`; the side legend now reads e.g. **"T1 · Saraighat Express · Howrah → New Jalpaiguri"**. Engine never reads names → golden unaffected.
+- **Honest nuance reported:** the **"Grand Trunk Express" is NOT a WB error.** It appears only in the separate `--real` Delhi–Nagpur corridor (`data/real_corridor.py`) as the real source timetable for NDLS→NGP — which is factually correct (the GT Express runs Delhi→Chennai *through* Nagpur). I deliberately did **not** rewrite it (that would introduce an error in an honesty phase) and did **not** force the example names Coromandel / Black Diamond / Howrah Rajdhani onto WB routes they don't actually serve. A gate locks GT Express to the real corridor and out of WB train names.
+- Priorities NOT assigned to WB trains here (that's an engine-output change → golden churn); names are display-only. Express/passenger *priority* classification can follow separately if you want it visible.
+
+**Gate `tests/test_honesty_phase_e.py`** (6 value-asserting): page drops "predictive maintenance"/"dynamic pricing"/"optimal schedule" and uses the cumulative-load framing; README says "greedily minimizes delay"; every WB train named (distinct, non-empty); no non-WB name used; snapshot exposes the names (baseline has none); GT Express stays only in the real corridor. `test_maintenance.py` page-marker updated to the new header + asserts the old term is gone.
+
+### STOPPED at Phase E boundary — awaiting your review before Phase F.
+
+---
+
+## Phase D — Pricing ethics (emergency freeze + load-visibility reframe): DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **254 passed** (was 248; +6 Phase D gates). recompute engine untouched → golden byte-identical. No console errors.
 
 - **(1) Emergency freeze (`app/state.py::passenger`):** while an active anomaly disrupts a train (reroute / hold / admin delay / reduced speed → `action != unchanged` or `added_delay != 0`), its fare is priced from the **nominal route + nominal departure**, so the incident NEVER surges the passenger's fare. `passenger()` now returns `fare_frozen`. Verified: WB T1 (rerouted) frozen to nominal ₹532; admin-delay and reduced-speed keep the pre-incident fare; an undisrupted train during an unrelated closure prices normally.
@@ -183,14 +202,16 @@ Formula hand-verified; fare rises with occupancy / distance / imminence; synthet
 
 ---
 
-## Feature 1 — PREDICTIVE MAINTENANCE (engine + display): DONE, reviewed & approved
+## Feature 1 — CUMULATIVE-LOAD WEAR FLAGGING (engine + display): DONE, reviewed & approved
+<!-- Phase E honesty rename: this was titled "predictive maintenance"; renamed to
+cumulative-load wear flagging (it is a heuristic, not a prediction). -->
 Built 2026-06-13. master untouched at cd37586. Suite: **206 passed** (196 prior + 10 new maintenance gates). The byte-identical recompute golden gate still passes — scheduling behavior is unchanged; this is purely additive. Determinism preserved (gated). Engine changed intentionally (this feature is engine+display).
 
 ### The heuristic — honest framing
 A **cumulative-load heuristic, NOT an AI prediction** (labeled that way in the UI and the snapshot). `engine/maintenance.py` (pure, deterministic): for each segment, `load_score = Σ over crossing trains of a per-train load weight` (the train's length / coach count where the dataset provides it, else 1), plus `usage_count`; the app adds `crossings/hour` over the planned horizon. Train sizes live as display-layer `LOAD_WEIGHTS` in `data/west_bengal.py` and `data/real_corridor.py` (illustrative coach counts; the scheduling engine ignores them).
 
 ### Flagging
-A segment at/above the per-dataset inspection threshold (baseline 2, real 70, WB 60) is flagged "due for inspection". WB flags the 8 highest-load corridors (north trunk NFK–MLDT/MLDT–NJP at load 68; the Howrah main + Memari–Barddhaman at 62). Shown three ways: an **amber underlay on the map**, an **amber ⚠ "inspection due" badge + Load column** in the segment-status table, and a **Predictive-maintenance panel** listing each flagged track with load score, train count, crossings/h and a reason.
+A segment at/above the per-dataset inspection threshold (baseline 2, real 70, WB 60) is flagged "due for inspection". WB flags the 8 highest-load corridors (north trunk NFK–MLDT/MLDT–NJP at load 68; the Howrah main + Memari–Barddhaman at 62). Shown three ways: an **amber underlay on the map**, an **amber ⚠ "inspection due" badge + Load column** in the segment-status table, and a **Cumulative-load wear-flagging panel** listing each flagged track with load score, train count, crossings/h and a reason.
 
 ### The impressive link (predict → schedule → reroute)
 A flagged segment's **"Schedule maintenance"** button injects a new `MaintenanceClosure` anomaly. It is routing-IDENTICAL to a track closure (added to `closed_segment_ids`; `apply_anomalies` shuts it) so the **existing reroute engine handles it unchanged** — gated as byte-identical to `TrackClosed` on the same segment. Only its label differs: the decision-log trigger reads `maintenance_closure(<seg>)`. Live-verified on WB: Reset → Schedule maintenance on flagged MYM–BWN → 4 trains (T1/T2/T4/T12) reroute onto the Dankuni chord, collision-free.

@@ -1,4 +1,4 @@
-"""Predictive maintenance — a CUMULATIVE-LOAD HEURISTIC (NOT an AI prediction).
+"""Cumulative-load wear flagging — a CUMULATIVE-LOAD HEURISTIC (NOT an AI prediction).
 
 For each track segment we accumulate, over the trains whose planned path uses
 it, a load score = sum of a per-train load weight (the train's length if known,

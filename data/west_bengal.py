@@ -160,6 +160,27 @@ LOAD_WEIGHTS = {
     "T7": 12, "T8": 10, "T9": 12, "T10": 16, "T11": 12, "T12": 20,
 }
 
+# DISPLAY-ONLY service names: real (or, where no single famous service fits a
+# demo route, an honest corridor descriptor) West Bengal trains, each matched to
+# the corridor that train actually runs. The scheduling engine never reads these.
+# NOTE: none of these is a non-WB train — e.g. the Grand Trunk Express (Delhi–
+# Chennai) is NOT here; it belongs only to the separate Delhi–Nagpur `--real`
+# corridor, where it genuinely runs NDLS->NGP.
+TRAIN_NAMES = {
+    "T1":  "Saraighat Express",          # Howrah–Guwahati, via New Jalpaiguri
+    "T2":  "Gour Express",               # Sealdah–Malda Town
+    "T3":  "Kamrup Express",             # Dibrugarh–Howrah, via New Jalpaiguri
+    "T4":  "Asansol–Kharagpur Intercity",
+    "T5":  "Rupasi Bangla Express",      # Howrah–Purulia
+    "T6":  "Digha–Barddhaman Express",
+    "T7":  "Bangaon–Sealdah Local",
+    "T8":  "Alipurduar–New Jalpaiguri Intercity",
+    "T9":  "Lalgola–Azimganj Passenger",
+    "T10": "Kharagpur–Bishnupur Express",
+    "T11": "Haldia–Howrah Local",
+    "T12": "Barddhaman–Katwa Express",
+}
+
 
 def build_network():
     return Network(STATIONS, SEGMENTS)

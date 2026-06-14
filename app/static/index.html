@@ -64,7 +64,7 @@
                 margin-top:2px; letter-spacing:.02em; }
   .added-tag { display:inline-block; margin-left:6px; padding:1px 6px; border-radius:99px;
                background:#0891b2; color:#fff; font-size:10px; font-weight:700; vertical-align:middle; }
-  /* Predictive maintenance (cumulative-load heuristic) */
+  /* Cumulative-load wear flagging (cumulative-load heuristic) */
   #maint-intro { margin:0 0 10px; }
   #maint-table .maint-load { font-weight:700; color:#b45309; font-variant-numeric:tabular-nums; }
   #maint-table button { padding:4px 9px; font-size:12px; background:#b45309; }
@@ -395,7 +395,7 @@
     </tr></thead><tbody></tbody></table>
   </section>
   <section id="maint-section">
-    <h2>Predictive maintenance</h2>
+    <h2>Cumulative-load wear flagging</h2>
     <p class="report-intro" id="maint-intro"></p>
     <table id="maint-table"><thead><tr>
       <th>Track</th><th>Load score</th><th>Trains</th><th>Crossings/h</th><th></th>
@@ -449,6 +449,7 @@ const v    = (id) => byId(id).value;   // current value of a select/input
 // Display names: populated from /api/state display_names
 // ============================================================
 let displayNames = {};
+let trainNames = {};   // train id -> real service name (display only)
 
 // Replace any KNOWN station-code token in text with its real name, so no raw
 // codes ever surface in prose. Covers the 6-city S1..S6 (a subset of this) and
@@ -1529,6 +1530,9 @@ function render(snap) {
   if (snap.display_names) {
     displayNames = snap.display_names;
   }
+  if (snap.train_names) {
+    trainNames = snap.train_names;
+  }
 
   // Populate every row's pickers with plain-language labels
   fillSegSelects(snap.segments);
@@ -1592,7 +1596,7 @@ function render(snap) {
       `<td class="num seg-load">${ms.load_score}</td></tr>`);
   }
 
-  // Predictive maintenance panel (cumulative-load heuristic — NOT a prediction)
+  // Cumulative-load wear-flagging panel (cumulative-load heuristic — NOT a prediction)
   const maintIntro = document.getElementById('maint-intro');
   const wt = maint.weighted ? ' weighted by train length (coaches)' : '';
   maintIntro.textContent =
@@ -1682,13 +1686,16 @@ function renderTrainLegend(snap, colorMap) {
     const st = t.station_times;
     const route = (st && st.length >= 2)
       ? dn(st[0][0]) + ' → ' + dn(st[st.length - 1][0]) : '';
+    const name = trainNames[t.id] || '';   // real WB service name (display only)
     const changed = t.action && t.action !== 'unchanged';
     const li = document.createElement('li');
     if (changed) li.className = 'is-changed';
+    const sub = name ? name + ' · ' + route : route;
     li.innerHTML =
       `<span class="sw" style="background:${colorMap[t.id] || '#888'}"></span>` +
-      `<span><span class="tid">${t.id}</span> <span class="rt">${route}</span></span>`;
-    li.title = t.id + ' — ' + (t.action || '').replace('_', ' ');
+      `<span><span class="tid">${t.id}</span> <span class="rt">${sub}</span></span>`;
+    li.title = (name ? name + ' — ' : '') + t.id + ' — '
+      + (t.action || '').replace('_', ' ');
     ul.appendChild(li);
   }
 }
@@ -1924,7 +1931,7 @@ refreshState();
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"
 // "added_train_ids" "added-tag" "WB_COORDS" "WB_GEO" "WB_MAJOR" "mapWB"
 // "wb-graticule" "zoom-controls" "Reset view" "train-legend" "WB_PRIMARY"
-// "placeWbLabels" "leader-group" "maintenance_closure" "Predictive maintenance"
+// "placeWbLabels" "leader-group" "maintenance_closure" "Cumulative-load wear flagging"
 // "Schedule maintenance" "maint-group" "cumulative-load heuristic"
 // "rule-based load visibility" "not surge pricing" "Fare frozen" "pass-fare" "synthetic" "production would use real bookings"
 // "station-ring" "station-stop" "wbStationGlyph" "trainRakeGlyph" "train-rake"

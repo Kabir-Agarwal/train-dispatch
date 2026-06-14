@@ -1,4 +1,4 @@
-"""Gates for Feature 1 — predictive maintenance (cumulative-load heuristic).
+"""Gates for Feature 1 — cumulative-load wear flagging (cumulative-load heuristic).
 
 Load accumulates correctly (hand-verified, weighted and default); the threshold
 flags the right segments; a MaintenanceClosure reroutes via the EXISTING engine
@@ -121,12 +121,14 @@ def test_page_has_maintenance_panel_and_honest_text():
     try:
         with urllib.request.urlopen(url + "/", timeout=5) as r:
             html = r.read().decode("utf-8")
-        for marker in ("Predictive maintenance", "cumulative-load heuristic",
+        for marker in ("Cumulative-load wear flagging", "cumulative-load heuristic",
                        "maintenance_closure", "Schedule maintenance", "maint-group",
                        "inspection due"):
             assert marker in html, marker
         # honesty: the only mention of "AI prediction" must be the disclaimer
         assert html.count("AI prediction") == html.count("not an AI prediction")
+        # Phase E honesty rename: the "predictive maintenance" framing is gone
+        assert "predictive maintenance" not in html.lower()
     finally:
         server.shutdown()
 
