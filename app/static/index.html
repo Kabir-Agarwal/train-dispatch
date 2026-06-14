@@ -620,6 +620,85 @@ const WB_SECONDARY = new Set([
 ]);
 const WB_MAJOR = new Set([...WB_PRIMARY, ...WB_SECONDARY]);  // anything labeled by default
 
+// LOCAL DE-OVERLAP for the Howrah/Kolkata core ONLY. These ~11 stations sit
+// within a 17x42px world box (e.g. Howrah & Sealdah are ~3px apart, Naihati &
+// Bandel ~4px) because they are genuinely only a few km apart, so at the fit-all
+// default zoom their fixed-size platform glyphs pile on top of each other. The
+// default view must stay fit-all (so northbound trains never leave the map), so
+// instead of zooming we nudge just this cluster apart: each member repels the
+// others until its glyph clears them, while EVERY other station stays fixed and
+// acts as a wall (so the cluster can't grow into a neighbour). Deterministic
+// (no randomness), WB-only, display-only — the rest of the map is untouched.
+// (Runs after WB_PRIMARY/WB_SECONDARY so the per-tier glyph size is known.)
+// ULB (Uluberia) joins the movable set so Santragachi has somewhere to go: it
+// is wedged between the Howrah–Dankuni chord and ULB, and needs ULB to ease out.
+const WB_CLUSTER = ["HWH", "SDAH", "DDJ", "BT", "NH", "BLY", "SRC", "DKAE",
+                    "SRP", "CGR", "BDC", "ULB"];
+// Track sections with BOTH ends inside the cluster (from data/west_bengal.py).
+// A station glyph is allowed to sit on its OWN incident sections (it is an
+// endpoint of them) but is pushed off any OTHER cluster section passing under it.
+const WB_CLUSTER_EDGES = [
+  ["HWH", "BLY"], ["BLY", "SRP"], ["SRP", "CGR"], ["CGR", "BDC"],
+  ["HWH", "DKAE"], ["HWH", "SRC"], ["SRC", "DKAE"], ["SRC", "ULB"],
+  ["SDAH", "DDJ"], ["DDJ", "BT"], ["BT", "NH"], ["NH", "BDC"],
+];
+(function relaxWbCluster() {
+  const clusterSet = new Set(WB_CLUSTER);
+  // glyph half-extent (circle that contains the platform+shelter+dot glyph):
+  // width is r*2, height ~r+4.6; use the larger so we clear in any direction.
+  const halfExtent = (id) => {
+    const r = WB_PRIMARY.has(id) ? 5.5 : WB_SECONDARY.has(id) ? 4 : 3.4;
+    return Math.max(r * 2, r + 4.6);
+  };
+  const GAP = 4;                            // clear breathing space between glyphs
+  const moving = WB_CLUSTER.filter((id) => WB_COORDS[id]);
+  const all = Object.keys(WB_COORDS);
+  for (let iter = 0; iter < 3000; iter++) {
+    let maxShift = 0;
+    for (const a of moving) {
+      let sx = 0, sy = 0;
+      // (1) glyph-vs-glyph: keep every pair of platform glyphs apart
+      for (const b of all) {
+        if (a === b) continue;
+        let dx = WB_COORDS[a][0] - WB_COORDS[b][0];
+        let dy = WB_COORDS[a][1] - WB_COORDS[b][1];
+        let d = Math.hypot(dx, dy) || 0.001;
+        const minD = halfExtent(a) + halfExtent(b) + GAP;
+        if (d < minD) {
+          // if b also moves, split the correction; if b is fixed, a takes it all
+          const share = clusterSet.has(b) ? 0.5 : 1.0;
+          const push = (minD - d) * share;
+          sx += (dx / d) * push;
+          sy += (dy / d) * push;
+        }
+      }
+      // (2) glyph-vs-section: push off any non-incident cluster track line
+      const clear = halfExtent(a) + 3;       // glyph half-extent + line breathing
+      for (const [u, v] of WB_CLUSTER_EDGES) {
+        if (a === u || a === v) continue;    // sitting on own section is fine
+        const ux = WB_COORDS[u][0], uy = WB_COORDS[u][1];
+        const ex = WB_COORDS[v][0] - ux, ey = WB_COORDS[v][1] - uy;
+        const len2 = ex * ex + ey * ey || 0.001;
+        let t = ((WB_COORDS[a][0] - ux) * ex + (WB_COORDS[a][1] - uy) * ey) / len2;
+        t = Math.max(0, Math.min(1, t));     // nearest point on the segment
+        const fx = ux + t * ex, fy = uy + t * ey;
+        let dx = WB_COORDS[a][0] - fx, dy = WB_COORDS[a][1] - fy;
+        let d = Math.hypot(dx, dy) || 0.001;
+        if (d < clear) {
+          const push = (clear - d) * 0.4;
+          sx += (dx / d) * push;
+          sy += (dy / d) * push;
+        }
+      }
+      // damp the combined step so glyph and line forces settle without oscillating
+      WB_COORDS[a][0] += sx * 0.8;
+      WB_COORDS[a][1] += sy * 0.8;
+      maxShift = Math.max(maxShift, Math.abs(sx * 0.8), Math.abs(sy * 0.8));
+    }
+    if (maxShift < 0.01) break;            // converged
+  }
+})();
+
 // One lookup across datasets; the code namespaces never collide.
 function fixedCoord(id) {
   return FIXED_COORDS[id] || REAL_COORDS[id] || WB_COORDS[id] || null;

@@ -1,5 +1,18 @@
 # PROGRESS.md
 
+## Kolkata-cluster de-overlap (Howrah core breathing room): DONE, awaiting visual pass
+Built 2026-06-14. Display layer ONLY (`app/static/index.html` is the only changed file); engine/data/state/tests untouched; master at cd37586. Suite: **217 passed** (unchanged). Screenshot tool still down — verified by reasoning through cluster coordinates + DOM (getBoundingClientRect / getScreenCTM in viewport px); no console errors.
+
+- **Problem:** the Howrah/Kolkata core (Howrah, Sealdah, Dum Dum, Barrackpore, Naihati, Bally, Santragachi, Dankuni, Serampore, Chandan Nagar, Bandel) is genuinely only a few km across, so it projects into a ~17×42px world box (Howrah↔Sealdah ~3px apart, Naihati↔Bandel ~4px). At the fit-all default zoom the fixed-size platform glyphs piled on top of each other.
+- **Why not just zoom the default in:** the default must stay fit-all so northbound trains (e.g. T1 Howrah→NJP) never leave the map (the earlier off-map fix). So I open the cluster up *locally* instead.
+- **Fix:** a deterministic local de-overlap relaxation (`relaxWbCluster`, runs once at load on `WB_COORDS`). The ~12 cluster members (the list above + Uluberia, added so Santragachi can ease off the Howrah–Dankuni chord) repel each other until their glyphs clear, AND are pushed off any *non-incident* cluster track line; **every other station stays fixed and acts as a wall**, so the cluster cannot grow into a neighbour and the rest of the map is byte-for-byte unchanged. Max drift 26px.
+- **Verified (viewport-px DOM):** cluster glyph↔glyph overlaps **0** (min cluster pair 3.6px → 18.5px); cluster glyph on a non-incident line **0**; labels **0/0/0** at the default and every zoom (6/24/50/50 labels); trains still sit exactly on the (relaxed) segments (rake centre 0px off track — interpolation is a convex blend of the endpoints); money-shot (close MYM-BWN → T1/T2/T3/T5 reroute) and zoom/pan still work.
+- **Deliberately NOT touched** (per "do not change the rest of the map"): pre-existing close-pair glyph overlaps in *other* regions — NJP/Siliguri, Durgapur/Andal, Nalhati/Rampurhat, Berhampore/Azimganj, Kharagpur/Midnapore, Mecheda/Tamluk. Same technique can spread those too if wanted.
+
+### STOPPED — awaiting your visual pass.
+
+---
+
 ## Approved marker designs (platform station + metro-rake train): DONE, awaiting visual pass
 Built 2026-06-14. Display layer ONLY (`app/static/index.html` is the only changed file); engine/data/state untouched; master at cd37586. Suite: **217 passed** (unchanged). Used the EXACT approved SVG geometry (not invented). Verified by reasoning through coordinates + DOM measurement (screenshot tool down); no console errors.
 
