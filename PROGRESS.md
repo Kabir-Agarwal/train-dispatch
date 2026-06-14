@@ -1,6 +1,19 @@
 # PROGRESS.md
 
-## Audit fixes (C1 dimming, pacing, selective reopen, legend, JS coverage): DONE, awaiting visual pass
+## Phase A — Single-track / opposing moves: INVESTIGATED, no gap, gate added. DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **235 passed** (was 230; +5 Phase A gates). **No engine/app/data change** — investigation found the behavior already correct, so only a regression gate was added (`tests/test_opposing_moves.py`).
+
+**Investigation (the question: single- or double-track, and can the engine schedule a head-on?):**
+- **Single-track everywhere.** Each physical link is ONE `Segment` with one id; both directions map to it (`model.py:5` "bidirectional single-track: occupancy applies regardless of direction"; WB/real `_ADJ[(a,b)]==_ADJ[(b,a)]==f"{a}-{b}"`; baseline T1 S1→S4 and T5 S4→S1 reuse SEG-12/23/34 reversed). No station pair has >1 segment in any dataset (baseline 8 / real 27 / WB 58 segments checked) → no double-track. WB "main vs chord" parallels are different *routes*, each single-track.
+- **Head-on already prevented.** `find_conflicts` (`collision.py`) groups by `segment_id` only → any same-segment overlap is a conflict regardless of direction. Proven: forcing D(S1→S2) and U(S2→S1) onto SEG-12[0,10] yields `Conflict(SEG-12, D, U, 0, 10)`. `recompute_schedule` resolves it — U held at S2 until minute 11 ("…so D clears the line"), SEG-12 becomes D[0,10]/U[11,21], `find_conflicts==[]`. The opposing train waits at a station, exactly as required. The recompute collision-free `assert` covers the WB mesh too.
+
+**Conclusion:** not a real gap → no fix made. Added `tests/test_opposing_moves.py` (5 value-asserting gates): no-double-track, reverse uses same id, head-on DETECTED (exact `Conflict`), head-on RESOLVED (exact held schedule + collision-free table), and the same guarantee on a real WB single-track segment (Howrah–Bally).
+
+### STOPPED at Phase A boundary — awaiting your review before Phase B.
+
+---
+
+## Audit fixes (C1 dimming, pacing, selective reopen, legend, JS coverage): DONE, reviewed
 Built 2026-06-14. Master safe at cd37586. Suite: **230 passed** (was 217; +13 new). Screenshot tool down — verified via DOM (preview_eval) + a headless Node gate; no console errors. Engine code unchanged (only WB *data* changed, golden regenerated for wb/* only).
 
 - **C1 — parked trains no longer look like "pop-in":** trains stay rendered the whole time, but a rake is **solid only while travelling**; before departure / after arrival it is a **dimmed (opacity 0.5) hollow outline** (`rakeStyle()` + `trainRakeGlyph(...,moving)`). So a long-held train reads as "waiting at a platform", not a glitch. Verified: t=0 → 12 parked hollow; mid-clip → 3 solid (moving) + 9 parked.
