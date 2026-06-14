@@ -1,6 +1,21 @@
 # PROGRESS.md
 
-## Phase F — System Boundaries doc + UI section: DONE, awaiting review
+## Checkpoint: tag `v1-submittable` (annotated) on 1770ce5 — complete hardened A–F (263 tests), pushed to GitHub. Rollback: `git reset --hard v1-submittable`.
+
+## Phase G — Delay cascade prediction (blast radius): DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **270 passed** (was 263; +7 Phase G gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
+
+- **What it computes:** given a primary delay on one train, the **blast radius** — which downstream trains inherit delay (via shared single-track segments + the engine's collision-free sequencing) and by how many minutes.
+- **Method (named):** **forward re-simulation diff** — `engine/cascade.py::delay_cascade()` runs the engine's deterministic, collision-free forward placement (`recompute_schedule`) twice — WITHOUT vs WITH the primary delay — and reports each train's destination-arrival shift. Delay only propagates through shared-segment sequencing, so the per-train diff is the true knock-on. Additive (never changes recompute → golden intact).
+- **Hand-verified case (the gate):** 6-city baseline, T2 & T4 share SEG-56 with 1 min clearance (T2 [20,29], T4 [30,39]). Delaying **T2 by 2** pushes T2's SEG-56 to [22,31], so T4 waits → inherits **+2**. The cascade reports exactly: primary T2 +2, downstream **{T4: +2}**, nobody else (total knock-on 2).
+- **UI:** header **"Delay blast radius: delaying T2 by 2 min cascades to 1 train — T4 +2 min (2 knock-on min total)"** (with method tooltip), shown only when exactly one train-delay is active; uses real service names where available; hides on reset. Cached on state change (extra recomputes run once per action, not per frame).
+- **Gate `tests/test_cascade.py`** (7 value-asserting): the exact hand-verified T2→T4 +2 case; an isolated train (T3 on its sole SEG-26) has zero blast radius; a larger delay still hits T4 and total knock-on is monotonic non-decreasing; N/A for unknown train / zero delay; the method is named/honest; the snapshot surfaces a value matching the engine and clears on reset.
+
+### STOPPED at Phase G boundary — awaiting your review before Phase H.
+
+---
+
+## Phase F — System Boundaries doc + UI section: DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **263 passed** (was 260; +3 Phase F gates). Display/docs only — no engine change → recompute golden byte-identical. No console errors. **This completes the A–F set.**
 
 - **New `SYSTEM_BOUNDARIES.md`:** honest write-up of the six deliberate simplifications, each as *In this demo → Why it's acceptable here → Production would require*:

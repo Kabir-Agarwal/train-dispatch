@@ -124,6 +124,8 @@
   #plain-summary { display:none; background:#edfaf1; border:1px solid #a8d5b5; border-radius:7px; padding:9px 14px; font-size:13.5px; color:#145e28; font-weight:600; margin-top:10px; }
   #dispatch-compare { margin-top:4px; font-size:13px; font-weight:700; color:#0d7a5f; cursor:help; }
   #dispatch-compare .dc-note { font-weight:500; color:#8a96a5; }
+  #delay-cascade { margin-top:4px; font-size:13px; font-weight:700; color:#b3471f; cursor:help; }
+  #delay-cascade .dc-note { font-weight:500; color:#8a96a5; }
   /* How-it-works panel */
   details.how-it-works { background:#f8fafc; border:1px solid #dde3ea; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.6; color:#3c4858; }
   details.how-it-works summary { font-weight:700; cursor:pointer; color:#10243e; font-size:13.5px; user-select:none; }
@@ -153,6 +155,7 @@
   <h1>Train Dispatch &amp; Anomaly Recovery</h1>
   <div class="total" id="total-delay"></div>
   <div id="dispatch-compare" style="display:none"></div>
+  <div id="delay-cascade" style="display:none"></div>
 </header>
 
 <!-- Network map: full-width above the two-column grid -->
@@ -1589,6 +1592,31 @@ function render(snap) {
     dcEl.style.display = 'none';
   }
 
+  // Phase G: delay cascade "blast radius" (only when a single train delay is active)
+  const cas = snap.delay_cascade;
+  const casEl = document.getElementById('delay-cascade');
+  if (cas && cas.applicable) {
+    const tn = id => (trainNames[id] ? trainNames[id] + ' (' + id + ')' : id);
+    if (cas.trains_affected > 0) {
+      const list = cas.downstream.map(d => tn(d.id) + ' +' + d.minutes + ' min').join(', ');
+      casEl.innerHTML = 'Delay blast radius: delaying ' + tn(cas.train) + ' by '
+        + cas.minutes + ' min cascades to ' + cas.trains_affected + ' train'
+        + (cas.trains_affected === 1 ? '' : 's') + ' &mdash; '
+        + '<span class="dc-note">' + list + ' (' + cas.total_knock_on
+        + ' knock-on min total)</span>';
+    } else {
+      casEl.innerHTML = 'Delay blast radius: delaying ' + tn(cas.train) + ' by '
+        + cas.minutes + ' min cascades to '
+        + '<span class="dc-note">no other trains (isolated).</span>';
+    }
+    casEl.title = 'Forward re-simulation: the schedule is re-run with vs without '
+      + 'this delay; downstream trains that inherit delay via shared single-track '
+      + 'sequencing are shown with their extra minutes.';
+    casEl.style.display = 'block';
+  } else {
+    casEl.style.display = 'none';
+  }
+
   let activeTxt = snap.anomalies.length
     ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
     : 'No active anomalies.';
@@ -1955,6 +1983,7 @@ refreshState();
 // "Reset to baseline" "Network — segment status" "Schedule board" "Decision log"
 // "Passenger view" "pass-eta" "How this works" "Report a problem"
 // "System boundaries" "system-boundaries" "SYSTEM_BOUNDARIES.md" "deliberately simplifies"
+// "delay-cascade" "Delay blast radius" "delay_cascade"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"

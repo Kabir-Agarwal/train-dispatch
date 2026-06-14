@@ -23,6 +23,7 @@ from engine.anomalies import (
 )
 from engine.maintenance import flagged_segments, segment_load
 from engine.baseline_compare import compare_dispatch
+from engine.cascade import delay_cascade
 from engine import pricing
 from engine.decision_log import (
     build_decision_log,
@@ -166,6 +167,7 @@ class AppState:
             self.network, self.trains, [], self.result
         )
         self.comparison = self._dispatch_comparison()
+        self.cascade = self._delay_cascade()
 
     def _all_trains(self):
         return self.trains + self.added_trains
@@ -177,6 +179,20 @@ class AppState:
         return compare_dispatch(
             self.network, self._all_trains(), self.anomalies,
             load_weights=self.load_weights,
+        )
+
+    def _delay_cascade(self):
+        """Phase G: blast radius of an active single train delay (its knock-on
+        vs the same state WITHOUT that delay). Only meaningful for exactly one
+        active train_delayed; otherwise {"applicable": False}. Cached per state
+        change (it runs extra recomputes) and read by snapshot()."""
+        delays = [a for a in self.anomalies if isinstance(a, TrainDelayed)]
+        if len(delays) != 1:
+            return {"applicable": False}
+        d = delays[0]
+        base = [a for a in self.anomalies if a is not d]
+        return delay_cascade(
+            self.network, self._all_trains(), base, d.train_id, d.minutes
         )
 
     def _make_train(self, spec, anomalies, already_added):
@@ -240,6 +256,7 @@ class AppState:
             self.network, all_trains, new_anomalies, result
         )
         self.comparison = self._dispatch_comparison()
+        self.cascade = self._delay_cascade()
 
     def reopen(self, segment_id):
         """Selectively REOPEN one previously closed/blocked/maintenance/speed-
@@ -276,6 +293,7 @@ class AppState:
             self.network, all_trains, remaining, result
         )
         self.comparison = self._dispatch_comparison()
+        self.cascade = self._delay_cascade()
 
     def _effective_segments(self):
         from engine.anomalies import apply_anomalies
@@ -376,6 +394,7 @@ class AppState:
             "decision_log": log_lines,
             "total_added_delay": self.result.total_added_delay,
             "dispatch_comparison": getattr(self, "comparison", {"applicable": False}),
+            "delay_cascade": getattr(self, "cascade", {"applicable": False}),
         }
 
     def passenger(self, train_id):
