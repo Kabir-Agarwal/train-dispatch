@@ -1,6 +1,19 @@
 # PROGRESS.md
 
-## Phase C — Train priority: DONE, awaiting review
+## Phase D — Pricing ethics (emergency freeze + load-visibility reframe): DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **254 passed** (was 248; +6 Phase D gates). recompute engine untouched → golden byte-identical. No console errors.
+
+- **(1) Emergency freeze (`app/state.py::passenger`):** while an active anomaly disrupts a train (reroute / hold / admin delay / reduced speed → `action != unchanged` or `added_delay != 0`), its fare is priced from the **nominal route + nominal departure**, so the incident NEVER surges the passenger's fare. `passenger()` now returns `fare_frozen`. Verified: WB T1 (rerouted) frozen to nominal ₹532; admin-delay and reduced-speed keep the pre-incident fare; an undisrupted train during an unrelated closure prices normally.
+- **(2) Load-visibility reframe (`engine/pricing.py` + UI):** `fare_reason` reframed from "Higher/Lower fare … (rule-based dynamic pricing)" to **"Busy/Typical/Quiet load — ~N% full … (rule-based load visibility, illustrative; not surge pricing)"**. New `frozen_fare_reason()`. UI label "Estimated fare · rule-based dynamic pricing" → **"Indicative fare · rule-based load visibility (not surge pricing)"**, and shows **"🔒 Fare frozen · held at normal level during disruption"** when frozen. The phrase "dynamic pricing" no longer appears in source.
+- **Honesty preserved:** still rule-based, synthetic-labelled, "production would use real bookings", and never ML; now also explicitly **not** surge/revenue pricing.
+- **Existing pricing tests updated** for the intentional reframe + the new freeze behavior (the old `test_fare_follows_the_engine_on_reroute_and_delay` asserted the *surge* Phase D removes; it's now `test_fare_freezes_under_disruption_no_surge`). The page-honesty gate now also asserts "dynamic pricing" is absent.
+- **Gate `tests/test_pricing_ethics.py`** (6 value-asserting): reroute freezes to nominal (no surge); admin delay doesn't surge; reduced speed freezes; undisrupted train not frozen during an unrelated anomaly; no-anomaly ⇒ no freeze; pricing framed as load visibility, not surge.
+
+### STOPPED at Phase D boundary — awaiting your review before Phase E.
+
+---
+
+## Phase C — Train priority: DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **248 passed** (was 243; +5 Phase C gates). Engine change is minimal and the recompute golden stays **byte-identical**.
 
 - **`engine/model.py`:** added `Train.priority` (default `PRIORITY_PASSENGER`) with classes `PRIORITY_FREIGHT=1 < PASSENGER=2 < EXPRESS=3` (higher = served first).

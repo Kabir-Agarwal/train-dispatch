@@ -391,16 +391,31 @@ class AppState:
             "violations": violations,
             "fare": None,
             "fare_reason": "",
+            "fare_frozen": False,
             "occupancy": None,
             "synthetic_occupancy": True,  # demo data — production = real bookings
         }
         action = self.result.actions.get(train_id)
         if action is not None and action.path:   # only running trains have a fare
             occ = pricing.synthetic_occupancy(train_id)
-            dist = pricing.route_distance(self.network, action.path)
-            est = pricing.fare_estimate(dist, occ, action.depart_at)
+            # EMERGENCY FREEZE (Phase D ethics): if this train is disrupted by an
+            # active anomaly (rerouted / held / delayed / slowed), price it as if
+            # UNDISRUPTED — its nominal route + nominal departure — so the incident
+            # never surges the passenger's fare. Otherwise price the live service.
+            orig = next((t for t in self._all_trains() if t.id == train_id), None)
+            disrupted = bool(self.anomalies) and orig is not None and (
+                action.action != "unchanged" or (action.added_delay or 0) != 0
+            )
+            if disrupted:
+                dist = pricing.route_distance(self.network, orig.path)
+                est = pricing.fare_estimate(dist, occ, orig.departure)
+                out["fare_frozen"] = True
+                out["fare_reason"] = pricing.frozen_fare_reason(est)
+            else:
+                dist = pricing.route_distance(self.network, action.path)
+                est = pricing.fare_estimate(dist, occ, action.depart_at)
+                out["fare_reason"] = pricing.fare_reason(est)
             out["fare"] = est
-            out["fare_reason"] = pricing.fare_reason(est)
             out["occupancy"] = occ
             # stretch: a REAL moving-average forecast on openly-synthetic demand
             series = pricing.synthetic_demand_series(train_id)

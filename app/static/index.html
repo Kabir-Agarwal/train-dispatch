@@ -423,7 +423,7 @@
       <div class="eta" id="pass-eta">&#8212;</div>
       <div class="reason" id="pass-text"></div>
       <div class="fare-block" id="pass-fare-block">
-        <div class="fare-label">Estimated fare <span class="muted">&middot; rule-based dynamic pricing</span></div>
+        <div class="fare-label" id="pass-fare-label">Indicative fare <span class="muted">&middot; rule-based load visibility (not surge pricing)</span></div>
         <div class="fare-amount" id="pass-fare">&#8212;</div>
         <div class="fare-reason" id="pass-fare-reason"></div>
         <div class="fare-demand">
@@ -1710,15 +1710,20 @@ async function refreshPassenger() {
     p.eta === null ? '—' : 'min ' + p.eta;
   document.getElementById('pass-text').textContent = withNames(p.text);
 
-  // Rule-based dynamic fare (consistent with the engine: same path & departure)
+  // Rule-based LOAD VISIBILITY (not surge pricing). The fare is frozen while the
+  // train is disrupted, so an incident never surges a passenger's fare.
   const fareEl = document.getElementById('pass-fare');
   const reasonEl = document.getElementById('pass-fare-reason');
+  const labelEl = document.getElementById('pass-fare-label');
   const occEl = document.getElementById('pass-occ');
   const demandLabel = document.getElementById('pass-demand-label');
   const demandSvg = document.getElementById('pass-demand');
   if (p.fare) {
     fareEl.textContent = p.fare.currency + p.fare.fare.toLocaleString();
     reasonEl.textContent = p.fare_reason;
+    labelEl.innerHTML = p.fare_frozen
+      ? '🔒 Fare frozen <span class="muted">&middot; held at normal level during disruption</span>'
+      : 'Indicative fare <span class="muted">&middot; rule-based load visibility (not surge pricing)</span>';
     const occPct = Math.round((p.occupancy || 0) * 100);
     occEl.textContent = 'Occupancy ' + occPct + '% — synthetic demo data; '
       + 'production would use real bookings.';
@@ -1921,7 +1926,7 @@ refreshState();
 // "wb-graticule" "zoom-controls" "Reset view" "train-legend" "WB_PRIMARY"
 // "placeWbLabels" "leader-group" "maintenance_closure" "Predictive maintenance"
 // "Schedule maintenance" "maint-group" "cumulative-load heuristic"
-// "rule-based dynamic pricing" "pass-fare" "synthetic" "production would use real bookings"
+// "rule-based load visibility" "not surge pricing" "Fare frozen" "pass-fare" "synthetic" "production would use real bookings"
 // "station-ring" "station-stop" "wbStationGlyph" "trainRakeGlyph" "train-rake"
 // "zoom-btn" "Zoom in to see all station names"
 </script>

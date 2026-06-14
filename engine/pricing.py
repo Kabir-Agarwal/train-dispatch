@@ -1,5 +1,7 @@
-"""Rule-based dynamic pricing — a clear, inspectable FORMULA, NOT machine
-learning. A fare estimate is:
+"""Rule-based fare / load visibility — a clear, inspectable FORMULA, NOT machine
+learning and NOT revenue surge pricing. It exists to make demand/load legible,
+not to maximise revenue (and Phase D freezes it during disruptions). A fare
+estimate is:
 
     fare = base(distance) * occupancy_multiplier * time_to_departure_multiplier
 
@@ -9,7 +11,9 @@ learning. A fare estimate is:
 
 Occupancy here is SYNTHETIC demo data (production would use real bookings); it is
 generated deterministically from the train id and always labelled synthetic.
-Everything is a pure function: deterministic, no scheduling, no ML.
+Everything is a pure function: deterministic, no scheduling, no ML. The UI frames
+this as load visibility, and a disrupted train's fare is held (see
+AppState.passenger) so an incident never surges a passenger's fare.
 """
 
 CURRENCY = "₹"   # ₹
@@ -67,16 +71,26 @@ def fare_estimate(distance, occupancy, ttd_minutes):
 
 def fare_reason(est):
     """One-line plain reason from the breakdown — a deterministic template (NOT
-    LLM-phrased), so the numbers always match the formula."""
+    LLM-phrased), so the numbers always match the formula. Framed as LOAD
+    VISIBILITY (how busy the train is), not a revenue surge."""
     occ_pct = round(est["occupancy"] * 100)
-    drivers = [f"{occ_pct}% full"]
+    load = ("Busy" if est["occupancy"] >= 0.70
+            else "Quiet" if est["occupancy"] <= 0.45 else "Typical")
+    drivers = [f"~{occ_pct}% full"]
     if est["surge"] >= 0.5:
         drivers.append("departs soon")
     elif est["surge"] <= 0.15:
         drivers.append("departs later")
-    combined = est["occupancy_mult"] * est["time_mult"]
-    level = "Higher" if combined >= 1.30 else "Lower" if combined <= 1.12 else "Standard"
-    return f"{level} fare — {', '.join(drivers)} (rule-based dynamic pricing)."
+    return (f"{load} load — {', '.join(drivers)} "
+            f"(rule-based load visibility, illustrative; not surge pricing).")
+
+
+def frozen_fare_reason(est):
+    """Reason shown when a disrupted train's fare is FROZEN (Phase D ethics): the
+    incident must never surge the passenger's fare."""
+    occ_pct = round(est["occupancy"] * 100)
+    return (f"Fare held at the normal level during this disruption — no surge "
+            f"(~{occ_pct}% full; rule-based load visibility, illustrative).")
 
 
 # --- Stretch: a REAL moving-average forecast on OPENLY-SYNTHETIC demand --------

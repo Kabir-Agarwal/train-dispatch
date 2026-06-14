@@ -57,20 +57,28 @@ def test_passenger_shows_eta_and_fare_together():
     p = s.passenger("T101")
     assert p["eta"] is not None
     assert p["fare"] and p["fare"]["fare"] > 0 and p["fare"]["currency"] == "₹"
-    assert "rule-based dynamic pricing" in p["fare_reason"]
+    assert "rule-based load visibility" in p["fare_reason"]
+    assert "not surge pricing" in p["fare_reason"]
+    assert p["fare_frozen"] is False                # no disruption -> live fare
     assert p["synthetic_occupancy"] is True
     assert p["occupancy"] is not None
     assert p["fare"]["distance"] == 1090            # T101 NDLS->NGP route km
 
 
-def test_fare_follows_the_engine_on_reroute_and_delay():
+def test_fare_freezes_under_disruption_no_surge():
+    """Phase D ethics: closing SEG-34 reroutes T1, but its fare is FROZEN to the
+    nominal route/departure — the incident does not change what the passenger
+    pays (no surge from the reroute)."""
     s = AppState()  # 6-city baseline; T1 runs SEG-12/23/34 (distance 30)
-    base = s.passenger("T1")["fare"]["fare"]
-    assert s.passenger("T1")["fare"]["distance"] == 30
-    # closing SEG-34 reroutes T1 onto a shorter path -> distance & fare change
+    base = s.passenger("T1")
+    assert base["fare_frozen"] is False
+    assert base["fare"]["distance"] == 30
     s.inject([{"type": "track_closed", "segment": "SEG-34"}])
     after = s.passenger("T1")
-    assert after["fare"]["distance"] == 22 and after["fare"]["fare"] != base
+    assert after["fare_frozen"] is True
+    assert after["fare"]["distance"] == 30           # nominal basis, NOT the 22 reroute
+    assert after["fare"]["fare"] == base["fare"]["fare"]   # fare unchanged by the incident
+    assert "no surge" in after["fare_reason"]
 
 
 def test_cancelled_train_has_no_fare():
@@ -93,10 +101,12 @@ def test_passenger_panel_and_honesty_in_page():
     try:
         with urllib.request.urlopen(url + "/", timeout=5) as r:
             html = r.read().decode("utf-8")
-        for marker in ("rule-based dynamic pricing", "pass-fare", "synthetic",
+        for marker in ("rule-based load visibility", "not surge pricing",
+                       "pass-fare", "synthetic",
                        "production would use real bookings"):
             assert marker in html, marker
-        # honesty: never claim ML / AI for pricing
+        # honesty: never claim ML / AI for pricing, and don't frame it as surge
         assert "machine learning" not in html.lower()
+        assert "dynamic pricing" not in html.lower()  # reframed away from surge
     finally:
         server.shutdown()
