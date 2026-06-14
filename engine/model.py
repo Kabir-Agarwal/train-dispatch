@@ -30,6 +30,16 @@ class Segment:
         return math.ceil(self.travel_time / self.speed_factor)
 
 
+# Train priority classes (higher integer = higher precedence under conflict).
+# Used by the recompute deconfliction to decide who claims a contended slot and
+# who waits. The DEFAULT is PASSENGER, and every dataset train uses the default,
+# so the placement order is unchanged unless priorities are explicitly varied
+# (the recompute golden is therefore unaffected by adding this field).
+PRIORITY_FREIGHT = 1
+PRIORITY_PASSENGER = 2
+PRIORITY_EXPRESS = 3
+
+
 @dataclass(frozen=True)
 class Train:
     id: str
@@ -37,6 +47,7 @@ class Train:
     destination: str
     path: tuple  # ordered segment ids
     departure: int  # minute the train leaves its origin
+    priority: int = PRIORITY_PASSENGER  # higher = served first under conflict
 
 
 class Network:

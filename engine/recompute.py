@@ -2,9 +2,10 @@
 delay-minimized schedule with a clear per-train action.
 
 Strategy (greedy, per PLAN: not a solver):
-- Trains are placed one at a time in baseline-departure priority order against
+- Trains are placed one at a time in (priority, baseline-departure) order against
   a growing occupancy table, so every placement is checked against EVERYTHING
-  scheduled so far — second-order conflicts cannot survive.
+  scheduled so far — second-order conflicts cannot survive. Higher-priority trains
+  are placed first and so claim contended slots; lower-priority trains wait.
 - A train keeps its original path and timing if that is conflict-free as-is
   (never over-react, never churn an untouched train onto a "better" route).
 - Otherwise the engine tries every open path with the smallest origin-hold
@@ -187,7 +188,11 @@ def recompute_schedule(network, trains, anomalies):
     actions = {}
     schedule = {}
     table = []
-    for train in sorted(trains, key=lambda t: (t.departure, t.id)):
+    # Placement order = priority first (higher precedence claims contended slots),
+    # then the original (departure, id) tie-break. With all trains at the default
+    # priority this is identical to the old ordering, so the recompute golden is
+    # unchanged; differing priorities favour the higher-priority train.
+    for train in sorted(trains, key=lambda t: (-t.priority, t.departure, t.id)):
         if train.id in cancelled:
             actions[train.id] = Action(
                 train.id, CANCELLED, None, None, None, None,

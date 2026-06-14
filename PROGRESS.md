@@ -1,6 +1,20 @@
 # PROGRESS.md
 
-## Phase B — Naive-baseline comparison: DONE, awaiting review
+## Phase C — Train priority: DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **248 passed** (was 243; +5 Phase C gates). Engine change is minimal and the recompute golden stays **byte-identical**.
+
+- **`engine/model.py`:** added `Train.priority` (default `PRIORITY_PASSENGER`) with classes `PRIORITY_FREIGHT=1 < PASSENGER=2 < EXPRESS=3` (higher = served first).
+- **`engine/recompute.py`:** placement order changed from `(departure, id)` to `(-priority, departure, id)`. Trains are placed against the growing occupancy table in priority order, so a higher-priority train claims a contended slot and lower-priority trains wait. **One-line ordering change; the collision-free `assert` and all safety logic are untouched.**
+- **Golden-safe by design:** every shipped train uses the default priority, so `-priority` is constant and the order reduces to the old `(departure, id)` → recompute output is identical (golden gate still passes byte-for-byte). Priority only changes outcomes when priorities are explicitly varied.
+- **Collision-free stays absolute:** priority only reorders *who is placed first*; every placement is still checked against the committed table and the final `find_conflicts` assert remains.
+- **No demo train was reprioritised yet** (keeps the golden pristine); classifying the WB services as express/passenger is a natural addition in Phase E (real train names).
+- **Gate `tests/test_priority.py`** (5 value-asserting): higher-priority train claims the contended slot while the lower waits (and wins *against* the id tie-break); equal priority falls back to the old id order (control + golden-safety); priority overrides an earlier departure; collision-free under mixed priorities; default is PASSENGER and no baseline/real/WB train is reprioritised.
+
+### STOPPED at Phase C boundary — awaiting your review before Phase D.
+
+---
+
+## Phase B — Naive-baseline comparison: DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **243 passed** (was 235; +8 Phase B gates). Recompute engine untouched → recompute golden still byte-identical. No console errors.
 
 - **New `engine/baseline_compare.py`** (additive — calls `recompute_schedule`, never changes it): `compare_dispatch()` measures total **passenger-delay-minutes** (coaches × minutes late vs the nominal timetable; coach count = illustrative load proxy, not real bookings) for **(a) naive hold-all** vs **(b) the reroute engine**.
