@@ -1,3 +1,19 @@
+---
+title: Train Dispatch
+emoji: 🚆
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
+<!-- The block above configures Hugging Face Spaces (Docker SDK). It must stay at
+the very top of this file. `app_port: 7860` is the port HF routes to; the
+Dockerfile sets PORT=7860 so run_ui.py binds 0.0.0.0:7860. See SPACES_DEPLOY.md
+(HF) and DEPLOY.md (Render/Railway). The deployed Space serves the West Bengal
+demo at the Space URL. -->
+
 # train-dispatch
 
 A railway dispatch and anomaly-recovery demo: a small 6-station network runs a live
