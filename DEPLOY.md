@@ -42,7 +42,7 @@ and provides `$PORT`. New Project → Deploy from repo → branch `real-railway`
 # Local dev (6-city, opens a browser):       python run_ui.py
 # Simulate the deployed WB site (headless):  PORT=8146 python run_ui.py --wb --no-browser
 #   -> binds 0.0.0.0:8146; open http://127.0.0.1:8146/
-# Tests:                                      python -m pytest -q   # 215 passed
+# Tests:                                      python -m pytest -q   # 230 passed
 ```
 
 ## Notes
