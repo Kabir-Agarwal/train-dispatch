@@ -58,16 +58,18 @@ well under a second.
 thousands of services) with indexed/heuristic routing, time-windowed search, and
 partitioning — full DFS would not scale.
 
-## 6. Reroutes trains, not passengers
-**In this demo:** recovery acts on *trains* (reroute / hold / sequence). It does
-not re-accommodate passengers: no connection protection, no rebooking onto
-another service, no seat/quota or refund handling. The fare panel is illustrative
-load visibility, not a booking system.
-**Why it's acceptable here:** the train plan is the prerequisite; passenger
-recovery is a separate, larger problem.
-**Production would require:** **passenger re-accommodation** — connection/itinerary
-awareness, rebooking and notification, seat/berth inventory, and refund/compensation
-rules.
+## 6. Passenger re-accommodation is basic
+**In this demo:** recovery acts on *trains* (reroute / hold / sequence) AND, when a
+train is cancelled, now computes earliest-arrival **alternative journeys** for its
+passengers over the remaining trains (Connection-Scan, Phase K) — it reroutes the
+people, not just the train. But that is the whole of it: the fare panel is
+illustrative load visibility, not a booking system.
+**Why it's acceptable here:** it gives each affected origin→destination a real
+next-best route + ETA, which is the core of passenger re-accommodation.
+**Production would require:** seat/berth **inventory** and rebooking/ticketing,
+fare adjustment and refunds, onward-**connection protection** across services and
+operators, and passenger notification — none of which this models. So this is
+genuine but partial **passenger re-accommodation**, not a reservation system.
 
 ---
 

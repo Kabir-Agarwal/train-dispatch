@@ -22,7 +22,7 @@ BOUNDARIES = [
     ("no crew / rake scheduling", ("crew", "rake")),
     ("deterministic not stochastic", ("deterministic", "stochastic")),
     ("regional not national scale", ("national", "50")),
-    ("reroutes trains not passengers", ("passenger re-accommodation", "reroute")),
+    ("passenger re-accommodation (now basic)", ("passenger re-accommodation", "reroute")),
 ]
 
 
@@ -57,6 +57,6 @@ def test_page_has_a_system_boundaries_section_pointing_at_the_doc():
         "crew or rake",
         "Deterministic, not stochastic",
         "Regional scale",
-        "Reroutes trains, not passengers",
+        "Passenger re-accommodation is basic",
     ):
         assert marker in html, marker

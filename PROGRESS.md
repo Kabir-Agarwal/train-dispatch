@@ -2,7 +2,22 @@
 
 ## Checkpoint: tag `v1-submittable` (annotated) on 1770ce5 — complete hardened A–F (263 tests), pushed to GitHub. Rollback: `git reset --hard v1-submittable`.
 
-## Phase J — Possession / maintenance scheduling: DONE, awaiting review
+## Phase K — Passenger re-accommodation: DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **298 passed** (was 291; +7 Phase K gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
+
+- **What it computes:** when a train is **cancelled**, the earliest-arriving **alternative journey** for each affected passenger origin→destination pair along its route, over the remaining trains' timetable — a real next-best route + ETA + transfers (reroute the people, not just the train).
+- **Named method:** **Connection-Scan Algorithm (CSA, earliest-arrival)** (`engine/reaccommodation.py`). Every segment hop of every remaining train is a connection (from, to, dep, arr, train); connections are scanned in departure order, boarding one only if the passenger has reached its `from` by its `dep`, improving earliest arrival at `to`; the destination arrival is reconstructed into legs. Zero transfer time (matches the zero-dwell model), labelled. Pure/deterministic, no recompute → golden intact.
+- **Hand-verified CSA case (the gate):** connections A→B (X, 0→10), B→C (Z, 12→20), a too-early B→C (Y, dep 8, missed) and a slower direct A→C (W, 0→30). From A at 0 → earliest arrival at C is **20 via X then Z** (1 transfer) — not the 30 direct, not the missed Y.
+- **Hand-verified LIVE case:** cancelling **T5 (Rupasi Bangla Express, PRR→HWH)** — a passenger **ADRA→KGP** (ready min 65) is re-accommodated via **T4 (ADRA→MDN→KGP)**, arriving **min 233**; cancelling **T6** re-accommodates **PKU→SRC via T5**, arriving 300.
+- **UI:** header **"Passenger re-accommodation (Rupasi Bangla Express (T5) cancelled): re-accommodated 3 of 36 passenger O–D groups onto other trains (33 stranded). e.g. Adra Jn→Midnapore via Asansol–Kharagpur Intercity (T4), ETA min 215"**, shown when exactly one train is cancelled; method in tooltip. `snapshot.reaccommodation` exposes every pair (alternative or stranded).
+- **Honesty (updated SYSTEM_BOUNDARIES + UI boundaries):** Phase K contradicted the old boundary "reroutes trains, not passengers", so I rewrote boundary 6 to **"Passenger re-accommodation is basic"** — it now computes alternative journeys, but still has no seat/berth inventory, rebooking/ticketing, fare adjustment, or onward-connection protection. The boundaries gate was updated to match.
+- **Gate `tests/test_reaccommodation.py`** (7 value-asserting): CSA earliest two-leg journey (20 over the 30 direct); doesn't board a missed connection; unreachable → None (incl. too-late); live T5 ADRA→KGP via T4 ETA 233; live T6 PKU→SRC via T5 ETA 300; unknown train N/A; snapshot surfaces re-accommodation on cancel (and not otherwise).
+
+### STOPPED at Phase K boundary — awaiting your review before Phase L (the final WALL-B phase).
+
+---
+
+## Phase J — Possession / maintenance scheduling: DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **291 passed** (was 284; +7 Phase J gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
 
 - **What it computes:** the lowest-disruption time **window** to take a track segment out of service for a fixed maintenance **duration** (a "possession"), reusing the reroute engine; connected to the cumulative-load **wear flagging** (the flagged segments are the ones that need possessions).
@@ -12,7 +27,7 @@ Built 2026-06-14. Master safe at cd37586. Suite: **291 passed** (was 284; +7 Pha
 - **UI:** header **"Maintenance possession (New Farakka Jn–Malda Town, wear-flagged): best window min 0–60 (+0 min) vs naive 242–302 (3 stranded) — avoids stranding 3 trains (60-min block; displaced trains rerouted)"**, scheduled on the highest-load flagged segment; method in tooltip. `snapshot.possession` exposes the full comparison.
 - **Gate `tests/test_possession.py`** (7 value-asserting): the exact SEG-56 hand case (best 0 / naive 26 / saved 26, displaced sets); smart never worse than naive; an unused segment has zero disruption anywhere; the WB NFK-MLDT stranding-avoidance (naive 3 → smart 0); invalid duration N/A + unknown segment raises; method named (reuses reroute engine); the snapshot schedules the possession on the top flagged segment.
 
-### STOPPED at Phase J boundary — awaiting your review before Phase K.
+### Phase J reviewed & approved.
 
 ---
 

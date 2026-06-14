@@ -27,6 +27,7 @@ from engine.cascade import delay_cascade
 from engine.eco_driving import VMAX_KMPH, eco_profile
 from engine.regen_sync import brake_regen_units, coordinate_regen
 from engine.possession import POSSESSION_DURATION_MIN, best_possession
+from engine.reaccommodation import reaccommodate
 from engine import pricing
 from engine.decision_log import (
     build_decision_log,
@@ -446,6 +447,15 @@ class AppState:
         res["flagged_load"] = flagged[0]["load_score"]
         return res
 
+    def _reaccommodation(self):
+        """Phase K: when exactly one train is cancelled, the earliest-arrival
+        alternative journeys for its affected passengers over the remaining
+        trains (Connection-Scan). {"applicable": False} otherwise."""
+        cancels = [a for a in self.anomalies if isinstance(a, TrainCancelled)]
+        if len(cancels) != 1:
+            return {"applicable": False}
+        return reaccommodate(self.network, self._all_trains(), cancels[0].train_id)
+
     def snapshot(self):
         """Everything the admin view shows. All numbers from the engine."""
         trains = []
@@ -485,6 +495,7 @@ class AppState:
             "eco_driving": self._eco_driving(),
             "regen_sync": self._regen_sync(),
             "possession": self._possession(),
+            "reaccommodation": self._reaccommodation(),
         }
 
     def passenger(self, train_id):

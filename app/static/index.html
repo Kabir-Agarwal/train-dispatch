@@ -132,6 +132,8 @@
   #regen-sync .dc-note { font-weight:500; color:#8a96a5; }
   #possession { margin-top:4px; font-size:13px; font-weight:700; color:#7b1fa2; cursor:help; }
   #possession .dc-note { font-weight:500; color:#8a96a5; }
+  #reaccommodation { margin-top:4px; font-size:13px; font-weight:700; color:#b3471f; cursor:help; }
+  #reaccommodation .dc-note { font-weight:500; color:#8a96a5; }
   /* How-it-works panel */
   details.how-it-works { background:#f8fafc; border:1px solid #dde3ea; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.6; color:#3c4858; }
   details.how-it-works summary { font-weight:700; cursor:pointer; color:#10243e; font-size:13.5px; user-select:none; }
@@ -165,6 +167,7 @@
   <div id="eco-driving" style="display:none"></div>
   <div id="regen-sync" style="display:none"></div>
   <div id="possession" style="display:none"></div>
+  <div id="reaccommodation" style="display:none"></div>
 </header>
 
 <!-- Network map: full-width above the two-column grid -->
@@ -321,9 +324,11 @@
       <li><b>Regional scale (~50 stations), not national.</b> Full path
       enumeration is fine here. National scale would need indexed/heuristic
       routing and partitioning.</li>
-      <li><b>Reroutes trains, not passengers.</b> Recovery acts on the train plan;
-      it does not rebook passengers or protect connections. The fare panel is
-      illustrative load visibility, not a booking system.</li>
+      <li><b>Passenger re-accommodation is basic.</b> Cancelled-train passengers
+      now get earliest-arrival alternative journeys (Connection-Scan), but there
+      is no seat/berth inventory, rebooking/ticketing, fare adjustment, or
+      onward-connection protection. The fare panel is illustrative load
+      visibility, not a booking system.</li>
     </ul>
   </details>
 
@@ -1692,6 +1697,31 @@ function render(snap) {
     posEl.style.display = 'none';
   }
 
+  // Phase K: passenger re-accommodation when a train is cancelled (reroute people)
+  const ra = snap.reaccommodation;
+  const raEl = document.getElementById('reaccommodation');
+  if (ra && ra.applicable) {
+    const tname = id => (trainNames[id] ? trainNames[id] + ' (' + id + ')' : id);
+    const ok = ra.passengers.filter(p => !p.stranded)
+      .sort((a, b) => (b.transfers || 0) - (a.transfers || 0));
+    let ex = '';
+    if (ok.length) {
+      const p = ok[0];
+      const via = [...new Set(p.legs.map(l => tname(l.train)))].join(' → ');
+      ex = ' e.g. ' + dn(p.from) + '→' + dn(p.to) + ' via ' + via + ', ETA min ' + p.eta;
+    }
+    raEl.innerHTML = 'Passenger re-accommodation (' + tname(ra.cancelled) + ' cancelled): '
+      + '<span class="dc-note">re-accommodated ' + ra.reaccommodated + ' of '
+      + ra.total + ' passenger O–D groups onto other trains (' + ra.stranded
+      + ' stranded).' + ex + '</span>';
+    raEl.title = ra.method + '. Each origin→destination pair the cancelled train '
+      + 'served is given the earliest-arriving alternative over the remaining '
+      + 'trains; pairs with no remaining route are reported as stranded.';
+    raEl.style.display = 'block';
+  } else {
+    raEl.style.display = 'none';
+  }
+
   let activeTxt = snap.anomalies.length
     ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
     : 'No active anomalies.';
@@ -2062,6 +2092,7 @@ refreshState();
 // "eco-driving" "Eco-driving" "cruise–coast–brake" "eco_driving"
 // "regen-sync" "Regen sync" "regen_sync"
 // "possession" "Maintenance possession" "wear-flagged"
+// "reaccommodation" "Passenger re-accommodation" "Connection-Scan"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"
