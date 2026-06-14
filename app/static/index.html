@@ -174,6 +174,20 @@
   .train-label { font-size:10px; font-weight:700; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .ghost-seg { stroke-width:8; fill:none; opacity:.5; stroke-dasharray:10,6; }
   .ghost-route { stroke-width:3.5; fill:none; opacity:.8; stroke-dasharray:7,5; }
+  /* Tabs / pages (layout only) */
+  .tabs { display:flex; gap:6px; padding:14px 22px 0; flex-wrap:wrap; }
+  .tab { background:#eef2f7; color:#3c4858; border:1px solid #dde3ea; border-bottom:0;
+         border-radius:8px 8px 0 0; padding:9px 18px; font-size:13.5px; font-weight:700;
+         cursor:pointer; }
+  .tab:hover { background:#e4eaf1; }
+  .tab.active { background:#10243e; color:#fff; border-color:#10243e; }
+  .tab-page { display:none; }
+  .tab-page.active { display:block; }
+  #dispatch-main { grid-template-columns:1fr; }   /* single column once passenger moved out */
+  .page-body { padding:16px 22px; }
+  .analysis-note { font-size:12.5px; color:#8a96a5; margin:0 0 8px; line-height:1.5; }
+  .boundaries-link { margin:0 22px 16px; }
+  .boundaries-link summary { font-size:12.5px; }
 </style>
 </head>
 <body>
@@ -181,15 +195,18 @@
   <h1>Train Dispatch &amp; Anomaly Recovery</h1>
   <div class="total" id="total-delay"></div>
   <div id="dispatch-compare" style="display:none"></div>
-  <div id="delay-cascade" style="display:none"></div>
-  <div id="eco-driving" style="display:none"></div>
-  <div id="regen-sync" style="display:none"></div>
-  <div id="possession" style="display:none"></div>
-  <div id="reaccommodation" style="display:none"></div>
-  <div id="freight" style="display:none"></div>
 </header>
 
-<!-- Network map: full-width above the two-column grid -->
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="dispatch" onclick="showTab('dispatch')">Dispatch</button>
+  <button class="tab" data-tab="analysis" onclick="showTab('analysis')">Analysis</button>
+  <button class="tab" data-tab="passenger" onclick="showTab('passenger')">Passenger</button>
+</nav>
+
+<!-- ===================== DISPATCH ===================== -->
+<div class="tab-page active" id="page-dispatch">
+
+<!-- Network map: full-width above the controls -->
 <section id="map-section">
   <h2>Network map</h2>
   <div id="map-stage">
@@ -313,42 +330,12 @@
   </div>
 </section>
 
-<main>
-<div><!-- left column: ADMIN -->
+<main id="dispatch-main">
+<div><!-- DISPATCH: controls, segment status, schedule board, decision log -->
   <!-- How this works: collapsible explainer -->
   <details class="how-it-works">
     <summary>How this works</summary>
     <p>Trains follow a fixed schedule, moving between stations along track segments at known travel times. The admin can report a problem &mdash; such as a closed track, a speed restriction, or a delayed train &mdash; using the controls below. The system instantly recomputes a new safe plan so that no two trains can ever be on the same track at the same time. The dashed &ldquo;ghosts&rdquo; on the map show the predicted new plan before it is applied, so you can review the impact first. Every decision the system makes is explained step by step in the Decision log below.</p>
-  </details>
-
-  <!-- System boundaries: honest, collapsible statement of deliberate simplifications -->
-  <details class="how-it-works" id="system-boundaries">
-    <summary>System boundaries &mdash; what this demo deliberately simplifies</summary>
-    <p>This is an honest demo, not a signalling-grade system. Each simplification
-    below is intentional; the full write-up with what production would require is in
-    <code>SYSTEM_BOUNDARIES.md</code>.</p>
-    <ul class="boundaries-list">
-      <li><b>Segment exclusivity, not real signalling.</b> Safety = one train per
-      track section at a time (conservative). Production would require fixed-block
-      or moving-block signalling with interlocking and braking curves.</li>
-      <li><b>Single-track assumption.</b> Every link is one shared track; opposing
-      trains are sequenced. Production would model double/multiple track, running
-      lines, loops and platform allocation.</li>
-      <li><b>No crew or rake scheduling.</b> Trains are abstract movers &mdash; no
-      driver duty hours, no physical rake links or turn-arounds. Production would
-      require crew rostering and rolling-stock links.</li>
-      <li><b>Deterministic, not stochastic.</b> Fixed travel times; identical
-      inputs give identical plans. Production would model delay distributions and
-      robust/simulation-based recovery.</li>
-      <li><b>Regional scale (~50 stations), not national.</b> Full path
-      enumeration is fine here. National scale would need indexed/heuristic
-      routing and partitioning.</li>
-      <li><b>Passenger re-accommodation is basic.</b> Cancelled-train passengers
-      now get earliest-arrival alternative journeys (Connection-Scan), but there
-      is no seat/berth inventory, rebooking/ticketing, fare adjustment, or
-      onward-connection protection. The fare panel is illustrative load
-      visibility, not a booking system.</li>
-    </ul>
   </details>
 
   <section>
@@ -458,14 +445,6 @@
       <th>Segment</th><th>Connects</th><th>Status</th><th>Travel time</th><th>Load</th>
     </tr></thead><tbody></tbody></table>
   </section>
-  <section id="maint-section">
-    <h2>Cumulative-load wear flagging</h2>
-    <p class="report-intro" id="maint-intro"></p>
-    <table id="maint-table"><thead><tr>
-      <th>Track</th><th>Load score</th><th>Trains</th><th>Crossings/h</th><th></th>
-    </tr></thead><tbody></tbody></table>
-    <div class="muted" id="maint-none" style="display:none">No segments over the inspection threshold.</div>
-  </section>
   <section>
     <h2>Schedule board</h2>
     <table id="board"><thead><tr>
@@ -478,7 +457,56 @@
     <ul id="log"></ul>
   </section>
 </div>
-<div><!-- right column: PASSENGER -->
+</main>
+
+<!-- Single small collapsed pointer to the boundaries doc (full text kept in the repo) -->
+<details class="how-it-works boundaries-link" id="system-boundaries">
+  <summary>System boundaries &rarr;</summary>
+  <p>This demo makes deliberate simplifications (signalling model, single-track, no
+  crew/rake, deterministic, regional scale, basic passenger re-accommodation). The
+  full statement is in <code>SYSTEM_BOUNDARIES.md</code> in the repository.</p>
+</details>
+
+</div><!-- /page-dispatch -->
+
+<!-- ===================== ANALYSIS ===================== -->
+<div class="tab-page" id="page-analysis">
+<div class="page-body">
+  <section>
+    <h2>Delay cascade</h2>
+    <p class="analysis-note">The knock-on "blast radius" of a delay: which downstream trains inherit delay (via shared single-track sequencing) and how much. Delay a train on the Dispatch tab to populate this.</p>
+    <div id="delay-cascade" style="display:none"></div>
+  </section>
+  <section>
+    <h2>Eco-driving</h2>
+    <p class="analysis-note">Traction-energy saving from holding the scheduled average speed instead of running flat-out to the line cap.</p>
+    <div id="eco-driving" style="display:none"></div>
+  </section>
+  <section>
+    <h2>Regenerative-braking synchronization</h2>
+    <p class="analysis-note">Energy recovered by coordinating accel/brake timing so a braking train feeds an accelerating train on the same power section.</p>
+    <div id="regen-sync" style="display:none"></div>
+  </section>
+  <section id="maint-section">
+    <h2>Cumulative-load wear flagging</h2>
+    <p class="report-intro" id="maint-intro"></p>
+    <table id="maint-table"><thead><tr>
+      <th>Track</th><th>Load score</th><th>Trains</th><th>Crossings/h</th><th></th>
+    </tr></thead><tbody></tbody></table>
+    <div class="muted" id="maint-none" style="display:none">No segments over the inspection threshold.</div>
+    <div id="possession" style="display:none"></div>
+  </section>
+  <section>
+    <h2>Freight yard</h2>
+    <p class="analysis-note">Synthetic wagon classification under track-length + hazmat-adjacency constraints, tied to the network via freight priority.</p>
+    <div id="freight" style="display:none"></div>
+  </section>
+</div>
+</div><!-- /page-analysis -->
+
+<!-- ===================== PASSENGER ===================== -->
+<div class="tab-page" id="page-passenger">
+<div class="page-body">
   <section>
     <h2>Passenger view</h2>
     <div class="controls"><label class="muted">Your train:&nbsp;</label><select id="pass-pick" onchange="refreshPassenger()"></select></div>
@@ -497,9 +525,10 @@
         <div class="muted synthetic-note" id="pass-occ"></div>
       </div>
     </div>
+    <div id="reaccommodation" style="display:none"></div>
   </section>
 </div>
-</main>
+</div><!-- /page-passenger -->
 
 <script>
 // ============================================================
@@ -2132,11 +2161,24 @@ async function reopenTrack() {
 }
 
 // ============================================================
+// Tabs — show one page at a time. Pure show/hide; all elements stay in the DOM
+// (the render targets them by id regardless of which tab is visible), so nothing
+// computational changes and the map/animation keep running.
+// ============================================================
+function showTab(name) {
+  for (const p of document.querySelectorAll('.tab-page'))
+    p.classList.toggle('active', p.id === 'page-' + name);
+  for (const b of document.querySelectorAll('#tabs .tab'))
+    b.classList.toggle('active', b.dataset.tab === name);
+}
+
+// ============================================================
 // Boot
 // ============================================================
 refreshState();
 
 // String literal anchors for automated test greps:
+// "tabs" "page-dispatch" "page-analysis" "page-passenger" "showTab" "Dispatch" "Analysis"
 // "track_closed" "track_blocked" "reduced_speed" "train_delayed" "train_cancelled"
 // "/api/state" "/api/inject" "/api/reset" "/api/passenger/" "/api/preview" "/api/reopen"
 // "Reopen a closed track" "seg-reopen" "reopenTrack" "rakeStyle"

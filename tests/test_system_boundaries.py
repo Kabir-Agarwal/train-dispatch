@@ -41,22 +41,22 @@ def test_each_boundary_says_what_production_would_require():
     assert text.count("production would require") >= len(BOUNDARIES)  # one per boundary
 
 
-def test_page_has_a_system_boundaries_section_pointing_at_the_doc():
+def test_page_has_only_a_small_pointer_to_the_boundaries_doc():
+    """The long boundaries text block was moved out of the page; only a small
+    collapsed 'System boundaries ->' pointer to SYSTEM_BOUNDARIES.md remains.
+    The full text lives in the doc (asserted by the doc tests above, unchanged)."""
     server, url = serve_in_thread(AppState(dataset="wb"))
     try:
         with urllib.request.urlopen(url + "/", timeout=5) as r:
             html = r.read().decode("utf-8")
     finally:
         server.shutdown()
-    for marker in (
-        'id="system-boundaries"',
-        "deliberately simplifies",
-        "SYSTEM_BOUNDARIES.md",
-        "Segment exclusivity",
-        "Single-track assumption",
-        "crew or rake",
-        "Deterministic, not stochastic",
-        "Regional scale",
-        "Passenger re-accommodation is basic",
-    ):
-        assert marker in html, marker
+    # the small pointer is present
+    assert 'id="system-boundaries"' in html
+    assert "System boundaries" in html
+    assert "SYSTEM_BOUNDARIES.md" in html
+    # the long on-page block is gone (these lived only in the removed block)
+    for gone in ("Segment exclusivity", "Single-track assumption",
+                 "Deterministic, not stochastic", "Regional scale (~50",
+                 "Passenger re-accommodation is basic"):
+        assert gone not in html, f"boundaries block not removed: {gone}"
