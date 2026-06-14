@@ -199,7 +199,8 @@
 
 <nav class="tabs" id="tabs">
   <button class="tab active" data-tab="dispatch" onclick="showTab('dispatch')">Dispatch</button>
-  <button class="tab" data-tab="analysis" onclick="showTab('analysis')">Analysis</button>
+  <!-- Analysis tab hidden from the UI (no button) — its page stays in the DOM,
+       display:none, so the panels/modules are retained, just not shown. -->
   <button class="tab" data-tab="passenger" onclick="showTab('passenger')">Passenger</button>
 </nav>
 
