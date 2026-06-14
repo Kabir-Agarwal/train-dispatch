@@ -1,5 +1,16 @@
 # PROGRESS.md
 
+## Final honesty pass (post-audit): DONE
+Built 2026-06-14. Master safe at cd37586. Single commit on top of `v2-complete` (d684dbc); tags `master`/`v1-submittable`/`v2-complete` untouched. Suite: **305 passed** (304 + 1 new combined-anomaly gate). Engine *behaviour* unchanged → recompute golden byte-identical (S4 is a docstring reword only).
+- **S1 — re-accommodation uses the LIVE schedule:** `reaccommodate(..., schedules=)` and `AppState._reaccommodation` build alternatives from the live recomputed station_times, so a suggested alternative never routes via a train that is itself rerouted/delayed/cancelled by another active anomaly. Gate `test_alternatives_reflect_live_schedule_under_a_co_active_anomaly`: with KGP-MDN closed + T5 cancelled, T4 is rerouted off MDN→KGP, so ADRA→KGP is correctly stranded (not the stale T4 route) and no leg runs over the closed track.
+- **S2 — dropped "optimal train control":** eco `_METHOD` + docstring now "eco-driving (cruise–coast–brake) energy model (simplified ∝v², illustrative; not a traction simulation)".
+- **S3 — eco headline:** "holding the scheduled average speed (instead of running flat-out to the line cap) saves ~70% … the cruise–coast–brake profile is illustrative" — saving attributed to the lower average speed, phases illustrative.
+- **S4 — `recompute.py` docstring:** "delay-minimized" → "greedily delay-minimized (not proven-optimal)".
+
+### Final pass complete.
+
+---
+
 ## Checkpoint: tag `v1-submittable` (annotated) on 1770ce5 — complete hardened A–F (263 tests), pushed to GitHub. Rollback: `git reset --hard v1-submittable`.
 
 ## Phase L — Freight handling (connected): DONE, awaiting review — **WALL-B (G–L) COMPLETE**

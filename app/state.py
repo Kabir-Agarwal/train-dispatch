@@ -452,11 +452,21 @@ class AppState:
     def _reaccommodation(self):
         """Phase K: when exactly one train is cancelled, the earliest-arrival
         alternative journeys for its affected passengers over the remaining
-        trains (Connection-Scan). {"applicable": False} otherwise."""
+        trains (Connection-Scan). {"applicable": False} otherwise.
+
+        Alternatives are built from the LIVE recomputed schedule (the running
+        trains' actual station_times under ALL active anomalies), so a suggested
+        alternative never routes via a train that is itself rerouted/delayed/
+        cancelled by another active disruption — it reflects what trains are
+        really doing now."""
         cancels = [a for a in self.anomalies if isinstance(a, TrainCancelled)]
         if len(cancels) != 1:
             return {"applicable": False}
-        return reaccommodate(self.network, self._all_trains(), cancels[0].train_id)
+        live = {tid: [(st, m) for st, m in a.arrivals.items()]
+                for tid, a in self.result.actions.items()
+                if a.arrivals and a.action != "cancelled"}
+        return reaccommodate(self.network, self._all_trains(),
+                             cancels[0].train_id, schedules=live)
 
     def _freight_yield_demo(self):
         """Phase L connection: a synthetic FREIGHT train (lowest priority) and an

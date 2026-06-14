@@ -1,10 +1,12 @@
 """Phase H — eco-driving speed profiles.
 
 For a train that must cover a route of `distance_km` in `scheduled_min`, the
-energy-aware way to drive (optimal train control) is the classic
-CRUISE -> COAST -> BRAKE structure: hold the scheduled average speed, then cut
-power and coast/brake into the stop — instead of running FLAT-OUT to the line
-speed limit and braking the surplus kinetic energy away at the end.
+energy-aware way to drive is the classic CRUISE -> COAST -> BRAKE structure: hold
+the scheduled average speed, then cut power and coast/brake into the stop —
+instead of running FLAT-OUT to the line speed limit and braking the surplus
+kinetic energy away at the end. (NOTE: this module does NOT solve the optimal-
+control problem; the energy saving comes entirely from the lower average speed —
+the coast/brake phases are illustrative, not separately optimised.)
 
 Energy model (simplified, honest): traction must overcome running resistance,
 whose dominant term grows with v**2 (aerodynamic/quadratic Davis term), so the
@@ -78,5 +80,5 @@ def eco_profile(distance_km, scheduled_min, vmax_kmph=VMAX_KMPH):
     }
 
 
-_METHOD = ("optimal train control (cruise–coast–brake); simplified resistance-∝v² "
-           "energy model — illustrative, not a traction simulation")
+_METHOD = ("eco-driving (cruise–coast–brake) energy model (simplified ∝v², "
+           "illustrative; not a traction simulation)")

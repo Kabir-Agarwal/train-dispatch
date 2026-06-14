@@ -76,3 +76,33 @@ def test_snapshot_surfaces_reaccommodation_when_a_train_is_cancelled():
     assert ra["reaccommodated"] >= 1
     p = next(x for x in ra["passengers"] if x["from"] == "ADRA" and x["to"] == "KGP")
     assert p["eta"] == 233 and p["stranded"] is False
+
+
+def test_alternatives_reflect_live_schedule_under_a_co_active_anomaly():
+    """S1: alternatives are built from the LIVE recomputed schedule, so a train
+    that is itself disrupted by another active anomaly is not suggested as it
+    nominally ran. Hand-verified: ADRA->KGP nominally re-accommodates via T4
+    (ADRA->MDN->KGP). With KGP-MDN CLOSED, T4 is itself rerouted off that hop, so
+    the live re-accommodation must NOT offer the stale T4 route — the passenger is
+    correctly stranded, and no suggested leg runs over the closed track."""
+    net, trains = wb.build_network(), wb.build_trains()
+    # nominal (anomaly-free) basis WOULD send ADRA->KGP via T4 — the stale answer
+    nom = reaccommodate(net, trains, "T5")
+    pnom = next(p for p in nom["passengers"] if p["from"] == "ADRA" and p["to"] == "KGP")
+    assert pnom["stranded"] is False
+    assert [l["train"] for l in pnom["legs"]] == ["T4", "T4"]
+
+    # live: close KGP-MDN (T4's path) AND cancel T5
+    s = AppState(dataset="wb")
+    s.reset()
+    s.inject([{"type": "track_closed", "segment": "KGP-MDN"},
+              {"type": "train_cancelled", "train": "T5"}])
+    assert s.result.actions["T4"].action == "reroute"      # T4 itself is disrupted
+    ra = s.snapshot()["reaccommodation"]
+    assert ra["basis"] == "live recomputed schedule — reflects active disruptions"
+    plive = next(p for p in ra["passengers"] if p["from"] == "ADRA" and p["to"] == "KGP")
+    assert plive["stranded"] is True                       # no stale T4 route offered
+    # and NO suggested leg anywhere routes over the closed segment
+    for p in ra["passengers"]:
+        for leg in p["legs"]:
+            assert {leg["from"], leg["to"]} != {"KGP", "MDN"}, "routed over a closed track"

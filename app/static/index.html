@@ -1638,15 +1638,17 @@ function render(snap) {
   const eco = snap.eco_driving;
   const ecoEl = document.getElementById('eco-driving');
   if (eco && eco.applicable) {
-    ecoEl.innerHTML = 'Eco-driving: cruise–coast–brake to schedule saves ~'
-      + eco.fleet_saved_pct + '% traction energy vs flat-out '
+    ecoEl.innerHTML = 'Eco-driving: holding the scheduled average speed (instead of '
+      + 'running flat-out to the line cap) saves ~' + eco.fleet_saved_pct
+      + '% traction energy '
       + '<span class="dc-note">(fleet ' + eco.total_eco_units.toLocaleString()
       + ' vs ' + eco.total_flatout_units.toLocaleString() + ' energy-units over '
       + eco.trains.length + ' trains; line cap ' + eco.vmax_kmph
-      + ' km/h; simplified ∝v² model)</span>';
-    ecoEl.title = eco.method + '. Each train holds its scheduled average speed '
-      + '(cruise, then coast/brake into the stop) instead of running to the line '
-      + 'limit and braking; energy ~ v² × distance.';
+      + ' km/h; energy ∝ v²; the cruise–coast–brake profile is illustrative)</span>';
+    ecoEl.title = eco.method + '. The saving comes from the lower average speed '
+      + '(energy ∝ v² × distance): holding the scheduled ~average speed instead of '
+      + 'sprinting to the line cap and braking. The cruise/coast/brake phases are '
+      + 'illustrative — they do not add separate savings.';
     ecoEl.style.display = 'block';
   } else {
     ecoEl.style.display = 'none';

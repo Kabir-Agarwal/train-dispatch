@@ -34,6 +34,21 @@ def _connections(network, trains, exclude_id):
     return conns
 
 
+def _connections_from_schedules(schedules, exclude_id):
+    """Connections from EXPLICIT per-train schedules ({train_id: [(station,
+    minute), ...]}) — used to build alternatives from the LIVE recomputed
+    schedule so they reflect active closures/delays/reroutes, not the nominal
+    timetable."""
+    conns = []
+    for tid, seq in schedules.items():
+        if tid == exclude_id:
+            continue
+        s = sorted(seq, key=lambda st: st[1])
+        for (a, ta), (b, tb) in zip(s, s[1:]):
+            conns.append({"from": a, "to": b, "dep": ta, "arr": tb, "train": tid})
+    return conns
+
+
 def earliest_journey(connections, origin, destination, ready_time):
     """CSA earliest arrival from `origin` (available at `ready_time`) to
     `destination`. Returns {eta, legs, transfers} or None if unreachable."""
@@ -62,18 +77,27 @@ def earliest_journey(connections, origin, destination, ready_time):
     return {"eta": best[destination], "legs": legs, "transfers": transfers}
 
 
-def reaccommodate(network, trains, cancelled_id):
+def reaccommodate(network, trains, cancelled_id, schedules=None):
     """For a cancelled train, the earliest-arrival alternative for each affected
     passenger O->D pair along its route (ready when the cancelled train would have
     been at the origin). Returns a summary dict; {"applicable": False} if the
-    train id is unknown."""
+    train id is unknown.
+
+    If `schedules` ({train_id: [(station, minute), ...]}) is given, the
+    alternatives are built from THOSE schedules — pass the LIVE recomputed
+    schedule so suggestions reflect every active disruption (a train that is
+    itself rerouted/delayed/cancelled appears with its real times, or not at all).
+    Without it, the nominal anomaly-free timetable is used (standalone/no-anomaly).
+    """
     cancelled = next((t for t in trains if t.id == cancelled_id), None)
     if cancelled is None:
         return {"applicable": False}
 
     arrivals, _ = compute_train_schedule(network, cancelled)
     seq = sorted(arrivals.items(), key=lambda kv: kv[1])     # (station, time) on route
-    conns = _connections(network, trains, cancelled_id)
+    conns = (_connections_from_schedules(schedules, cancelled_id)
+             if schedules is not None
+             else _connections(network, trains, cancelled_id))
 
     passengers = []
     for i in range(len(seq)):
@@ -98,4 +122,7 @@ def reaccommodate(network, trains, cancelled_id):
         "stranded": len(passengers) - len(reacc),
         "passengers": passengers,
         "method": _METHOD,
+        "basis": ("live recomputed schedule — reflects active disruptions"
+                  if schedules is not None
+                  else "nominal timetable (no other anomalies active)"),
     }

@@ -1,5 +1,5 @@
 """Recompute engine (Phase 3): after an anomaly, produce a collision-free,
-delay-minimized schedule with a clear per-train action.
+greedily delay-minimized (not proven-optimal) schedule with a clear per-train action.
 
 Strategy (greedy, per PLAN: not a solver):
 - Trains are placed one at a time in (priority, baseline-departure) order against
