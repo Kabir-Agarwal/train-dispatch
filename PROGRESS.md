@@ -2,7 +2,21 @@
 
 ## Checkpoint: tag `v1-submittable` (annotated) on 1770ce5 — complete hardened A–F (263 tests), pushed to GitHub. Rollback: `git reset --hard v1-submittable`.
 
-## Phase I — Regenerative-braking synchronization: DONE, awaiting review
+## Phase J — Possession / maintenance scheduling: DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **291 passed** (was 284; +7 Phase J gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
+
+- **What it computes:** the lowest-disruption time **window** to take a track segment out of service for a fixed maintenance **duration** (a "possession"), reusing the reroute engine; connected to the cumulative-load **wear flagging** (the flagged segments are the ones that need possessions).
+- **Named method:** **minimum-disruption window search** (`engine/possession.py::best_possession`). Per-train displacement cost comes from the existing engine (recompute with the segment CLOSED → reroute added delay, or STRANDED if no alternative). A window `[start, start+duration]` displaces exactly the trains whose baseline occupancy of the segment overlaps it; each window is scored by **(trains stranded, added delay)** — avoid stranding first, then minimise delay — and the scan returns the best start vs a naive fixed window at the segment's first use. Estimate (displaced trains rerouted), labelled. Calls recompute once, never changes it → golden intact.
+- **Hand-verified case (the gate):** 6-city baseline, SEG-56 (used by T2 [20,29], T4 [30,39]; closing costs T2 +11, T4 +15), 12-min possession. Naive window at first use [20,32] displaces both → **+26 min**; the scan finds empty window [0,12] displacing nobody → **+0**. Smart beats naive by **26 min**.
+- **Hand-verified WB case:** the top wear-flagged segment **NFK-MLDT** — a naive window [242,302] strands **3** trains (T1,T2,T3); the scan finds [0,60] that strands **0** → coordination **avoids 3 strandings**.
+- **UI:** header **"Maintenance possession (New Farakka Jn–Malda Town, wear-flagged): best window min 0–60 (+0 min) vs naive 242–302 (3 stranded) — avoids stranding 3 trains (60-min block; displaced trains rerouted)"**, scheduled on the highest-load flagged segment; method in tooltip. `snapshot.possession` exposes the full comparison.
+- **Gate `tests/test_possession.py`** (7 value-asserting): the exact SEG-56 hand case (best 0 / naive 26 / saved 26, displaced sets); smart never worse than naive; an unused segment has zero disruption anywhere; the WB NFK-MLDT stranding-avoidance (naive 3 → smart 0); invalid duration N/A + unknown segment raises; method named (reuses reroute engine); the snapshot schedules the possession on the top flagged segment.
+
+### STOPPED at Phase J boundary — awaiting your review before Phase K.
+
+---
+
+## Phase I — Regenerative-braking synchronization: DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **284 passed** (was 277; +7 Phase I gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
 
 - **What it computes (builds on H):** coordinating train accel/decel timing so a braking train's regenerated energy is absorbed by an accelerating train on the **same power section** (here, the same station's electrical zone) in the same minute — and the **energy recovered** by coordination vs leaving timing uncoordinated.
@@ -12,7 +26,7 @@ Built 2026-06-14. Master safe at cd37586. Suite: **284 passed** (was 277; +7 Pha
 - **UI:** header **"Regen sync: coordinating accel/brake timing recovers 6,120 energy-units (uncoordinated: 0; +6,120 by coordination) at 2 power sections — Kharagpur Jn, New Jalpaiguri; same-minute transfer, ≤3 min slack, regen ≈ 0.85·v²)"** with method tooltip. `snapshot.regen_sync` exposes pairs/sections/totals.
 - **Gate `tests/test_regen_sync.py`** (7 value-asserting): hand case sync>unsync (100 vs 0); already-aligned needs no coordination; insufficient slack can't sync; different section can't transfer; recovery capped by the smaller side; regen quadratic in speed (brake_regen_units(60)=3060); the live WB snapshot recovers 6 120 at {KGP, NJP} by coordination.
 
-### STOPPED at Phase I boundary — awaiting your review before Phase J.
+### Phase I reviewed & approved.
 
 ---
 

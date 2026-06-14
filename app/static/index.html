@@ -130,6 +130,8 @@
   #eco-driving .dc-note { font-weight:500; color:#8a96a5; }
   #regen-sync { margin-top:4px; font-size:13px; font-weight:700; color:#0d7a5f; cursor:help; }
   #regen-sync .dc-note { font-weight:500; color:#8a96a5; }
+  #possession { margin-top:4px; font-size:13px; font-weight:700; color:#7b1fa2; cursor:help; }
+  #possession .dc-note { font-weight:500; color:#8a96a5; }
   /* How-it-works panel */
   details.how-it-works { background:#f8fafc; border:1px solid #dde3ea; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.6; color:#3c4858; }
   details.how-it-works summary { font-weight:700; cursor:pointer; color:#10243e; font-size:13.5px; user-select:none; }
@@ -162,6 +164,7 @@
   <div id="delay-cascade" style="display:none"></div>
   <div id="eco-driving" style="display:none"></div>
   <div id="regen-sync" style="display:none"></div>
+  <div id="possession" style="display:none"></div>
 </header>
 
 <!-- Network map: full-width above the two-column grid -->
@@ -1662,6 +1665,33 @@ function render(snap) {
     rgEl.style.display = 'none';
   }
 
+  // Phase J: lowest-disruption maintenance possession window for a wear-flagged track
+  const pos = snap.possession;
+  const posEl = document.getElementById('possession');
+  if (pos && pos.applicable) {
+    const seg = withNames(pos.segment);
+    const cost = p => (p.stranded ? p.stranded + ' stranded' + (p.delay ? ', +' + p.delay + ' min' : '')
+                                  : '+' + p.delay + ' min');
+    const best = cost({ stranded: pos.best_stranded, delay: pos.best_delay });
+    const naive = cost({ stranded: pos.naive_stranded, delay: pos.naive_delay });
+    let saved;
+    if (pos.saved_stranded > 0)
+      saved = 'avoids stranding ' + pos.saved_stranded + ' train' + (pos.saved_stranded === 1 ? '' : 's');
+    else if (pos.saved_delay > 0) saved = 'saves ' + pos.saved_delay + ' min of delay';
+    else saved = 'no busier window available';
+    posEl.innerHTML = 'Maintenance possession (' + seg + ', wear-flagged): best window min '
+      + pos.best_start + '–' + pos.best_end + ' (' + best + ') vs naive '
+      + pos.naive_start + '–' + pos.naive_end + ' (' + naive + ') '
+      + '<span class="dc-note">— ' + saved + ' (' + pos.duration + '-min block; '
+      + 'displaced trains rerouted)</span>';
+    posEl.title = pos.method + '. The segment is flagged by the cumulative-load '
+      + 'wear heuristic; the window is chosen to displace the fewest/cheapest '
+      + 'trains (avoid stranding first, then minimise added delay).';
+    posEl.style.display = 'block';
+  } else {
+    posEl.style.display = 'none';
+  }
+
   let activeTxt = snap.anomalies.length
     ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
     : 'No active anomalies.';
@@ -2031,6 +2061,7 @@ refreshState();
 // "delay-cascade" "Delay blast radius" "delay_cascade"
 // "eco-driving" "Eco-driving" "cruise–coast–brake" "eco_driving"
 // "regen-sync" "Regen sync" "regen_sync"
+// "possession" "Maintenance possession" "wear-flagged"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"

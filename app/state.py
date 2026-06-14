@@ -26,6 +26,7 @@ from engine.baseline_compare import compare_dispatch
 from engine.cascade import delay_cascade
 from engine.eco_driving import VMAX_KMPH, eco_profile
 from engine.regen_sync import brake_regen_units, coordinate_regen
+from engine.possession import POSSESSION_DURATION_MIN, best_possession
 from engine import pricing
 from engine.decision_log import (
     build_decision_log,
@@ -431,6 +432,20 @@ class AppState:
         res["pair_count"] = len(res["pairs"])
         return res
 
+    def _possession(self):
+        """Phase J: lowest-disruption maintenance possession window for the
+        highest-load WEAR-FLAGGED segment (connects to the cumulative-load
+        flagging), reusing the reroute engine. {"applicable": False} if nothing
+        is flagged."""
+        flagged = self._maintenance()["flagged"]
+        if not flagged:
+            return {"applicable": False}
+        seg = flagged[0]["id"]
+        res = best_possession(self.network, self._all_trains(), seg,
+                              POSSESSION_DURATION_MIN)
+        res["flagged_load"] = flagged[0]["load_score"]
+        return res
+
     def snapshot(self):
         """Everything the admin view shows. All numbers from the engine."""
         trains = []
@@ -469,6 +484,7 @@ class AppState:
             "delay_cascade": getattr(self, "cascade", {"applicable": False}),
             "eco_driving": self._eco_driving(),
             "regen_sync": self._regen_sync(),
+            "possession": self._possession(),
         }
 
     def passenger(self, train_id):
