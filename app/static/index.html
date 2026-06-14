@@ -75,6 +75,22 @@
                 border:1px solid #e8c48a; white-space:nowrap; }
   .seg-load { font-variant-numeric:tabular-nums; color:#5a6779; }
   td.num { font-variant-numeric:tabular-nums; }
+  /* Schedule board readability (display only — fixed columns + clean wrapping) */
+  #board { table-layout:fixed; }
+  #board th:nth-child(1), #board td:nth-child(1) { width:9%; }   /* Train */
+  #board th:nth-child(2), #board td:nth-child(2) { width:9%; }   /* Action */
+  #board th:nth-child(3), #board td:nth-child(3) { width:6%; }   /* Departs */
+  #board th:nth-child(4), #board td:nth-child(4) { width:30%; }  /* Arrivals */
+  #board th:nth-child(5), #board td:nth-child(5) { width:8%; }   /* delay */
+  #board th:nth-child(6), #board td:nth-child(6) { width:38%; }  /* Why */
+  #board td { word-break:break-word; overflow-wrap:anywhere; }
+  .arr-cell .arr-od { font-weight:600; color:#16263d; }
+  .arr-cell .arr-od b { font-weight:700; }
+  .arr-stops { margin-top:2px; }
+  .arr-stops > summary { cursor:pointer; font-size:11px; color:#6a7686; }
+  .arr-mid { display:block; font-size:11.5px; color:#8a96a5; line-height:1.5; margin-top:2px; }
+  .why-cell { font-size:12px; line-height:1.4; white-space:normal;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
   /* Network map section: full-width above the grid */
   #map-section { background:#fff; border-radius:12px; padding:16px 18px; box-shadow:0 1px 3px rgba(16,36,62,.12); margin:16px 22px 0; }
   #map-section h2 { margin-bottom:10px; }
@@ -1810,9 +1826,23 @@ function render(snap) {
   const attrsAll = snap.train_attrs || {};
   const addedSet = new Set(snap.added_train_ids || []);
   for (const t of snap.trains) {
-    const arr = t.arrivals
-      ? Object.entries(t.arrivals).map(([st, m]) => dn(st) + '@' + m).join('  ')
-      : '&mdash;';
+    // Arrivals: origin -> destination prominent; intermediate stops collapsed.
+    let arr = '&mdash;';
+    if (t.arrivals) {
+      const e = Object.entries(t.arrivals);
+      if (e.length) {
+        const first = e[0], last = e[e.length - 1];
+        arr = `<span class="arr-od"><b>${dn(first[0])}</b> ${first[1]}` +
+          ` &rarr; <b>${dn(last[0])}</b> ${last[1]}</span>`;
+        const mids = e.slice(1, -1);
+        if (mids.length) {
+          const midStr = mids.map(([st, m]) => dn(st) + ' ' + m).join(' &middot; ');
+          arr += `<details class="arr-stops"><summary>+${mids.length} stop` +
+            `${mids.length > 1 ? 's' : ''}</summary>` +
+            `<span class="arr-mid">${midStr}</span></details>`;
+        }
+      }
+    }
     const delay = t.added_delay === null ? '&mdash;'
       : (t.added_delay > 0 ? '+' : '') + t.added_delay + ' min';
     // Display-only attributes (real corridor): loco class + driver employee no.
@@ -1826,8 +1856,8 @@ function render(snap) {
     const addedTag = addedSet.has(t.id) ? '<span class="added-tag">added</span>' : '';
     board.insertAdjacentHTML('beforeend',
       `<tr><td><b>${t.id}</b>${addedTag}${attrLine}</td><td><span class="pill ${t.action}">${t.action.replace('_',' ')}</span></td>` +
-      `<td class="num">${t.depart_at ?? '&mdash;'}</td><td class="num">${arr}</td>` +
-      `<td class="num">${delay}</td><td class="muted">${withNames(t.reason)}</td></tr>`);
+      `<td class="num">${t.depart_at ?? '&mdash;'}</td><td class="arr-cell">${arr}</td>` +
+      `<td class="num">${delay}</td><td class="why-cell muted" title="${withNames(t.reason).replace(/"/g, '&quot;')}">${withNames(t.reason)}</td></tr>`);
   }
 
   document.getElementById('trigger').textContent = withNames(snap.trigger_text || '');
