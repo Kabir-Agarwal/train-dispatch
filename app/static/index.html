@@ -162,6 +162,8 @@
   .station-circle { stroke:#fff; stroke-width:1.6; }
   .station-ring { stroke:#fff; stroke-width:1.4; }    /* transit-stop station symbol */
   .train-rake rect, .train-rake path { stroke-linejoin:round; }   /* metro-rake train glyph */
+  .cascade-min { font-size:11px; font-weight:800; paint-order:stroke; stroke:#fff;
+                 stroke-width:3; stroke-linejoin:round; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .graticule { stroke:#dde4ec; stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
   .graticule-label { font-size:8.5px; fill:#b3bdc9; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .leader { stroke:#aab6c2; stroke-width:1; fill:none; }
@@ -299,6 +301,14 @@
     <span class="legend-item">
       <svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#e0972a" stroke-width="8" stroke-linecap="round" opacity="0.5"/></svg>
       flagged for inspection (high load)
+    </span>
+    <span class="legend-item">
+      <svg width="20" height="14"><circle cx="10" cy="7" r="5.5" fill="none" stroke="#d23b32" stroke-width="2.5"/></svg>
+      delayed train
+    </span>
+    <span class="legend-item">
+      <svg width="20" height="14"><circle cx="10" cy="7" r="5.5" fill="none" stroke="#e0972a" stroke-width="2.5"/></svg>
+      knock-on delay
     </span>
   </div>
   <div class="map-controls">
@@ -544,6 +554,7 @@ const v    = (id) => byId(id).value;   // current value of a select/input
 // ============================================================
 let displayNames = {};
 let trainNames = {};   // train id -> real service name (display only)
+let delayCascade = null;   // active delay-cascade snapshot (display only); drives the on-map ripple highlight
 
 // Replace any KNOWN station-code token in text with its real name, so no raw
 // codes ever surface in prose. Covers the 6-city S1..S6 (a subset of this) and
@@ -928,6 +939,22 @@ function wbStationGlyph(x, y, r) {
 // APPROVED train glyph: a metro rake (2 coaches + a streamlined engine), in the
 // train's colour, centred on its position (px, py) and rotated to the segment
 // heading so the ENGINE leads. Fixed pixel geometry (same at every zoom level).
+// Delay-cascade highlight: a coloured glow ring (+ "+Nm" label) drawn behind a
+// train to show the ripple — primary delayed train in red, affected downstream
+// trains in amber. Display only; reads the existing cascade computation.
+function cascadeHalo(px, py, color, label) {
+  const g = svgEl('g', { class: 'cascade-halo' });
+  g.appendChild(svgEl('circle', { cx: px, cy: py, r: 19, fill: 'none',
+    stroke: color, 'stroke-width': 2, opacity: 0.28 }));
+  g.appendChild(svgEl('circle', { cx: px, cy: py, r: 13, fill: 'none',
+    stroke: color, 'stroke-width': 3, opacity: 0.9 }));
+  if (label) {
+    g.appendChild(svgEl('text', { x: px + 15, y: py - 11, class: 'cascade-min',
+      fill: color }, label));
+  }
+  return g;
+}
+
 function trainRakeGlyph(px, py, angDeg, color, moving) {
   // C1: a rake is SOLID only while actively travelling; parked (before
   // departure / after arrival) it is a dimmed HOLLOW outline so it clearly
@@ -1345,12 +1372,26 @@ function drawTrains(trains, t, coords, colorMap) {
   clearGroup('train-group');
   const tG = document.getElementById('train-group');
 
+  // Delay-cascade ripple highlight (display only): primary delayed train + the
+  // downstream trains it makes late, from the existing cascade computation.
+  const affected = {};
+  if (delayCascade) for (const d of (delayCascade.downstream || [])) affected[d.id] = d.minutes;
+
   for (const train of trains) {
     if (!train.station_times) continue; // cancelled/stranded: no marker
 
     const place = trainPlace(train.station_times, t, coords);
     if (!place) continue;
     const [px, py] = place.pos;          // always exactly on a track segment
+
+    // glow ring BEHIND the rake when this train is in the active cascade
+    if (delayCascade) {
+      if (train.id === delayCascade.train) {
+        tG.appendChild(cascadeHalo(px, py, '#d23b32', '+' + delayCascade.minutes + 'm'));
+      } else if (affected[train.id] != null) {
+        tG.appendChild(cascadeHalo(px, py, '#e0972a', '+' + affected[train.id] + 'm'));
+      }
+    }
 
     const color = colorMap[train.id] || '#888';
 
@@ -1657,6 +1698,9 @@ function render(snap) {
 
   // Phase G: delay cascade "blast radius" (only when a single train delay is active)
   const cas = snap.delay_cascade;
+  // Drive the on-map cascade highlight from the SAME computation (display only;
+  // null when not applicable, so it clears on reset). drawTrains reads this.
+  delayCascade = (cas && cas.applicable) ? cas : null;
   const casEl = document.getElementById('delay-cascade');
   if (cas && cas.applicable) {
     const tn = id => (trainNames[id] ? trainNames[id] + ' (' + id + ')' : id);
