@@ -164,6 +164,10 @@
   .train-rake rect, .train-rake path { stroke-linejoin:round; }   /* metro-rake train glyph */
   .cascade-min { font-size:11px; font-weight:800; paint-order:stroke; stroke:#fff;
                  stroke-width:3; stroke-linejoin:round; font-family:system-ui,Segoe UI,Arial,sans-serif; }
+  .pass-journey { font-size:12.5px; color:#3c4858; line-height:1.7; margin:6px auto 0; max-width:440px; }
+  .pass-journey .jl { font-weight:700; color:#5a6779; }
+  .pass-journey .jt { font-variant-numeric:tabular-nums; color:#8a96a5; }
+  .pass-journey .ja { color:#b3bdc9; }
   .graticule { stroke:#dde4ec; stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
   .graticule-label { font-size:8.5px; fill:#b3bdc9; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .leader { stroke:#aab6c2; stroke-width:1; fill:none; }
@@ -525,6 +529,7 @@
       <div class="muted" id="pass-train"></div>
       <div class="eta" id="pass-eta">&#8212;</div>
       <div class="reason" id="pass-text"></div>
+      <div class="pass-journey" id="pass-journey"></div>
       <div class="fare-block" id="pass-fare-block">
         <div class="fare-label" id="pass-fare-label">Indicative fare <span class="muted">&middot; rule-based load visibility (not surge pricing)</span></div>
         <div class="fare-amount" id="pass-fare">&#8212;</div>
@@ -623,11 +628,16 @@ function fillReopenSelect(segments) {
 // Trains CAN grow (live add), so rebuild when the count changes, preserving the
 // current selection. #pass-pick (passenger view) is filled the same way.
 function fillTrainSelects(trains) {
+  // Order T1, T2, ... T10, T11, T12 numerically (the snapshot is sorted as
+  // strings, which would read T1, T10, T11, T12, T2, ...). Display only.
+  const tNum = id => { const m = /^T(\d+)$/.exec(id || ''); return m ? +m[1] : 1e9; };
+  const ordered = [...trains].sort((a, b) => tNum(a.id) - tNum(b.id)
+    || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   for (const sel of document.querySelectorAll('select.train-sel, #pass-pick')) {
-    if (sel.options.length === trains.length) continue;
+    if (sel.options.length === ordered.length) continue;
     const cur = sel.value;
     sel.innerHTML = '';
-    for (const t of trains) {
+    for (const t of ordered) {
       const o = document.createElement('option');
       o.value = t.id;
       const st = t.station_times;
@@ -2007,6 +2017,19 @@ async function refreshPassenger() {
   document.getElementById('pass-eta').textContent =
     p.eta === null ? '—' : 'min ' + p.eta;
   document.getElementById('pass-text').textContent = withNames(p.text);
+
+  // Journey: stations in the actual TRAVEL ORDER (origin first -> destination
+  // last), read from the snapshot's station_times sorted by minute. Display only.
+  const jrnEl = document.getElementById('pass-journey');
+  const sel = (currentSnap.trains || []).find(t => t.id === p.train_id);
+  if (sel && sel.station_times && sel.station_times.length) {
+    const stops = [...sel.station_times].sort((a, b) => a[1] - b[1]);
+    jrnEl.innerHTML = '<span class="jl">Journey:</span> ' + stops
+      .map(([st, m]) => dn(st) + ' <span class="jt">' + m + '</span>')
+      .join(' <span class="ja">&rarr;</span> ');
+  } else {
+    jrnEl.innerHTML = '';
+  }
 
   // Rule-based LOAD VISIBILITY (not surge pricing). The fare is frozen while the
   // train is disrupted, so an incident never surges a passenger's fare.
