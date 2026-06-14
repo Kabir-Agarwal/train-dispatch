@@ -2,7 +2,22 @@
 
 ## Checkpoint: tag `v1-submittable` (annotated) on 1770ce5 — complete hardened A–F (263 tests), pushed to GitHub. Rollback: `git reset --hard v1-submittable`.
 
-## Phase K — Passenger re-accommodation: DONE, awaiting review
+## Phase L — Freight handling (connected): DONE, awaiting review — **WALL-B (G–L) COMPLETE**
+Built 2026-06-14. Master safe at cd37586. Suite: **304 passed** (was 298; +6 Phase L gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
+
+- **What it computes (Part 1 — yard):** classification of N inbound wagons to M destination tracks under **track-length (capacity)** and **hazmat-adjacency** (no two hazardous wagons next to each other) constraints, minimising **reshuffles**. Synthetic yard data, clearly labelled.
+- **Named method:** **greedy constrained classification** (`engine/freight.py`): each wagon → its destination track; reworked (a reshuffle) only when the track is full or appending would put two hazmat wagons adjacent — so forced reshuffles are minimised. `is_valid_classification` re-checks capacity + hazmat adjacency.
+- **Connection (Part 2):** each destination track becomes a **freight train at `PRIORITY_FREIGHT`** (the lowest class built in Phase C); it runs on the network and **yields** to express/passenger under contention via the **existing recompute** (not a new mechanism). `AppState._freight_yield_demo` builds a synthetic freight vs express head-on on a real segment and shows the freight held.
+- **Hand-verified yard case (the gate):** dests A (cap 3), B (cap 2), inbound [a1, a2ₕ, a3ₕ, b1, b2, b3] → A=[a1,a2ₕ], B=[b1,b2]; **a3 reworked (hazmat-adjacency), b3 reworked (track-full) → 2 reshuffles**, both tracks valid.
+- **Hand-verified connection:** on baseline SEG-12, **express unchanged @0, freight held @11** (collision-free); freight also yields to a default passenger train. `PRIORITY_FREIGHT < PASSENGER < EXPRESS`.
+- **UI:** header **"Freight yard (synthetic): 12 wagons → 3 classification tracks, 2 reshuffles, length + hazmat constraints satisfied. Each track → a lowest-priority freight train; FREIGHT-demo yields to EXPRESS-demo on Howrah Jn–Bally (held to min 9). (illustrative yard data)"**; method/synthetic note in tooltip. `snapshot.freight` exposes tracks, rework, freight trains, and the priority demo.
+- **Gate `tests/test_freight.py`** (6 value-asserting): the exact hand-verified yard instance (2 reshuffles, both reasons, valid); validity check catches over-capacity and hazmat-adjacency; synthetic yard deterministic + valid + within capacity; freight yields to an express (reusing Phase C, collision-free); freight is lowest priority and yields to a passenger too; snapshot exposes the yard + the freight-yields-via-engine connection.
+
+### STOPPED at Phase L boundary — **G–L set complete.** Awaiting your review.
+
+---
+
+## Phase K — Passenger re-accommodation: DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **298 passed** (was 291; +7 Phase K gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
 
 - **What it computes:** when a train is **cancelled**, the earliest-arriving **alternative journey** for each affected passenger origin→destination pair along its route, over the remaining trains' timetable — a real next-best route + ETA + transfers (reroute the people, not just the train).
@@ -13,7 +28,7 @@ Built 2026-06-14. Master safe at cd37586. Suite: **298 passed** (was 291; +7 Pha
 - **Honesty (updated SYSTEM_BOUNDARIES + UI boundaries):** Phase K contradicted the old boundary "reroutes trains, not passengers", so I rewrote boundary 6 to **"Passenger re-accommodation is basic"** — it now computes alternative journeys, but still has no seat/berth inventory, rebooking/ticketing, fare adjustment, or onward-connection protection. The boundaries gate was updated to match.
 - **Gate `tests/test_reaccommodation.py`** (7 value-asserting): CSA earliest two-leg journey (20 over the 30 direct); doesn't board a missed connection; unreachable → None (incl. too-late); live T5 ADRA→KGP via T4 ETA 233; live T6 PKU→SRC via T5 ETA 300; unknown train N/A; snapshot surfaces re-accommodation on cancel (and not otherwise).
 
-### STOPPED at Phase K boundary — awaiting your review before Phase L (the final WALL-B phase).
+### Phase K reviewed & approved.
 
 ---
 

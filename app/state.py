@@ -28,6 +28,8 @@ from engine.eco_driving import VMAX_KMPH, eco_profile
 from engine.regen_sync import brake_regen_units, coordinate_regen
 from engine.possession import POSSESSION_DURATION_MIN, best_possession
 from engine.reaccommodation import reaccommodate
+from engine.freight import classify, synthetic_yard
+from engine.model import PRIORITY_EXPRESS, PRIORITY_FREIGHT
 from engine import pricing
 from engine.decision_log import (
     build_decision_log,
@@ -456,6 +458,49 @@ class AppState:
             return {"applicable": False}
         return reaccommodate(self.network, self._all_trains(), cancels[0].train_id)
 
+    def _freight_yield_demo(self):
+        """Phase L connection: a synthetic FREIGHT train (lowest priority) and an
+        EXPRESS train contend head-on on a real segment; the existing recompute
+        (Phase C priority) makes the freight YIELD. Self-contained — does not
+        touch the live schedule."""
+        seg_id = self.network.segment_ids()[0]
+        a, b = self.network.segment(seg_id).endpoints
+        exp = Train("EXPRESS-demo", a, b, (seg_id,), 0, priority=PRIORITY_EXPRESS)
+        frt = Train("FREIGHT-demo", b, a, (seg_id,), 0, priority=PRIORITY_FREIGHT)
+        res = recompute_schedule(self.network, [exp, frt], [])
+        ea, fa = res.actions["EXPRESS-demo"], res.actions["FREIGHT-demo"]
+        return {
+            "segment": seg_id,
+            "express": {"id": exp.id, "action": ea.action, "depart": ea.depart_at},
+            "freight": {"id": frt.id, "action": fa.action, "depart": fa.depart_at},
+            "freight_yields": fa.action == "hold" and ea.action == "unchanged",
+        }
+
+    def _freight(self):
+        """Phase L: synthetic freight-yard classification (length + hazmat
+        constraints, minimising reshuffles) tied to the network — each track
+        becomes a lowest-priority freight train that yields under contention."""
+        wagons, caps = synthetic_yard()
+        cls = classify(wagons, caps)
+        tracks = [{"dest": d, "wagons": [w.id for w in ws], "count": len(ws),
+                   "hazmat": sum(1 for w in ws if w.hazmat), "capacity": caps[d]}
+                  for d, ws in cls["tracks"].items()]
+        freight_trains = [{"id": "FR-" + t["dest"], "to": t["dest"],
+                           "wagons": t["count"], "priority": "freight"}
+                          for t in tracks if t["count"]]
+        return {
+            "applicable": True,
+            "synthetic": True,
+            "note": "SYNTHETIC yard data — illustrative, not a real wagon manifest",
+            "wagons": len(wagons), "destinations": len(caps), "capacities": caps,
+            "tracks": tracks, "rework": cls["rework"],
+            "reshuffles": cls["reshuffles"], "valid": cls["valid"],
+            "freight_trains": freight_trains,
+            "priority_demo": self._freight_yield_demo(),
+            "method": "greedy constrained classification (rework only on capacity/"
+                      "hazmat-adjacency); freight = lowest priority, yields via Phase C",
+        }
+
     def snapshot(self):
         """Everything the admin view shows. All numbers from the engine."""
         trains = []
@@ -496,6 +541,7 @@ class AppState:
             "regen_sync": self._regen_sync(),
             "possession": self._possession(),
             "reaccommodation": self._reaccommodation(),
+            "freight": self._freight(),
         }
 
     def passenger(self, train_id):
