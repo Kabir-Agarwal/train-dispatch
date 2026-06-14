@@ -126,6 +126,8 @@
   #dispatch-compare .dc-note { font-weight:500; color:#8a96a5; }
   #delay-cascade { margin-top:4px; font-size:13px; font-weight:700; color:#b3471f; cursor:help; }
   #delay-cascade .dc-note { font-weight:500; color:#8a96a5; }
+  #eco-driving { margin-top:4px; font-size:13px; font-weight:700; color:#0d7a5f; cursor:help; }
+  #eco-driving .dc-note { font-weight:500; color:#8a96a5; }
   /* How-it-works panel */
   details.how-it-works { background:#f8fafc; border:1px solid #dde3ea; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.6; color:#3c4858; }
   details.how-it-works summary { font-weight:700; cursor:pointer; color:#10243e; font-size:13.5px; user-select:none; }
@@ -156,6 +158,7 @@
   <div class="total" id="total-delay"></div>
   <div id="dispatch-compare" style="display:none"></div>
   <div id="delay-cascade" style="display:none"></div>
+  <div id="eco-driving" style="display:none"></div>
 </header>
 
 <!-- Network map: full-width above the two-column grid -->
@@ -1617,6 +1620,24 @@ function render(snap) {
     casEl.style.display = 'none';
   }
 
+  // Phase H: eco-driving (cruise-coast-brake) energy saved vs flat-out running
+  const eco = snap.eco_driving;
+  const ecoEl = document.getElementById('eco-driving');
+  if (eco && eco.applicable) {
+    ecoEl.innerHTML = 'Eco-driving: cruise–coast–brake to schedule saves ~'
+      + eco.fleet_saved_pct + '% traction energy vs flat-out '
+      + '<span class="dc-note">(fleet ' + eco.total_eco_units.toLocaleString()
+      + ' vs ' + eco.total_flatout_units.toLocaleString() + ' energy-units over '
+      + eco.trains.length + ' trains; line cap ' + eco.vmax_kmph
+      + ' km/h; simplified ∝v² model)</span>';
+    ecoEl.title = eco.method + '. Each train holds its scheduled average speed '
+      + '(cruise, then coast/brake into the stop) instead of running to the line '
+      + 'limit and braking; energy ~ v² × distance.';
+    ecoEl.style.display = 'block';
+  } else {
+    ecoEl.style.display = 'none';
+  }
+
   let activeTxt = snap.anomalies.length
     ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
     : 'No active anomalies.';
@@ -1984,6 +2005,7 @@ refreshState();
 // "Passenger view" "pass-eta" "How this works" "Report a problem"
 // "System boundaries" "system-boundaries" "SYSTEM_BOUNDARIES.md" "deliberately simplifies"
 // "delay-cascade" "Delay blast radius" "delay_cascade"
+// "eco-driving" "Eco-driving" "cruise–coast–brake" "eco_driving"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"

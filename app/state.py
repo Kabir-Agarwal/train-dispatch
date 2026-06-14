@@ -24,6 +24,7 @@ from engine.anomalies import (
 from engine.maintenance import flagged_segments, segment_load
 from engine.baseline_compare import compare_dispatch
 from engine.cascade import delay_cascade
+from engine.eco_driving import VMAX_KMPH, eco_profile
 from engine import pricing
 from engine.decision_log import (
     build_decision_log,
@@ -359,6 +360,43 @@ class AppState:
             "flagged": flagged_list,
         }
 
+    def _eco_driving(self):
+        """Phase H: per-train eco-driving (cruise-coast-brake) profiles over the
+        live schedule + the fleet energy saved vs flat-out running. Pure
+        arithmetic over the current actions (no recompute)."""
+        rows = []
+        tot_flat = tot_eco = 0
+        for tid in sorted(self.result.actions, key=lambda x: (len(x), x)):
+            a = self.result.actions[tid]
+            if not a.path or not a.arrivals:
+                continue
+            dist = pricing.route_distance(self.network, a.path)
+            journey = max(a.arrivals.values()) - a.depart_at
+            prof = eco_profile(dist, journey)
+            if not prof.get("feasible"):
+                continue
+            rows.append({
+                "id": tid,
+                "distance_km": dist,
+                "cruise_speed_kmph": prof["cruise_speed_kmph"],
+                "energy_saved_pct": prof["energy_saved_pct"],
+                "energy_saved_units": prof["energy_saved_units"],
+            })
+            tot_flat += prof["energy_flatout_units"]
+            tot_eco += prof["energy_eco_units"]
+        if not rows:
+            return {"applicable": False}
+        return {
+            "applicable": True,
+            "vmax_kmph": VMAX_KMPH,
+            "trains": rows,
+            "total_flatout_units": tot_flat,
+            "total_eco_units": tot_eco,
+            "total_saved_units": tot_flat - tot_eco,
+            "fleet_saved_pct": round((1 - tot_eco / tot_flat) * 100) if tot_flat else 0,
+            "method": eco_profile(1, 1)["method"],
+        }
+
     def snapshot(self):
         """Everything the admin view shows. All numbers from the engine."""
         trains = []
@@ -395,6 +433,7 @@ class AppState:
             "total_added_delay": self.result.total_added_delay,
             "dispatch_comparison": getattr(self, "comparison", {"applicable": False}),
             "delay_cascade": getattr(self, "cascade", {"applicable": False}),
+            "eco_driving": self._eco_driving(),
         }
 
     def passenger(self, train_id):

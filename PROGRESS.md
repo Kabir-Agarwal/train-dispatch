@@ -2,7 +2,20 @@
 
 ## Checkpoint: tag `v1-submittable` (annotated) on 1770ce5 — complete hardened A–F (263 tests), pushed to GitHub. Rollback: `git reset --hard v1-submittable`.
 
-## Phase G — Delay cascade prediction (blast radius): DONE, awaiting review
+## Phase H — Eco-driving speed profiles: DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **277 passed** (was 270; +7 Phase H gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
+
+- **What it computes:** per train, an energy-minimizing **cruise–coast–brake** speed profile that still meets the scheduled arrival, plus the **energy saved vs flat-out** running to the line limit.
+- **Named method:** **optimal train control (cruise–coast–brake) with a simplified resistance-∝v² energy model** (`engine/eco_driving.py::eco_profile`). Holding the scheduled average speed `v_avg = distance / time` (then coasting/braking into the stop) costs `~v_avg² × distance`; a flat-out run to the line cap `Vmax` costs `~Vmax² × distance`, so `energy_saved = 1 − (v_avg/Vmax)²`. Illustrative (constant resistance coeff, no gradient/regen) and labelled as such — not a traction simulation. Pure arithmetic, no recompute → golden intact. `VMAX_KMPH = 110` (line cap, illustrative); datasets schedule ~60 km/h.
+- **Hand-verified case (the gate):** 10 km in 10 min = 60 km/h avg vs a 110 cap → flat-out `110²·10 = 121 000`, eco `60²·10 = 36 000`, saved `85 000 = 1 − (60/110)² = 70 %`; profile meets arrival and uses less energy. A looser 10 km/15 min (40 km/h) saves more (87 %); a 10 km/5 min schedule (needs 120 km/h) is correctly infeasible.
+- **UI:** header line **"Eco-driving: cruise–coast–brake to schedule saves ~70% traction energy vs flat-out (fleet 9,039,600 vs 30,383,100 energy-units over 12 trains; line cap 110 km/h; simplified ∝v² model)"** with the method in the tooltip; shown whenever trains are running. Per-train profiles exposed in `snapshot.eco_driving`.
+- **Gate `tests/test_eco_driving.py`** (7 value-asserting): exact hand-verified segment (121k/36k/85k/70 %, meets arrival, less energy); phases are cruise/coast/brake (power on/off/off) covering the route distance; more slack saves strictly more; schedule above the line cap is infeasible; zero/negative inputs N/A; method named/honest; snapshot exposes a fleet saving (70 % at the scheduled 60 km/h) with per-train rows.
+
+### STOPPED at Phase H boundary — awaiting your review before Phase I.
+
+---
+
+## Phase G — Delay cascade prediction (blast radius): DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **270 passed** (was 263; +7 Phase G gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
 
 - **What it computes:** given a primary delay on one train, the **blast radius** — which downstream trains inherit delay (via shared single-track segments + the engine's collision-free sequencing) and by how many minutes.
@@ -11,7 +24,7 @@ Built 2026-06-14. Master safe at cd37586. Suite: **270 passed** (was 263; +7 Pha
 - **UI:** header **"Delay blast radius: delaying T2 by 2 min cascades to 1 train — T4 +2 min (2 knock-on min total)"** (with method tooltip), shown only when exactly one train-delay is active; uses real service names where available; hides on reset. Cached on state change (extra recomputes run once per action, not per frame).
 - **Gate `tests/test_cascade.py`** (7 value-asserting): the exact hand-verified T2→T4 +2 case; an isolated train (T3 on its sole SEG-26) has zero blast radius; a larger delay still hits T4 and total knock-on is monotonic non-decreasing; N/A for unknown train / zero delay; the method is named/honest; the snapshot surfaces a value matching the engine and clears on reset.
 
-### STOPPED at Phase G boundary — awaiting your review before Phase H.
+### Phase G reviewed & approved.
 
 ---
 
