@@ -1,6 +1,20 @@
 # PROGRESS.md
 
-## Phase A — Single-track / opposing moves: INVESTIGATED, no gap, gate added. DONE, awaiting review
+## Phase B — Naive-baseline comparison: DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **243 passed** (was 235; +8 Phase B gates). Recompute engine untouched → recompute golden still byte-identical. No console errors.
+
+- **New `engine/baseline_compare.py`** (additive — calls `recompute_schedule`, never changes it): `compare_dispatch()` measures total **passenger-delay-minutes** (coaches × minutes late vs the nominal timetable; coach count = illustrative load proxy, not real bookings) for **(a) naive hold-all** vs **(b) the reroute engine**.
+- **Fair, apples-to-apples:** both policies are kept collision-free by the SAME engine. Naive = the closure is assumed to clear after `NAIVE_CLEARANCE_MIN=180` min; the trains whose booked path uses the closed track are held until then and run their ORIGINAL route (no rerouting); everyone deconflicted normally. Smart = the real reroute. (An earlier cut that let naive ignore conflicts was rejected as a strawman — it made naive look artificially good.)
+- **Result (default WB MYM-BWN closure):** affected = T1, T3. Smart **11 640** vs naive **21 512** passenger-delay-min → **46 % reduction**. Robust: reroute is never worse across assumed clearance 60–600 min (28 % at 1 h → 77 % at an indefinite block); ~46 % at the stated 3 h assumption.
+- **UI:** header line **"vs naive hold-all dispatch: total delay reduced 46% (11640 vs 21512 …)"** with a tooltip stating the assumption (held-until-reopen +180 min, both collision-free, illustrative load). Shows only while a closure is active; hides on reset/reopen. Cached on state change (the extra recomputes run once per action, not per animation frame).
+- **Honesty:** the clearance time is an explicit, surfaced assumption; the metric is labelled illustrative; no "optimal" claims.
+- **Gate `tests/test_baseline_compare.py`** (8 value-asserting): correct affected set, reroute beats naive by ≥25 % (band 40–60 % for the default), reroute never worse across clearance times, longer blockage ⇒ ≥ reduction, N/A without a closure / when no train is blocked, and the snapshot surfaces a value matching the engine + clears on reset.
+
+### STOPPED at Phase B boundary — awaiting your review before Phase C.
+
+---
+
+## Phase A — Single-track / opposing moves: INVESTIGATED, no gap, gate added. DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **235 passed** (was 230; +5 Phase A gates). **No engine/app/data change** — investigation found the behavior already correct, so only a regression gate was added (`tests/test_opposing_moves.py`).
 
 **Investigation (the question: single- or double-track, and can the engine schedule a head-on?):**

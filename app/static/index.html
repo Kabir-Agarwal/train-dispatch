@@ -122,6 +122,8 @@
   #preview-total { font-size:13px; color:#5a6779; margin-top:6px; }
   /* Plain summary banner */
   #plain-summary { display:none; background:#edfaf1; border:1px solid #a8d5b5; border-radius:7px; padding:9px 14px; font-size:13.5px; color:#145e28; font-weight:600; margin-top:10px; }
+  #dispatch-compare { margin-top:4px; font-size:13px; font-weight:700; color:#0d7a5f; cursor:help; }
+  #dispatch-compare .dc-note { font-weight:500; color:#8a96a5; }
   /* How-it-works panel */
   details.how-it-works { background:#f8fafc; border:1px solid #dde3ea; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.6; color:#3c4858; }
   details.how-it-works summary { font-weight:700; cursor:pointer; color:#10243e; font-size:13.5px; user-select:none; }
@@ -150,6 +152,7 @@
 <header>
   <h1>Train Dispatch &amp; Anomaly Recovery</h1>
   <div class="total" id="total-delay"></div>
+  <div id="dispatch-compare" style="display:none"></div>
 </header>
 
 <!-- Network map: full-width above the two-column grid -->
@@ -1535,6 +1538,25 @@ function render(snap) {
 
   document.getElementById('total-delay').textContent =
     'Total added delay: ' + snap.total_added_delay + ' min';
+
+  // Phase B: value vs a naive hold-all dispatcher (only when a track is closed)
+  const dc = snap.dispatch_comparison;
+  const dcEl = document.getElementById('dispatch-compare');
+  if (dc && dc.applicable) {
+    dcEl.innerHTML = 'vs naive hold-all dispatch: total delay reduced '
+      + dc.reduction_pct + '% '
+      + '<span class="dc-note">(' + dc.smart_delay + ' vs ' + dc.naive_delay
+      + ' ' + dc.metric + ')</span>';
+    dcEl.title = 'Naive = hold the trains blocked by the closure until the line '
+      + 'reopens (assumed +' + dc.clearance_min + ' min) then run their booked '
+      + 'route, no rerouting. Reroute = alternate paths. Both kept collision-free '
+      + 'by the same engine. Delay = coaches × minutes late vs the nominal '
+      + 'timetable (illustrative load, not real bookings).';
+    dcEl.style.display = 'block';
+  } else {
+    dcEl.style.display = 'none';
+  }
+
   let activeTxt = snap.anomalies.length
     ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
     : 'No active anomalies.';

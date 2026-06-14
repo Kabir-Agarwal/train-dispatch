@@ -22,6 +22,7 @@ from engine.anomalies import (
     apply_anomalies,
 )
 from engine.maintenance import flagged_segments, segment_load
+from engine.baseline_compare import compare_dispatch
 from engine import pricing
 from engine.decision_log import (
     build_decision_log,
@@ -161,9 +162,19 @@ class AppState:
         self._facts = fact_entries_for_all_trains(
             self.network, self.trains, [], self.result
         )
+        self.comparison = self._dispatch_comparison()
 
     def _all_trains(self):
         return self.trains + self.added_trains
+
+    def _dispatch_comparison(self):
+        """Phase B: naive hold-all vs reroute engine for the active closure(s).
+        Cached on each state change (it runs extra recomputes) and read by
+        snapshot(); {"applicable": False} when no track is closed."""
+        return compare_dispatch(
+            self.network, self._all_trains(), self.anomalies,
+            load_weights=self.load_weights,
+        )
 
     def _make_train(self, spec, anomalies, already_added):
         """Validate an add-train spec and build a Train with a fastest currently-
@@ -225,6 +236,7 @@ class AppState:
         self._facts = fact_entries_for_all_trains(
             self.network, all_trains, new_anomalies, result
         )
+        self.comparison = self._dispatch_comparison()
 
     def reopen(self, segment_id):
         """Selectively REOPEN one previously closed/blocked/maintenance/speed-
@@ -260,6 +272,7 @@ class AppState:
         self._facts = fact_entries_for_all_trains(
             self.network, all_trains, remaining, result
         )
+        self.comparison = self._dispatch_comparison()
 
     def _effective_segments(self):
         from engine.anomalies import apply_anomalies
@@ -358,6 +371,7 @@ class AppState:
             "trains": trains,
             "decision_log": log_lines,
             "total_added_delay": self.result.total_added_delay,
+            "dispatch_comparison": getattr(self, "comparison", {"applicable": False}),
         }
 
     def passenger(self, train_id):
