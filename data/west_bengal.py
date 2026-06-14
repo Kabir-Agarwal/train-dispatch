@@ -113,10 +113,15 @@ TRAINS = [
     Train("T1", "HWH", "NJP",
           _route("HWH", "BLY", "SRP", "CGR", "BDC", "MYM", "BWN", "BHP", "SNT",
                  "RPH", "NHT", "NFK", "MLDT", "NJP"), 0),
-    # Sealdah -> Alipurduar (south-east -> far north-east, via Lalgola line)
-    Train("T2", "SDAH", "APDJ",
+    # Sealdah -> Malda Town (south-east -> north-central, via the Lalgola line).
+    # Terminates at Malda (NOT carried on to NJP/APDJ) so it does NOT share the
+    # 220-min Malda-NJP single track with the money-shot pair T1 (HWH->NJP) and
+    # T3 (NJP->HWH); that head-on otherwise forces ~600 min of holds and a dead,
+    # mostly-parked clip. With T2 off it, simMax drops 1056 -> 835 and T2 runs
+    # early instead of waiting. Still a long cross-state Kolkata->Malda service.
+    Train("T2", "SDAH", "MLDT",
           _route("SDAH", "DDJ", "BT", "NH", "RHA", "KNJ", "BPC", "AZ", "NFK",
-                 "MLDT", "NJP", "NCB", "APDJ"), 20),
+                 "MLDT"), 20),
     # north -> south (opposite direction down the main line)
     Train("T3", "NJP", "HWH",
           _route("NJP", "MLDT", "NFK", "NHT", "RPH", "SNT", "BHP", "BWN", "MYM",

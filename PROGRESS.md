@@ -1,6 +1,19 @@
 # PROGRESS.md
 
-## Kolkata-cluster de-overlap (Howrah core breathing room): DONE, awaiting visual pass
+## Audit fixes (C1 dimming, pacing, selective reopen, legend, JS coverage): DONE, awaiting visual pass
+Built 2026-06-14. Master safe at cd37586. Suite: **230 passed** (was 217; +13 new). Screenshot tool down — verified via DOM (preview_eval) + a headless Node gate; no console errors. Engine code unchanged (only WB *data* changed, golden regenerated for wb/* only).
+
+- **C1 — parked trains no longer look like "pop-in":** trains stay rendered the whole time, but a rake is **solid only while travelling**; before departure / after arrival it is a **dimmed (opacity 0.5) hollow outline** (`rakeStyle()` + `trainRakeGlyph(...,moving)`). So a long-held train reads as "waiting at a platform", not a glitch. Verified: t=0 → 12 parked hollow; mid-clip → 3 solid (moving) + 9 parked.
+- **S1 — demo pacing (data change):** retargeted **T2 SDAH→Malda** (was →APDJ) so it no longer shares the 220-min Malda–NJP single track with the money-shot pair T1/T3. That head-on was forcing ~600 min of holds. Result: **simMax 1056 → 835** (−21%), T2 runs early (dep 37 vs 131), T3's wait 639 → 418. T3's remaining ~418 wait is **inherent and honest** (it can't go N→S until T1 finishes S→N on the single track) — now clearly shown dimmed. Also bumped `SIM_SPEED` 6 → 9 for a livelier clip. Engine untouched; `recompute_golden.json` regenerated (only the 4 `wb/*` entries changed; baseline/real byte-identical).
+- **Selective track reopen:** new control **"Reopen a closed track"** (dropdown of only currently closed/speed-limited segments) → `POST /api/reopen` → `AppState.reopen(seg)` removes just that segment's anomalies and recomputes via the existing engine; other closures / per-train restrictions / added trains are preserved. Unknown or already-open segment → HTTP 400, no crash.
+- **Legend order:** train legend now sorts **T1, T2, … T12** numerically (was string order T1, T10, T11…). Colours are keyed by id, so swatches still match the map.
+- **JS test coverage (the audit's key gap):** `tests/test_anim_trainplace.py` (+`_trainplace_check.mjs`) drives the **shipped** `trainPlace`/`rakeStyle` (extracted from index.html) over a full timeline via Node and asserts the C1 policy, hop-adjacency, and that the position lies exactly on the segment (max cross-product 0). Plus `tests/test_reopen.py` (8 gates) for selective reopen. **+13 tests.**
+
+### STOPPED — awaiting your visual pass.
+
+---
+
+## Kolkata-cluster de-overlap (Howrah core breathing room): DONE, reviewed
 Built 2026-06-14. Display layer ONLY (`app/static/index.html` is the only changed file); engine/data/state/tests untouched; master at cd37586. Suite: **217 passed** (unchanged). Screenshot tool still down — verified by reasoning through cluster coordinates + DOM (getBoundingClientRect / getScreenCTM in viewport px); no console errors.
 
 - **Problem:** the Howrah/Kolkata core (Howrah, Sealdah, Dum Dum, Barrackpore, Naihati, Bally, Santragachi, Dankuni, Serampore, Chandan Nagar, Bandel) is genuinely only a few km across, so it projects into a ~17×42px world box (Howrah↔Sealdah ~3px apart, Naihati↔Bandel ~4px). At the fit-all default zoom the fixed-size platform glyphs piled on top of each other.

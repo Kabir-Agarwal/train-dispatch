@@ -5294,17 +5294,17 @@
     "reason": "held at KGP until minute 335 so T4 clear(s) the line; arrives BPRS at minute 530 (+290 min)"
    },
    "T11": {
-    "action": "unchanged",
-    "added_delay": 0,
+    "action": "hold",
+    "added_delay": 56,
     "arrivals": {
-     "HLZ": 50,
-     "HWH": 173,
-     "MCA": 107,
-     "PKU": 85,
-     "SRC": 167,
-     "ULB": 137
+     "HLZ": 106,
+     "HWH": 229,
+     "MCA": 163,
+     "PKU": 141,
+     "SRC": 223,
+     "ULB": 193
     },
-    "depart_at": 50,
+    "depart_at": 106,
     "path": [
      "PKU-HLZ",
      "MCA-PKU",
@@ -5312,7 +5312,7 @@
      "SRC-ULB",
      "HWH-SRC"
     ],
-    "reason": "proceeds as planned; arrives HWH at minute 173"
+    "reason": "held at HLZ until minute 106 so T6 clear(s) the line; arrives HWH at minute 229 (+56 min)"
    },
    "T12": {
     "action": "unchanged",
@@ -5329,73 +5329,47 @@
    },
    "T2": {
     "action": "reroute",
-    "added_delay": 194,
+    "added_delay": -59,
     "arrivals": {
-     "APDJ": 876,
-     "AZ": 403,
-     "BDC": 177,
-     "BLY": 209,
-     "BT": 155,
-     "BWN": 315,
-     "CGR": 185,
-     "DDJ": 137,
-     "DKAE": 235,
-     "HSA": 846,
-     "HWH": 217,
-     "KWAE": 368,
-     "MLDT": 508,
-     "NFK": 468,
-     "NH": 169,
-     "NHT": 433,
-     "NJP": 728,
-     "NMZ": 786,
-     "SDAH": 131,
-     "SGUJ": 736,
-     "SKG": 285,
-     "SRP": 197
+     "AZ": 143,
+     "BDC": 66,
+     "BT": 44,
+     "DDJ": 26,
+     "KWAE": 108,
+     "MLDT": 223,
+     "NFK": 183,
+     "NH": 58,
+     "SDAH": 20
     },
-    "depart_at": 131,
+    "depart_at": 20,
     "path": [
      "SDAH-DDJ",
      "DDJ-BT",
      "BT-NH",
      "NH-BDC",
-     "CGR-BDC",
-     "SRP-CGR",
-     "BLY-SRP",
-     "HWH-BLY",
-     "HWH-DKAE",
-     "DKAE-SKG",
-     "SKG-BWN",
-     "BWN-KWAE",
+     "BDC-KWAE",
      "KWAE-AZ",
-     "AZ-NHT",
-     "NHT-NFK",
-     "NFK-MLDT",
-     "MLDT-NJP",
-     "NJP-SGUJ",
-     "SGUJ-NMZ",
-     "NMZ-HSA",
-     "HSA-APDJ"
+     "AZ-NFK",
+     "NFK-MLDT"
     ],
-    "reason": "rerouted via SDAH-DDJ-BT-NH-BDC-CGR-SRP-BLY-HWH-DKAE-SKG-BWN-KWAE-AZ-NHT-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 131 because avoids conflict with T1, T7 on the planned path; arrives APDJ at minute 876 (+194 min)"
+    "reason": "rerouted via SDAH-DDJ-BT-NH-BDC-KWAE-AZ-NFK-MLDT because avoids conflict with T1, T7 on the planned path; arrives MLDT at minute 223 (-59 min)"
    },
    "T3": {
     "action": "reroute",
-    "added_delay": 604,
+    "added_delay": 383,
     "arrivals": {
-     "AZ": 1029,
-     "BDC": 1106,
-     "BLY": 1138,
-     "CGR": 1114,
-     "HWH": 1146,
-     "KWAE": 1064,
-     "MLDT": 949,
-     "NFK": 989,
-     "NJP": 729,
-     "SRP": 1126
+     "AZ": 808,
+     "BDC": 885,
+     "BLY": 917,
+     "CGR": 893,
+     "HWH": 925,
+     "KWAE": 843,
+     "MLDT": 728,
+     "NFK": 768,
+     "NJP": 508,
+     "SRP": 905
     },
-    "depart_at": 729,
+    "depart_at": 508,
     "path": [
      "MLDT-NJP",
      "NFK-MLDT",
@@ -5407,7 +5381,7 @@
      "BLY-SRP",
      "HWH-BLY"
     ],
-    "reason": "rerouted via NJP-MLDT-NFK-AZ-KWAE-BDC-CGR-SRP-BLY-HWH, departing minute 729 because avoids conflict with T1 on the planned path; arrives HWH at minute 1146 (+604 min)"
+    "reason": "rerouted via NJP-MLDT-NFK-AZ-KWAE-BDC-CGR-SRP-BLY-HWH, departing minute 508 because avoids conflict with T1 on the planned path; arrives HWH at minute 925 (+383 min)"
    },
    "T4": {
     "action": "unchanged",
@@ -5454,39 +5428,31 @@
     "reason": "held at PRR until minute 176 so T4 clear(s) the line; arrives HWH at minute 457 (+151 min)"
    },
    "T6": {
-    "action": "reroute",
-    "added_delay": 30,
+    "action": "unchanged",
+    "added_delay": 0,
     "arrivals": {
-     "BDC": 258,
-     "BLY": 226,
-     "BWN": 314,
-     "CGR": 250,
-     "DGH": 60,
-     "HWH": 218,
-     "MCA": 152,
-     "MYM": 286,
-     "PKU": 130,
-     "SRC": 212,
-     "SRP": 238,
-     "TMZ": 100,
-     "ULB": 182
+     "BWN": 284,
+     "DGH": 40,
+     "DKAE": 204,
+     "MCA": 132,
+     "PKU": 110,
+     "SKG": 254,
+     "SRC": 192,
+     "TMZ": 80,
+     "ULB": 162
     },
-    "depart_at": 60,
+    "depart_at": 40,
     "path": [
      "TMZ-DGH",
      "PKU-TMZ",
      "MCA-PKU",
      "ULB-MCA",
      "SRC-ULB",
-     "HWH-SRC",
-     "HWH-BLY",
-     "BLY-SRP",
-     "SRP-CGR",
-     "CGR-BDC",
-     "BDC-MYM",
-     "MYM-BWN"
+     "SRC-DKAE",
+     "DKAE-SKG",
+     "SKG-BWN"
     ],
-    "reason": "rerouted via DGH-TMZ-PKU-MCA-ULB-SRC-HWH-BLY-SRP-CGR-BDC-MYM-BWN, departing minute 60 because avoids conflict with T2 on the planned path; arrives BWN at minute 314 (+30 min)"
+    "reason": "proceeds as planned; arrives BWN at minute 284"
    },
    "T7": {
     "action": "unchanged",
@@ -5650,32 +5616,32 @@
    [
     "T11",
     "HWH-SRC",
-    167,
-    173
+    223,
+    229
    ],
    [
     "T11",
     "MCA-PKU",
-    85,
-    107
+    141,
+    163
    ],
    [
     "T11",
     "PKU-HLZ",
-    50,
-    85
+    106,
+    141
    ],
    [
     "T11",
     "SRC-ULB",
-    137,
-    167
+    193,
+    223
    ],
    [
     "T11",
     "ULB-MCA",
-    107,
-    137
+    163,
+    193
    ],
    [
     "T12",
@@ -5685,183 +5651,105 @@
    ],
    [
     "T2",
-    "AZ-NHT",
-    403,
-    433
+    "AZ-NFK",
+    143,
+    183
    ],
    [
     "T2",
-    "BLY-SRP",
-    197,
-    209
+    "BDC-KWAE",
+    66,
+    108
    ],
    [
     "T2",
     "BT-NH",
-    155,
-    169
-   ],
-   [
-    "T2",
-    "BWN-KWAE",
-    315,
-    368
-   ],
-   [
-    "T2",
-    "CGR-BDC",
-    177,
-    185
+    44,
+    58
    ],
    [
     "T2",
     "DDJ-BT",
-    137,
-    155
-   ],
-   [
-    "T2",
-    "DKAE-SKG",
-    235,
-    285
-   ],
-   [
-    "T2",
-    "HSA-APDJ",
-    846,
-    876
-   ],
-   [
-    "T2",
-    "HWH-BLY",
-    209,
-    217
-   ],
-   [
-    "T2",
-    "HWH-DKAE",
-    217,
-    235
+    26,
+    44
    ],
    [
     "T2",
     "KWAE-AZ",
-    368,
-    403
+    108,
+    143
    ],
    [
     "T2",
+    "NFK-MLDT",
+    183,
+    223
+   ],
+   [
+    "T2",
+    "NH-BDC",
+    58,
+    66
+   ],
+   [
+    "T2",
+    "SDAH-DDJ",
+    20,
+    26
+   ],
+   [
+    "T3",
+    "AZ-NFK",
+    768,
+    808
+   ],
+   [
+    "T3",
+    "BDC-KWAE",
+    843,
+    885
+   ],
+   [
+    "T3",
+    "BLY-SRP",
+    905,
+    917
+   ],
+   [
+    "T3",
+    "CGR-BDC",
+    885,
+    893
+   ],
+   [
+    "T3",
+    "HWH-BLY",
+    917,
+    925
+   ],
+   [
+    "T3",
+    "KWAE-AZ",
+    808,
+    843
+   ],
+   [
+    "T3",
     "MLDT-NJP",
     508,
     728
    ],
    [
-    "T2",
+    "T3",
     "NFK-MLDT",
-    468,
-    508
-   ],
-   [
-    "T2",
-    "NH-BDC",
-    169,
-    177
-   ],
-   [
-    "T2",
-    "NHT-NFK",
-    433,
-    468
-   ],
-   [
-    "T2",
-    "NJP-SGUJ",
     728,
-    736
-   ],
-   [
-    "T2",
-    "NMZ-HSA",
-    786,
-    846
-   ],
-   [
-    "T2",
-    "SDAH-DDJ",
-    131,
-    137
-   ],
-   [
-    "T2",
-    "SGUJ-NMZ",
-    736,
-    786
-   ],
-   [
-    "T2",
-    "SKG-BWN",
-    285,
-    315
-   ],
-   [
-    "T2",
-    "SRP-CGR",
-    185,
-    197
-   ],
-   [
-    "T3",
-    "AZ-NFK",
-    989,
-    1029
-   ],
-   [
-    "T3",
-    "BDC-KWAE",
-    1064,
-    1106
-   ],
-   [
-    "T3",
-    "BLY-SRP",
-    1126,
-    1138
-   ],
-   [
-    "T3",
-    "CGR-BDC",
-    1106,
-    1114
-   ],
-   [
-    "T3",
-    "HWH-BLY",
-    1138,
-    1146
-   ],
-   [
-    "T3",
-    "KWAE-AZ",
-    1029,
-    1064
-   ],
-   [
-    "T3",
-    "MLDT-NJP",
-    729,
-    949
-   ],
-   [
-    "T3",
-    "NFK-MLDT",
-    949,
-    989
+    768
    ],
    [
     "T3",
     "SRP-CGR",
-    1114,
-    1126
+    893,
+    905
    ],
    [
     "T4",
@@ -5931,75 +5819,51 @@
    ],
    [
     "T6",
-    "BDC-MYM",
-    258,
-    286
-   ],
-   [
-    "T6",
-    "BLY-SRP",
-    226,
-    238
-   ],
-   [
-    "T6",
-    "CGR-BDC",
-    250,
-    258
-   ],
-   [
-    "T6",
-    "HWH-BLY",
-    218,
-    226
-   ],
-   [
-    "T6",
-    "HWH-SRC",
-    212,
-    218
+    "DKAE-SKG",
+    204,
+    254
    ],
    [
     "T6",
     "MCA-PKU",
-    130,
-    152
-   ],
-   [
-    "T6",
-    "MYM-BWN",
-    286,
-    314
+    110,
+    132
    ],
    [
     "T6",
     "PKU-TMZ",
-    100,
-    130
+    80,
+    110
+   ],
+   [
+    "T6",
+    "SKG-BWN",
+    254,
+    284
+   ],
+   [
+    "T6",
+    "SRC-DKAE",
+    192,
+    204
    ],
    [
     "T6",
     "SRC-ULB",
-    182,
-    212
-   ],
-   [
-    "T6",
-    "SRP-CGR",
-    238,
-    250
+    162,
+    192
    ],
    [
     "T6",
     "TMZ-DGH",
-    60,
-    100
+    40,
+    80
    ],
    [
     "T6",
     "ULB-MCA",
-    152,
-    182
+    132,
+    162
    ],
    [
     "T7",
@@ -6068,7 +5932,7 @@
     73
    ]
   ],
-  "total_added_delay": 1269
+  "total_added_delay": 821
  },
  "wb/close-MYM-BWN": {
   "actions": {
@@ -6156,61 +6020,47 @@
    },
    "T2": {
     "action": "reroute",
-    "added_delay": 104,
+    "added_delay": -42,
     "arrivals": {
-     "APDJ": 786,
-     "AZ": 313,
-     "BPC": 301,
-     "BT": 155,
-     "DDJ": 137,
-     "HSA": 756,
-     "KNJ": 231,
-     "MLDT": 418,
-     "NFK": 378,
-     "NH": 169,
-     "NHT": 343,
-     "NJP": 638,
-     "NMZ": 696,
-     "RHA": 199,
-     "SDAH": 131,
-     "SGUJ": 646
+     "AZ": 160,
+     "BDC": 83,
+     "BT": 61,
+     "DDJ": 43,
+     "KWAE": 125,
+     "MLDT": 240,
+     "NFK": 200,
+     "NH": 75,
+     "SDAH": 37
     },
-    "depart_at": 131,
+    "depart_at": 37,
     "path": [
      "SDAH-DDJ",
      "DDJ-BT",
      "BT-NH",
-     "NH-RHA",
-     "RHA-KNJ",
-     "KNJ-BPC",
-     "BPC-AZ",
-     "AZ-NHT",
-     "NHT-NFK",
-     "NFK-MLDT",
-     "MLDT-NJP",
-     "NJP-SGUJ",
-     "SGUJ-NMZ",
-     "NMZ-HSA",
-     "HSA-APDJ"
+     "NH-BDC",
+     "BDC-KWAE",
+     "KWAE-AZ",
+     "AZ-NFK",
+     "NFK-MLDT"
     ],
-    "reason": "rerouted via SDAH-DDJ-BT-NH-RHA-KNJ-BPC-AZ-NHT-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 131 because avoids conflict with T1, T7 on the planned path; arrives APDJ at minute 786 (+104 min)"
+    "reason": "rerouted via SDAH-DDJ-BT-NH-BDC-KWAE-AZ-NFK-MLDT, departing minute 37 because avoids conflict with T7 on the planned path; arrives MLDT at minute 240 (-42 min)"
    },
    "T3": {
     "action": "reroute",
-    "added_delay": 514,
+    "added_delay": 293,
     "arrivals": {
-     "AZ": 939,
-     "BDC": 1016,
-     "BLY": 1048,
-     "CGR": 1024,
-     "HWH": 1056,
-     "KWAE": 974,
-     "MLDT": 859,
-     "NFK": 899,
-     "NJP": 639,
-     "SRP": 1036
+     "AZ": 718,
+     "BDC": 795,
+     "BLY": 827,
+     "CGR": 803,
+     "HWH": 835,
+     "KWAE": 753,
+     "MLDT": 638,
+     "NFK": 678,
+     "NJP": 418,
+     "SRP": 815
     },
-    "depart_at": 639,
+    "depart_at": 418,
     "path": [
      "MLDT-NJP",
      "NFK-MLDT",
@@ -6222,7 +6072,7 @@
      "BLY-SRP",
      "HWH-BLY"
     ],
-    "reason": "rerouted via NJP-MLDT-NFK-AZ-KWAE-BDC-CGR-SRP-BLY-HWH, departing minute 639 because planned path uses closed segment(s) MYM-BWN; arrives HWH at minute 1056 (+514 min)"
+    "reason": "rerouted via NJP-MLDT-NFK-AZ-KWAE-BDC-CGR-SRP-BLY-HWH, departing minute 418 because planned path uses closed segment(s) MYM-BWN; arrives HWH at minute 835 (+293 min)"
    },
    "T4": {
     "action": "unchanged",
@@ -6468,147 +6318,105 @@
    ],
    [
     "T2",
-    "AZ-NHT",
-    313,
-    343
+    "AZ-NFK",
+    160,
+    200
    ],
    [
     "T2",
-    "BPC-AZ",
-    301,
-    313
+    "BDC-KWAE",
+    83,
+    125
    ],
    [
     "T2",
     "BT-NH",
-    155,
-    169
+    61,
+    75
    ],
    [
     "T2",
     "DDJ-BT",
-    137,
-    155
+    43,
+    61
    ],
    [
     "T2",
-    "HSA-APDJ",
-    756,
-    786
+    "KWAE-AZ",
+    125,
+    160
    ],
    [
     "T2",
-    "KNJ-BPC",
-    231,
-    301
+    "NFK-MLDT",
+    200,
+    240
    ],
    [
     "T2",
+    "NH-BDC",
+    75,
+    83
+   ],
+   [
+    "T2",
+    "SDAH-DDJ",
+    37,
+    43
+   ],
+   [
+    "T3",
+    "AZ-NFK",
+    678,
+    718
+   ],
+   [
+    "T3",
+    "BDC-KWAE",
+    753,
+    795
+   ],
+   [
+    "T3",
+    "BLY-SRP",
+    815,
+    827
+   ],
+   [
+    "T3",
+    "CGR-BDC",
+    795,
+    803
+   ],
+   [
+    "T3",
+    "HWH-BLY",
+    827,
+    835
+   ],
+   [
+    "T3",
+    "KWAE-AZ",
+    718,
+    753
+   ],
+   [
+    "T3",
     "MLDT-NJP",
     418,
     638
    ],
    [
-    "T2",
+    "T3",
     "NFK-MLDT",
-    378,
-    418
-   ],
-   [
-    "T2",
-    "NH-RHA",
-    169,
-    199
-   ],
-   [
-    "T2",
-    "NHT-NFK",
-    343,
-    378
-   ],
-   [
-    "T2",
-    "NJP-SGUJ",
     638,
-    646
-   ],
-   [
-    "T2",
-    "NMZ-HSA",
-    696,
-    756
-   ],
-   [
-    "T2",
-    "RHA-KNJ",
-    199,
-    231
-   ],
-   [
-    "T2",
-    "SDAH-DDJ",
-    131,
-    137
-   ],
-   [
-    "T2",
-    "SGUJ-NMZ",
-    646,
-    696
-   ],
-   [
-    "T3",
-    "AZ-NFK",
-    899,
-    939
-   ],
-   [
-    "T3",
-    "BDC-KWAE",
-    974,
-    1016
-   ],
-   [
-    "T3",
-    "BLY-SRP",
-    1036,
-    1048
-   ],
-   [
-    "T3",
-    "CGR-BDC",
-    1016,
-    1024
-   ],
-   [
-    "T3",
-    "HWH-BLY",
-    1048,
-    1056
-   ],
-   [
-    "T3",
-    "KWAE-AZ",
-    939,
-    974
-   ],
-   [
-    "T3",
-    "MLDT-NJP",
-    639,
-    859
-   ],
-   [
-    "T3",
-    "NFK-MLDT",
-    859,
-    899
+    678
    ],
    [
     "T3",
     "SRP-CGR",
-    1024,
-    1036
+    803,
+    815
    ],
    [
     "T4",
@@ -6791,7 +6599,7 @@
     73
    ]
   ],
-  "total_added_delay": 880
+  "total_added_delay": 513
  },
  "wb/delay-T1-60": {
   "actions": {
@@ -6834,35 +6642,35 @@
    },
    "T10": {
     "action": "hold",
-    "added_delay": 290,
+    "added_delay": 189,
     "arrivals": {
-     "ADRA": 453,
-     "BPRS": 530,
-     "BQA": 495,
-     "KGP": 335,
-     "MDN": 353
+     "ADRA": 352,
+     "BPRS": 429,
+     "BQA": 394,
+     "KGP": 234,
+     "MDN": 252
     },
-    "depart_at": 335,
+    "depart_at": 234,
     "path": [
      "KGP-MDN",
      "MDN-ADRA",
      "ADRA-BQA",
      "BQA-BPRS"
     ],
-    "reason": "held at KGP until minute 335 so T4 clear(s) the line; arrives BPRS at minute 530 (+290 min)"
+    "reason": "held at KGP until minute 234 so T4 clear(s) the line; arrives BPRS at minute 429 (+189 min)"
    },
    "T11": {
-    "action": "unchanged",
-    "added_delay": 0,
+    "action": "hold",
+    "added_delay": 56,
     "arrivals": {
-     "HLZ": 50,
-     "HWH": 173,
-     "MCA": 107,
-     "PKU": 85,
-     "SRC": 167,
-     "ULB": 137
+     "HLZ": 106,
+     "HWH": 229,
+     "MCA": 163,
+     "PKU": 141,
+     "SRC": 223,
+     "ULB": 193
     },
-    "depart_at": 50,
+    "depart_at": 106,
     "path": [
      "PKU-HLZ",
      "MCA-PKU",
@@ -6870,7 +6678,7 @@
      "SRC-ULB",
      "HWH-SRC"
     ],
-    "reason": "proceeds as planned; arrives HWH at minute 173"
+    "reason": "held at HLZ until minute 106 so T6 clear(s) the line; arrives HWH at minute 229 (+56 min)"
    },
    "T12": {
     "action": "unchanged",
@@ -6887,60 +6695,30 @@
    },
    "T2": {
     "action": "reroute",
-    "added_delay": 254,
+    "added_delay": -59,
     "arrivals": {
-     "APDJ": 936,
-     "BDC": 172,
-     "BLY": 204,
-     "BT": 150,
-     "BWN": 310,
-     "CGR": 180,
-     "DDJ": 132,
-     "DGR": 374,
-     "DKAE": 230,
-     "HSA": 906,
-     "HWH": 212,
-     "MLDT": 568,
-     "NFK": 528,
-     "NH": 164,
-     "NHT": 493,
-     "NJP": 788,
-     "NMZ": 846,
-     "RPH": 476,
-     "SDAH": 126,
-     "SGUJ": 796,
-     "SKG": 280,
-     "SNT": 446,
-     "SRP": 192,
-     "UDL": 386
+     "AZ": 143,
+     "BDC": 66,
+     "BT": 44,
+     "DDJ": 26,
+     "KWAE": 108,
+     "MLDT": 223,
+     "NFK": 183,
+     "NH": 58,
+     "SDAH": 20
     },
-    "depart_at": 126,
+    "depart_at": 20,
     "path": [
      "SDAH-DDJ",
      "DDJ-BT",
      "BT-NH",
      "NH-BDC",
-     "CGR-BDC",
-     "SRP-CGR",
-     "BLY-SRP",
-     "HWH-BLY",
-     "HWH-DKAE",
-     "DKAE-SKG",
-     "SKG-BWN",
-     "BWN-DGR",
-     "DGR-UDL",
-     "UDL-SNT",
-     "SNT-RPH",
-     "RPH-NHT",
-     "NHT-NFK",
-     "NFK-MLDT",
-     "MLDT-NJP",
-     "NJP-SGUJ",
-     "SGUJ-NMZ",
-     "NMZ-HSA",
-     "HSA-APDJ"
+     "BDC-KWAE",
+     "KWAE-AZ",
+     "AZ-NFK",
+     "NFK-MLDT"
     ],
-    "reason": "rerouted via SDAH-DDJ-BT-NH-BDC-CGR-SRP-BLY-HWH-DKAE-SKG-BWN-DGR-UDL-SNT-RPH-NHT-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 126 because avoids conflict with T1, T7 on the planned path; arrives APDJ at minute 936 (+254 min)"
+    "reason": "rerouted via SDAH-DDJ-BT-NH-BDC-KWAE-AZ-NFK-MLDT because avoids conflict with T7 on the planned path; arrives MLDT at minute 223 (-59 min)"
    },
    "T3": {
     "action": "reroute",
@@ -6989,66 +6767,64 @@
     "reason": "proceeds as planned; arrives KGP at minute 233"
    },
    "T5": {
-    "action": "hold",
-    "added_delay": 151,
+    "action": "reroute",
+    "added_delay": 105,
     "arrivals": {
-     "ADRA": 216,
-     "HWH": 457,
-     "KGP": 334,
-     "MCA": 391,
-     "MDN": 316,
-     "PKU": 369,
-     "PRR": 176,
-     "SRC": 451,
-     "ULB": 421
+     "ADRA": 116,
+     "ASN": 216,
+     "BDC": 371,
+     "BLY": 403,
+     "BWN": 315,
+     "CGR": 379,
+     "DGR": 251,
+     "HWH": 411,
+     "MYM": 343,
+     "PRR": 76,
+     "SRP": 391,
+     "UDL": 239
     },
-    "depart_at": 176,
+    "depart_at": 76,
     "path": [
      "ADRA-PRR",
-     "MDN-ADRA",
-     "KGP-MDN",
-     "PKU-KGP",
-     "MCA-PKU",
-     "ULB-MCA",
-     "SRC-ULB",
-     "HWH-SRC"
+     "ASN-ADRA",
+     "UDL-ASN",
+     "DGR-UDL",
+     "BWN-DGR",
+     "MYM-BWN",
+     "BDC-MYM",
+     "CGR-BDC",
+     "SRP-CGR",
+     "BLY-SRP",
+     "HWH-BLY"
     ],
-    "reason": "held at PRR until minute 176 so T4 clear(s) the line; arrives HWH at minute 457 (+151 min)"
+    "reason": "rerouted via PRR-ADRA-ASN-UDL-DGR-BWN-MYM-BDC-CGR-SRP-BLY-HWH, departing minute 76 because avoids conflict with T4 on the planned path; arrives HWH at minute 411 (+105 min)"
    },
    "T6": {
-    "action": "reroute",
-    "added_delay": 25,
+    "action": "unchanged",
+    "added_delay": 0,
     "arrivals": {
-     "BDC": 253,
-     "BLY": 221,
-     "BWN": 309,
-     "CGR": 245,
-     "DGH": 55,
-     "HWH": 213,
-     "MCA": 147,
-     "MYM": 281,
-     "PKU": 125,
-     "SRC": 207,
-     "SRP": 233,
-     "TMZ": 95,
-     "ULB": 177
+     "BWN": 284,
+     "DGH": 40,
+     "DKAE": 204,
+     "MCA": 132,
+     "PKU": 110,
+     "SKG": 254,
+     "SRC": 192,
+     "TMZ": 80,
+     "ULB": 162
     },
-    "depart_at": 55,
+    "depart_at": 40,
     "path": [
      "TMZ-DGH",
      "PKU-TMZ",
      "MCA-PKU",
      "ULB-MCA",
      "SRC-ULB",
-     "HWH-SRC",
-     "HWH-BLY",
-     "BLY-SRP",
-     "SRP-CGR",
-     "CGR-BDC",
-     "BDC-MYM",
-     "MYM-BWN"
+     "SRC-DKAE",
+     "DKAE-SKG",
+     "SKG-BWN"
     ],
-    "reason": "rerouted via DGH-TMZ-PKU-MCA-ULB-SRC-HWH-BLY-SRP-CGR-BDC-MYM-BWN, departing minute 55 because avoids conflict with T2 on the planned path; arrives BWN at minute 309 (+25 min)"
+    "reason": "proceeds as planned; arrives BWN at minute 284"
    },
    "T7": {
     "action": "unchanged",
@@ -7188,56 +6964,56 @@
    [
     "T10",
     "ADRA-BQA",
-    453,
-    495
+    352,
+    394
    ],
    [
     "T10",
     "BQA-BPRS",
-    495,
-    530
+    394,
+    429
    ],
    [
     "T10",
     "KGP-MDN",
-    335,
-    353
+    234,
+    252
    ],
    [
     "T10",
     "MDN-ADRA",
-    353,
-    453
+    252,
+    352
    ],
    [
     "T11",
     "HWH-SRC",
-    167,
-    173
+    223,
+    229
    ],
    [
     "T11",
     "MCA-PKU",
-    85,
-    107
+    141,
+    163
    ],
    [
     "T11",
     "PKU-HLZ",
-    50,
-    85
+    106,
+    141
    ],
    [
     "T11",
     "SRC-ULB",
-    137,
-    167
+    193,
+    223
    ],
    [
     "T11",
     "ULB-MCA",
-    107,
-    137
+    163,
+    193
    ],
    [
     "T12",
@@ -7247,141 +7023,51 @@
    ],
    [
     "T2",
-    "BLY-SRP",
-    192,
-    204
+    "AZ-NFK",
+    143,
+    183
+   ],
+   [
+    "T2",
+    "BDC-KWAE",
+    66,
+    108
    ],
    [
     "T2",
     "BT-NH",
-    150,
-    164
-   ],
-   [
-    "T2",
-    "BWN-DGR",
-    310,
-    374
-   ],
-   [
-    "T2",
-    "CGR-BDC",
-    172,
-    180
+    44,
+    58
    ],
    [
     "T2",
     "DDJ-BT",
-    132,
-    150
+    26,
+    44
    ],
    [
     "T2",
-    "DGR-UDL",
-    374,
-    386
-   ],
-   [
-    "T2",
-    "DKAE-SKG",
-    230,
-    280
-   ],
-   [
-    "T2",
-    "HSA-APDJ",
-    906,
-    936
-   ],
-   [
-    "T2",
-    "HWH-BLY",
-    204,
-    212
-   ],
-   [
-    "T2",
-    "HWH-DKAE",
-    212,
-    230
-   ],
-   [
-    "T2",
-    "MLDT-NJP",
-    568,
-    788
+    "KWAE-AZ",
+    108,
+    143
    ],
    [
     "T2",
     "NFK-MLDT",
-    528,
-    568
+    183,
+    223
    ],
    [
     "T2",
     "NH-BDC",
-    164,
-    172
-   ],
-   [
-    "T2",
-    "NHT-NFK",
-    493,
-    528
-   ],
-   [
-    "T2",
-    "NJP-SGUJ",
-    788,
-    796
-   ],
-   [
-    "T2",
-    "NMZ-HSA",
-    846,
-    906
-   ],
-   [
-    "T2",
-    "RPH-NHT",
-    476,
-    493
+    58,
+    66
    ],
    [
     "T2",
     "SDAH-DDJ",
-    126,
-    132
-   ],
-   [
-    "T2",
-    "SGUJ-NMZ",
-    796,
-    846
-   ],
-   [
-    "T2",
-    "SKG-BWN",
-    280,
-    310
-   ],
-   [
-    "T2",
-    "SNT-RPH",
-    446,
-    476
-   ],
-   [
-    "T2",
-    "SRP-CGR",
-    180,
-    192
-   ],
-   [
-    "T2",
-    "UDL-SNT",
-    386,
-    446
+    20,
+    26
    ],
    [
     "T3",
@@ -7458,122 +7144,116 @@
    [
     "T5",
     "ADRA-PRR",
-    176,
+    76,
+    116
+   ],
+   [
+    "T5",
+    "ASN-ADRA",
+    116,
     216
    ],
    [
     "T5",
-    "HWH-SRC",
-    451,
-    457
+    "BDC-MYM",
+    343,
+    371
    ],
    [
     "T5",
-    "KGP-MDN",
-    316,
-    334
+    "BLY-SRP",
+    391,
+    403
    ],
    [
     "T5",
-    "MCA-PKU",
-    369,
+    "BWN-DGR",
+    251,
+    315
+   ],
+   [
+    "T5",
+    "CGR-BDC",
+    371,
+    379
+   ],
+   [
+    "T5",
+    "DGR-UDL",
+    239,
+    251
+   ],
+   [
+    "T5",
+    "HWH-BLY",
+    403,
+    411
+   ],
+   [
+    "T5",
+    "MYM-BWN",
+    315,
+    343
+   ],
+   [
+    "T5",
+    "SRP-CGR",
+    379,
     391
    ],
    [
     "T5",
-    "MDN-ADRA",
+    "UDL-ASN",
     216,
-    316
-   ],
-   [
-    "T5",
-    "PKU-KGP",
-    334,
-    369
-   ],
-   [
-    "T5",
-    "SRC-ULB",
-    421,
-    451
-   ],
-   [
-    "T5",
-    "ULB-MCA",
-    391,
-    421
+    239
    ],
    [
     "T6",
-    "BDC-MYM",
-    253,
-    281
-   ],
-   [
-    "T6",
-    "BLY-SRP",
-    221,
-    233
-   ],
-   [
-    "T6",
-    "CGR-BDC",
-    245,
-    253
-   ],
-   [
-    "T6",
-    "HWH-BLY",
-    213,
-    221
-   ],
-   [
-    "T6",
-    "HWH-SRC",
-    207,
-    213
+    "DKAE-SKG",
+    204,
+    254
    ],
    [
     "T6",
     "MCA-PKU",
-    125,
-    147
-   ],
-   [
-    "T6",
-    "MYM-BWN",
-    281,
-    309
+    110,
+    132
    ],
    [
     "T6",
     "PKU-TMZ",
-    95,
-    125
+    80,
+    110
+   ],
+   [
+    "T6",
+    "SKG-BWN",
+    254,
+    284
+   ],
+   [
+    "T6",
+    "SRC-DKAE",
+    192,
+    204
    ],
    [
     "T6",
     "SRC-ULB",
-    177,
-    207
-   ],
-   [
-    "T6",
-    "SRP-CGR",
-    233,
-    245
+    162,
+    192
    ],
    [
     "T6",
     "TMZ-DGH",
-    55,
-    95
+    40,
+    80
    ],
    [
     "T6",
     "ULB-MCA",
-    147,
-    177
+    132,
+    162
    ],
    [
     "T7",
@@ -7642,7 +7322,7 @@
     73
    ]
   ],
-  "total_added_delay": 690
+  "total_added_delay": 261
  },
  "wb/empty": {
   "actions": {
@@ -7685,22 +7365,22 @@
    },
    "T10": {
     "action": "hold",
-    "added_delay": 290,
+    "added_delay": 189,
     "arrivals": {
-     "ADRA": 453,
-     "BPRS": 530,
-     "BQA": 495,
-     "KGP": 335,
-     "MDN": 353
+     "ADRA": 352,
+     "BPRS": 429,
+     "BQA": 394,
+     "KGP": 234,
+     "MDN": 252
     },
-    "depart_at": 335,
+    "depart_at": 234,
     "path": [
      "KGP-MDN",
      "MDN-ADRA",
      "ADRA-BQA",
      "BQA-BPRS"
     ],
-    "reason": "held at KGP until minute 335 so T4 clear(s) the line; arrives BPRS at minute 530 (+290 min)"
+    "reason": "held at KGP until minute 234 so T4 clear(s) the line; arrives BPRS at minute 429 (+189 min)"
    },
    "T11": {
     "action": "hold",
@@ -7738,79 +7418,47 @@
    },
    "T2": {
     "action": "reroute",
-    "added_delay": 194,
+    "added_delay": -59,
     "arrivals": {
-     "APDJ": 876,
-     "AZ": 428,
-     "BDC": 77,
-     "BLY": 109,
-     "BT": 55,
-     "BWN": 215,
-     "CGR": 85,
-     "DDJ": 37,
-     "DGR": 279,
-     "DKAE": 135,
-     "HSA": 846,
-     "HWH": 117,
-     "MLDT": 508,
-     "NFK": 468,
-     "NH": 69,
-     "NHT": 398,
-     "NJP": 728,
-     "NMZ": 786,
-     "RPH": 381,
-     "SDAH": 31,
-     "SGUJ": 736,
-     "SKG": 185,
-     "SNT": 351,
-     "SRP": 97,
-     "UDL": 291
+     "AZ": 143,
+     "BDC": 66,
+     "BT": 44,
+     "DDJ": 26,
+     "KWAE": 108,
+     "MLDT": 223,
+     "NFK": 183,
+     "NH": 58,
+     "SDAH": 20
     },
-    "depart_at": 31,
+    "depart_at": 20,
     "path": [
      "SDAH-DDJ",
      "DDJ-BT",
      "BT-NH",
      "NH-BDC",
-     "CGR-BDC",
-     "SRP-CGR",
-     "BLY-SRP",
-     "HWH-BLY",
-     "HWH-DKAE",
-     "DKAE-SKG",
-     "SKG-BWN",
-     "BWN-DGR",
-     "DGR-UDL",
-     "UDL-SNT",
-     "SNT-RPH",
-     "RPH-NHT",
-     "AZ-NHT",
+     "BDC-KWAE",
+     "KWAE-AZ",
      "AZ-NFK",
-     "NFK-MLDT",
-     "MLDT-NJP",
-     "NJP-SGUJ",
-     "SGUJ-NMZ",
-     "NMZ-HSA",
-     "HSA-APDJ"
+     "NFK-MLDT"
     ],
-    "reason": "rerouted via SDAH-DDJ-BT-NH-BDC-CGR-SRP-BLY-HWH-DKAE-SKG-BWN-DGR-UDL-SNT-RPH-NHT-AZ-NFK-MLDT-NJP-SGUJ-NMZ-HSA-APDJ, departing minute 31 because avoids conflict with T1, T7 on the planned path; arrives APDJ at minute 876 (+194 min)"
+    "reason": "rerouted via SDAH-DDJ-BT-NH-BDC-KWAE-AZ-NFK-MLDT because avoids conflict with T1, T7 on the planned path; arrives MLDT at minute 223 (-59 min)"
    },
    "T3": {
     "action": "reroute",
-    "added_delay": 604,
+    "added_delay": 383,
     "arrivals": {
-     "AZ": 1029,
-     "BDC": 1106,
-     "BLY": 1138,
-     "CGR": 1114,
-     "HWH": 1146,
-     "KWAE": 1064,
-     "MLDT": 949,
-     "NFK": 989,
-     "NJP": 729,
-     "SRP": 1126
+     "AZ": 808,
+     "BDC": 885,
+     "BLY": 917,
+     "CGR": 893,
+     "HWH": 925,
+     "KWAE": 843,
+     "MLDT": 728,
+     "NFK": 768,
+     "NJP": 508,
+     "SRP": 905
     },
-    "depart_at": 729,
+    "depart_at": 508,
     "path": [
      "MLDT-NJP",
      "NFK-MLDT",
@@ -7822,7 +7470,7 @@
      "BLY-SRP",
      "HWH-BLY"
     ],
-    "reason": "rerouted via NJP-MLDT-NFK-AZ-KWAE-BDC-CGR-SRP-BLY-HWH, departing minute 729 because avoids conflict with T1, T2 on the planned path; arrives HWH at minute 1146 (+604 min)"
+    "reason": "rerouted via NJP-MLDT-NFK-AZ-KWAE-BDC-CGR-SRP-BLY-HWH, departing minute 508 because avoids conflict with T1 on the planned path; arrives HWH at minute 925 (+383 min)"
    },
    "T4": {
     "action": "unchanged",
@@ -7842,31 +7490,37 @@
     "reason": "proceeds as planned; arrives KGP at minute 233"
    },
    "T5": {
-    "action": "hold",
-    "added_delay": 151,
+    "action": "reroute",
+    "added_delay": 105,
     "arrivals": {
-     "ADRA": 216,
-     "HWH": 457,
-     "KGP": 334,
-     "MCA": 391,
-     "MDN": 316,
-     "PKU": 369,
-     "PRR": 176,
-     "SRC": 451,
-     "ULB": 421
+     "ADRA": 116,
+     "ASN": 216,
+     "BDC": 371,
+     "BLY": 403,
+     "BWN": 315,
+     "CGR": 379,
+     "DGR": 251,
+     "HWH": 411,
+     "MYM": 343,
+     "PRR": 76,
+     "SRP": 391,
+     "UDL": 239
     },
-    "depart_at": 176,
+    "depart_at": 76,
     "path": [
      "ADRA-PRR",
-     "MDN-ADRA",
-     "KGP-MDN",
-     "PKU-KGP",
-     "MCA-PKU",
-     "ULB-MCA",
-     "SRC-ULB",
-     "HWH-SRC"
+     "ASN-ADRA",
+     "UDL-ASN",
+     "DGR-UDL",
+     "BWN-DGR",
+     "MYM-BWN",
+     "BDC-MYM",
+     "CGR-BDC",
+     "SRP-CGR",
+     "BLY-SRP",
+     "HWH-BLY"
     ],
-    "reason": "held at PRR until minute 176 so T4 clear(s) the line; arrives HWH at minute 457 (+151 min)"
+    "reason": "rerouted via PRR-ADRA-ASN-UDL-DGR-BWN-MYM-BDC-CGR-SRP-BLY-HWH, departing minute 76 because avoids conflict with T4 on the planned path; arrives HWH at minute 411 (+105 min)"
    },
    "T6": {
     "action": "unchanged",
@@ -8033,26 +7687,26 @@
    [
     "T10",
     "ADRA-BQA",
-    453,
-    495
+    352,
+    394
    ],
    [
     "T10",
     "BQA-BPRS",
-    495,
-    530
+    394,
+    429
    ],
    [
     "T10",
     "KGP-MDN",
-    335,
-    353
+    234,
+    252
    ],
    [
     "T10",
     "MDN-ADRA",
-    353,
-    453
+    252,
+    352
    ],
    [
     "T11",
@@ -8093,200 +7747,104 @@
    [
     "T2",
     "AZ-NFK",
-    428,
-    468
+    143,
+    183
    ],
    [
     "T2",
-    "AZ-NHT",
-    398,
-    428
-   ],
-   [
-    "T2",
-    "BLY-SRP",
-    97,
-    109
+    "BDC-KWAE",
+    66,
+    108
    ],
    [
     "T2",
     "BT-NH",
-    55,
-    69
-   ],
-   [
-    "T2",
-    "BWN-DGR",
-    215,
-    279
-   ],
-   [
-    "T2",
-    "CGR-BDC",
-    77,
-    85
+    44,
+    58
    ],
    [
     "T2",
     "DDJ-BT",
-    37,
-    55
+    26,
+    44
    ],
    [
     "T2",
-    "DGR-UDL",
-    279,
-    291
+    "KWAE-AZ",
+    108,
+    143
    ],
    [
     "T2",
-    "DKAE-SKG",
-    135,
-    185
+    "NFK-MLDT",
+    183,
+    223
    ],
    [
     "T2",
-    "HSA-APDJ",
-    846,
-    876
+    "NH-BDC",
+    58,
+    66
    ],
    [
     "T2",
+    "SDAH-DDJ",
+    20,
+    26
+   ],
+   [
+    "T3",
+    "AZ-NFK",
+    768,
+    808
+   ],
+   [
+    "T3",
+    "BDC-KWAE",
+    843,
+    885
+   ],
+   [
+    "T3",
+    "BLY-SRP",
+    905,
+    917
+   ],
+   [
+    "T3",
+    "CGR-BDC",
+    885,
+    893
+   ],
+   [
+    "T3",
     "HWH-BLY",
-    109,
-    117
+    917,
+    925
    ],
    [
-    "T2",
-    "HWH-DKAE",
-    117,
-    135
+    "T3",
+    "KWAE-AZ",
+    808,
+    843
    ],
    [
-    "T2",
+    "T3",
     "MLDT-NJP",
     508,
     728
    ],
    [
-    "T2",
+    "T3",
     "NFK-MLDT",
-    468,
-    508
-   ],
-   [
-    "T2",
-    "NH-BDC",
-    69,
-    77
-   ],
-   [
-    "T2",
-    "NJP-SGUJ",
     728,
-    736
-   ],
-   [
-    "T2",
-    "NMZ-HSA",
-    786,
-    846
-   ],
-   [
-    "T2",
-    "RPH-NHT",
-    381,
-    398
-   ],
-   [
-    "T2",
-    "SDAH-DDJ",
-    31,
-    37
-   ],
-   [
-    "T2",
-    "SGUJ-NMZ",
-    736,
-    786
-   ],
-   [
-    "T2",
-    "SKG-BWN",
-    185,
-    215
-   ],
-   [
-    "T2",
-    "SNT-RPH",
-    351,
-    381
-   ],
-   [
-    "T2",
-    "SRP-CGR",
-    85,
-    97
-   ],
-   [
-    "T2",
-    "UDL-SNT",
-    291,
-    351
-   ],
-   [
-    "T3",
-    "AZ-NFK",
-    989,
-    1029
-   ],
-   [
-    "T3",
-    "BDC-KWAE",
-    1064,
-    1106
-   ],
-   [
-    "T3",
-    "BLY-SRP",
-    1126,
-    1138
-   ],
-   [
-    "T3",
-    "CGR-BDC",
-    1106,
-    1114
-   ],
-   [
-    "T3",
-    "HWH-BLY",
-    1138,
-    1146
-   ],
-   [
-    "T3",
-    "KWAE-AZ",
-    1029,
-    1064
-   ],
-   [
-    "T3",
-    "MLDT-NJP",
-    729,
-    949
-   ],
-   [
-    "T3",
-    "NFK-MLDT",
-    949,
-    989
+    768
    ],
    [
     "T3",
     "SRP-CGR",
-    1114,
-    1126
+    893,
+    905
    ],
    [
     "T4",
@@ -8309,50 +7867,68 @@
    [
     "T5",
     "ADRA-PRR",
-    176,
+    76,
+    116
+   ],
+   [
+    "T5",
+    "ASN-ADRA",
+    116,
     216
    ],
    [
     "T5",
-    "HWH-SRC",
-    451,
-    457
+    "BDC-MYM",
+    343,
+    371
    ],
    [
     "T5",
-    "KGP-MDN",
-    316,
-    334
+    "BLY-SRP",
+    391,
+    403
    ],
    [
     "T5",
-    "MCA-PKU",
-    369,
+    "BWN-DGR",
+    251,
+    315
+   ],
+   [
+    "T5",
+    "CGR-BDC",
+    371,
+    379
+   ],
+   [
+    "T5",
+    "DGR-UDL",
+    239,
+    251
+   ],
+   [
+    "T5",
+    "HWH-BLY",
+    403,
+    411
+   ],
+   [
+    "T5",
+    "MYM-BWN",
+    315,
+    343
+   ],
+   [
+    "T5",
+    "SRP-CGR",
+    379,
     391
    ],
    [
     "T5",
-    "MDN-ADRA",
+    "UDL-ASN",
     216,
-    316
-   ],
-   [
-    "T5",
-    "PKU-KGP",
-    334,
-    369
-   ],
-   [
-    "T5",
-    "SRC-ULB",
-    421,
-    451
-   ],
-   [
-    "T5",
-    "ULB-MCA",
-    391,
-    421
+    239
    ],
    [
     "T6",
@@ -8469,6 +8045,6 @@
     73
    ]
   ],
-  "total_added_delay": 1295
+  "total_added_delay": 674
  }
 }

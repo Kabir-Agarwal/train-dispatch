@@ -11,6 +11,7 @@ import data.baseline
 import data.real_corridor
 import data.west_bengal
 from engine.anomalies import (
+    SEGMENT_ANOMALIES,
     MaintenanceClosure,
     ReducedSpeed,
     TrackBlocked,
@@ -223,6 +224,41 @@ class AppState:
         )
         self._facts = fact_entries_for_all_trains(
             self.network, all_trains, new_anomalies, result
+        )
+
+    def reopen(self, segment_id):
+        """Selectively REOPEN one previously closed/blocked/maintenance/speed-
+        reduced segment (remove every segment-level anomaly targeting it) and
+        recompute via the existing engine. Per-train restrictions, train delays/
+        cancellations, and other segments' closures are left untouched — this is
+        a surgical undo, NOT a full reset. Unknown or already-open segment ->
+        ValidationError, state unchanged."""
+        self.network.segment(segment_id)   # raises UnknownSegmentError if unknown
+        remaining = [a for a in self.anomalies
+                     if not (isinstance(a, SEGMENT_ANOMALIES)
+                             and a.segment_id == segment_id)]
+        if len(remaining) == len(self.anomalies):
+            raise ValidationError(
+                f"segment '{segment_id}' has no closure/restriction to reopen"
+            )
+        all_trains = self.trains + self.added_trains
+        if remaining:
+            result = recompute_schedule(self.network, all_trains, remaining)
+        elif self.added_trains:
+            result = recompute_schedule(self.network, all_trains, [])
+        else:
+            # nothing left to apply -> the clean baseline (collision-free slotting
+            # if the nominal timetable is not conflict-free, e.g. the WB mesh)
+            try:
+                result = _baseline_result(self.network, self.trains)
+            except BaselineConflictError:
+                result = recompute_schedule(self.network, self.trains, [])
+        self.anomalies = remaining
+        self.result = result
+        self.log = (build_decision_log(self.network, all_trains, remaining, result)
+                    if remaining or self.added_trains else None)
+        self._facts = fact_entries_for_all_trains(
+            self.network, all_trains, remaining, result
         )
 
     def _effective_segments(self):

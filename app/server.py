@@ -83,6 +83,15 @@ def make_handler(state):
                     self._send_json({"error": str(exc)}, 400)
                 except (json.JSONDecodeError, AttributeError) as exc:
                     self._send_json({"error": f"bad request: {exc}"}, 400)
+            elif self.path == "/api/reopen":
+                try:
+                    payload = json.loads(raw)
+                    state.reopen(payload["segment"])
+                    self._send_json(state.snapshot())
+                except DispatchError as exc:
+                    self._send_json({"error": str(exc)}, 400)
+                except (json.JSONDecodeError, AttributeError, KeyError, TypeError) as exc:
+                    self._send_json({"error": f"bad request: {exc}"}, 400)
             elif self.path == "/api/reset":
                 state.reset()
                 self._send_json(state.snapshot())

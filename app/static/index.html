@@ -363,6 +363,15 @@
         <div class="act-cap">Schedules a brand-new train collision-free against existing traffic (holding or rerouting as needed), or reports if it cannot be placed.</div>
       </div>
 
+      <div class="act">
+        <div class="act-line">
+          <span class="act-name">Reopen a closed track</span>
+          <select class="reopen-sel" id="seg-reopen"></select>
+          <button onclick="reopenTrack()">Reopen track</button>
+        </div>
+        <div class="act-cap">Reopens just this one track (clears its closure / block / speed limit) and re-plans &mdash; the other restrictions stay in place. Only tracks currently closed or restricted are listed.</div>
+      </div>
+
       <div class="act reset-act">
         <div class="act-line">
           <button class="warn" onclick="resetAll()">Reset to baseline</button>
@@ -473,6 +482,34 @@ function fillSegSelects(segments) {
   }
 }
 
+// "Reopen a closed track": DYNAMIC — only the segments that are currently NOT
+// open (closed / blocked / speed-reduced). Rebuilt every render so it reflects
+// the live state; preserves the current selection when possible.
+function fillReopenSelect(segments) {
+  const sel = document.getElementById('seg-reopen');
+  if (!sel) return;
+  const cur = sel.value;
+  const closed = segments.filter(s => s.status && s.status !== 'open');
+  sel.innerHTML = '';
+  if (!closed.length) {
+    const o = document.createElement('option');
+    o.value = ''; o.textContent = '(no closed tracks)'; o.disabled = true;
+    sel.appendChild(o);
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  for (const s of closed) {
+    const o = document.createElement('option');
+    o.value = s.id;
+    const [a, b] = s.endpoints;
+    const tag = s.status === 'reduced-speed' ? ' (speed-limited)' : ' (closed)';
+    o.textContent = dn(a) + ' – ' + dn(b) + tag;
+    sel.appendChild(o);
+  }
+  if (cur && closed.some(s => s.id === cur)) sel.value = cur;
+}
+
 // Every train dropdown shows a readable route label ("T101 · Origin → Dest").
 // Trains CAN grow (live add), so rebuild when the count changes, preserving the
 // current selection. #pass-pick (passenger view) is filled the same way.
@@ -527,7 +564,7 @@ let playing = false;
 let lastRaf = null;
 let lastTs  = null;
 
-const SIM_SPEED = 6; // sim-minutes per real second
+const SIM_SPEED = 9; // sim-minutes per real second (livelier demo; S1 pacing)
 
 // ============================================================
 // Station coordinate layout — geographic positions for Indian cities
@@ -793,27 +830,36 @@ function wbStationGlyph(x, y, r) {
 // APPROVED train glyph: a metro rake (2 coaches + a streamlined engine), in the
 // train's colour, centred on its position (px, py) and rotated to the segment
 // heading so the ENGINE leads. Fixed pixel geometry (same at every zoom level).
-function trainRakeGlyph(px, py, angDeg, color) {
+function trainRakeGlyph(px, py, angDeg, color, moving) {
+  // C1: a rake is SOLID only while actively travelling; parked (before
+  // departure / after arrival) it is a dimmed HOLLOW outline so it clearly
+  // reads as "waiting at a platform", not as a glitch popping in.
+  const st = rakeStyle(moving !== false);
+  const fill = st.hollow ? 'none' : color;
+  const edge = st.hollow ? color : '#fff';     // hollow -> outline IS the colour
   const outer = svgEl('g', {
-    class: 'train-rake', transform: `translate(${px} ${py}) rotate(${angDeg})`
+    class: 'train-rake' + (st.hollow ? ' parked' : ''),
+    opacity: st.opacity,
+    transform: `translate(${px} ${py}) rotate(${angDeg})`
   });
   const inner = svgEl('g', { transform: 'translate(-17.5 0)' });  // centre the 0..35 rake
   const car = (tx) => {
     const c = svgEl('g', { transform: `translate(${tx} 0)` });
     c.appendChild(svgEl('rect', { x: 0, y: -4, width: 10, height: 8, rx: 2.5,
-      fill: color, stroke: '#fff', 'stroke-width': 0.9 }));
+      fill: fill, stroke: edge, 'stroke-width': st.strokeWidth }));
     return c;
   };
   inner.appendChild(car(0));
   inner.appendChild(car(11));
   const eng = svgEl('g', { transform: 'translate(22 0)' });        // streamlined engine (front)
   eng.appendChild(svgEl('path', { d: 'M0,-4 L8,-4 Q13,-4 13,0 Q13,4 8,4 L0,4 Z',
-    fill: color, stroke: '#fff', 'stroke-width': 0.9 }));
+    fill: fill, stroke: edge, 'stroke-width': st.strokeWidth }));
   inner.appendChild(eng);
   outer.appendChild(inner);
   return outer;
 }
 
+// <<ANIM_FNS_START>>  (pure, DOM-free — headless-tested by tests/_trainplace_check.mjs)
 // Place a train at simTime t along its station_times walk.
 // station_times: [[station, minute], ...] — adjacent, minute-ascending.
 // Returns { pos:[x,y], dir:[dx,dy]|null, moving:bool } or null.
@@ -848,6 +894,16 @@ function trainPlace(stationTimes, t, coords) {
   }
   return null;
 }
+
+// C1 visibility policy (single source of truth for the rake's look). A train is
+// drawn at EVERY time it has coords (never hidden -> never "pops in"), but it is
+// only SOLID while moving:true; when parked it is a faded HOLLOW outline.
+function rakeStyle(moving) {
+  return moving
+    ? { hollow: false, opacity: 1,   strokeWidth: 0.9 }   // travelling -> solid
+    : { hollow: true,  opacity: 0.5, strokeWidth: 1.3 };  // waiting -> dim hollow
+}
+// <<ANIM_FNS_END>>
 
 // ============================================================
 // Build static map elements (segments + stations)
@@ -1208,7 +1264,7 @@ function drawTrains(trains, t, coords, colorMap) {
     // destination. (No shape swap moving<->parked -> no flicker.)
     const ang = (place.moving && place.dir)
       ? Math.atan2(place.dir[1], place.dir[0]) * 180 / Math.PI : 0;
-    const marker = trainRakeGlyph(px, py, ang, color);
+    const marker = trainRakeGlyph(px, py, ang, color, place.moving);
     marker.appendChild(svgEl('title', {}, train.id));   // hover shows the id
     tG.appendChild(marker);
   }
@@ -1473,6 +1529,7 @@ function render(snap) {
 
   // Populate every row's pickers with plain-language labels
   fillSegSelects(snap.segments);
+  fillReopenSelect(snap.segments);
   fillTrainSelects(snap.trains);
   fillStationSelects(snap.stations);
 
@@ -1593,7 +1650,13 @@ function renderTrainLegend(snap, colorMap) {
   const ul = document.getElementById('train-legend-list');
   if (!ul) return;
   ul.innerHTML = '';
-  for (const t of snap.trains) {
+  // Order T1, T2, ... T12 numerically (the snapshot is sorted as strings, which
+  // would read T1, T10, T11, T12, T2, ...). Colours are keyed by id, so the
+  // swatch always matches the rake on the map regardless of legend order.
+  const tNum = id => { const m = /^T(\d+)$/.exec(id || ''); return m ? +m[1] : 1e9; };
+  const ordered = [...snap.trains].sort((a, b) => tNum(a.id) - tNum(b.id)
+    || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  for (const t of ordered) {
     const st = t.station_times;
     const route = (st && st.length >= 2)
       ? dn(st[0][0]) + ' → ' + dn(st[st.length - 1][0]) : '';
@@ -1795,6 +1858,28 @@ async function resetAll() {
   render(await r.json());
 }
 
+// Selectively reopen ONE closed/restricted track (direct apply — it is an undo,
+// so no ghost preview); other restrictions stay in place. Re-plans via engine.
+async function reopenTrack() {
+  const seg = v('seg-reopen');
+  if (!seg) { document.getElementById('error').textContent =
+    'Reopen: no closed track selected.'; return; }
+  document.getElementById('error').textContent = '';
+  try {
+    const r = await fetch('/api/reopen', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ segment: seg })
+    });
+    const body = await r.json();
+    if (!r.ok) { document.getElementById('error').textContent =
+      'Reopen error: ' + (body.error || r.status); return; }
+    render(body);
+  } catch (e) {
+    document.getElementById('error').textContent = 'Reopen error: ' + e.message;
+  }
+}
+
 // ============================================================
 // Boot
 // ============================================================
@@ -1802,7 +1887,8 @@ refreshState();
 
 // String literal anchors for automated test greps:
 // "track_closed" "track_blocked" "reduced_speed" "train_delayed" "train_cancelled"
-// "/api/state" "/api/inject" "/api/reset" "/api/passenger/" "/api/preview"
+// "/api/state" "/api/inject" "/api/reset" "/api/passenger/" "/api/preview" "/api/reopen"
+// "Reopen a closed track" "seg-reopen" "reopenTrack" "rakeStyle"
 // "Network map" "time-slider" "Apply" "Cancel" "station_times" "Δ delay" "•"
 // "Reset to baseline" "Network — segment status" "Schedule board" "Decision log"
 // "Passenger view" "pass-eta" "How this works" "Report a problem"
