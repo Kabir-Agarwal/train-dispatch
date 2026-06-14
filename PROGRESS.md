@@ -2,7 +2,21 @@
 
 ## Checkpoint: tag `v1-submittable` (annotated) on 1770ce5 — complete hardened A–F (263 tests), pushed to GitHub. Rollback: `git reset --hard v1-submittable`.
 
-## Phase H — Eco-driving speed profiles: DONE, awaiting review
+## Phase I — Regenerative-braking synchronization: DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **284 passed** (was 277; +7 Phase I gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
+
+- **What it computes (builds on H):** coordinating train accel/decel timing so a braking train's regenerated energy is absorbed by an accelerating train on the **same power section** (here, the same station's electrical zone) in the same minute — and the **energy recovered** by coordination vs leaving timing uncoordinated.
+- **Named method:** **windowed supply/demand matching with slack synchronization** (`engine/regen_sync.py::coordinate_regen`). Braking = a regen SUPPLY (≈ 0.85·v², the recoverable share of Phase H's v² kinetic energy); accelerating = a DEMAND (≈ v²). Energy transfers when a supply & demand share a section within a time window (greedy, deterministic). Unsynchronized uses scheduled times; synchronized shifts each demand up to `max_shift` minutes toward the nearest same-section supply, then matches. Illustrative (no line-side storage), labelled. Pure arithmetic, no recompute → golden intact.
+- **Hand-verified case (the gate):** section P1, brake at min 10 (100 units), accel at min 13. With a 1-min window the regen is wasted (3 min apart); shifting the accel 3 min (within a 5-min slack) to min 10 absorbs it → **synchronized 100 vs unsynchronized 0**.
+- **Hand-verified LIVE case:** in the default WB schedule a departure and arrival sit **1 min apart at KGP (T10 dep 234 / T4 arr 233) and NJP (T3 dep 418 / T1 arr 417)**. Same-minute transfer wastes both uncoordinated (0); coordinating within 3 min recovers **2 × brake_regen_units(60)=3060 = 6 120 units**.
+- **UI:** header **"Regen sync: coordinating accel/brake timing recovers 6,120 energy-units (uncoordinated: 0; +6,120 by coordination) at 2 power sections — Kharagpur Jn, New Jalpaiguri; same-minute transfer, ≤3 min slack, regen ≈ 0.85·v²)"** with method tooltip. `snapshot.regen_sync` exposes pairs/sections/totals.
+- **Gate `tests/test_regen_sync.py`** (7 value-asserting): hand case sync>unsync (100 vs 0); already-aligned needs no coordination; insufficient slack can't sync; different section can't transfer; recovery capped by the smaller side; regen quadratic in speed (brake_regen_units(60)=3060); the live WB snapshot recovers 6 120 at {KGP, NJP} by coordination.
+
+### STOPPED at Phase I boundary — awaiting your review before Phase J.
+
+---
+
+## Phase H — Eco-driving speed profiles: DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **277 passed** (was 270; +7 Phase H gates). Scheduling engine untouched → recompute golden byte-identical. No console errors.
 
 - **What it computes:** per train, an energy-minimizing **cruise–coast–brake** speed profile that still meets the scheduled arrival, plus the **energy saved vs flat-out** running to the line limit.
@@ -11,7 +25,7 @@ Built 2026-06-14. Master safe at cd37586. Suite: **277 passed** (was 270; +7 Pha
 - **UI:** header line **"Eco-driving: cruise–coast–brake to schedule saves ~70% traction energy vs flat-out (fleet 9,039,600 vs 30,383,100 energy-units over 12 trains; line cap 110 km/h; simplified ∝v² model)"** with the method in the tooltip; shown whenever trains are running. Per-train profiles exposed in `snapshot.eco_driving`.
 - **Gate `tests/test_eco_driving.py`** (7 value-asserting): exact hand-verified segment (121k/36k/85k/70 %, meets arrival, less energy); phases are cruise/coast/brake (power on/off/off) covering the route distance; more slack saves strictly more; schedule above the line cap is infeasible; zero/negative inputs N/A; method named/honest; snapshot exposes a fleet saving (70 % at the scheduled 60 km/h) with per-train rows.
 
-### STOPPED at Phase H boundary — awaiting your review before Phase I.
+### Phase H reviewed & approved.
 
 ---
 

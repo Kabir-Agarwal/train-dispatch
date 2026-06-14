@@ -128,6 +128,8 @@
   #delay-cascade .dc-note { font-weight:500; color:#8a96a5; }
   #eco-driving { margin-top:4px; font-size:13px; font-weight:700; color:#0d7a5f; cursor:help; }
   #eco-driving .dc-note { font-weight:500; color:#8a96a5; }
+  #regen-sync { margin-top:4px; font-size:13px; font-weight:700; color:#0d7a5f; cursor:help; }
+  #regen-sync .dc-note { font-weight:500; color:#8a96a5; }
   /* How-it-works panel */
   details.how-it-works { background:#f8fafc; border:1px solid #dde3ea; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.6; color:#3c4858; }
   details.how-it-works summary { font-weight:700; cursor:pointer; color:#10243e; font-size:13.5px; user-select:none; }
@@ -159,6 +161,7 @@
   <div id="dispatch-compare" style="display:none"></div>
   <div id="delay-cascade" style="display:none"></div>
   <div id="eco-driving" style="display:none"></div>
+  <div id="regen-sync" style="display:none"></div>
 </header>
 
 <!-- Network map: full-width above the two-column grid -->
@@ -1638,6 +1641,27 @@ function render(snap) {
     ecoEl.style.display = 'none';
   }
 
+  // Phase I: regenerative-braking synchronization (energy recovered by coordination)
+  const rg = snap.regen_sync;
+  const rgEl = document.getElementById('regen-sync');
+  if (rg && rg.applicable && (rg.recovered_sync > 0 || rg.recovered_unsync > 0)) {
+    const secs = rg.sections.map(s => dn(s)).join(', ');
+    rgEl.innerHTML = 'Regen sync: coordinating accel/brake timing recovers '
+      + rg.recovered_sync.toLocaleString() + ' energy-units '
+      + '<span class="dc-note">(uncoordinated: ' + rg.recovered_unsync.toLocaleString()
+      + '; +' + rg.extra_recovered.toLocaleString() + ' by coordination) at '
+      + rg.pair_count + ' power section' + (rg.pair_count === 1 ? '' : 's')
+      + (secs ? ' — ' + secs : '') + '; same-minute transfer, ≤' + rg.max_shift_min
+      + ' min slack, regen ≈ 0.85·v²)</span>';
+    rgEl.title = rg.method + '. A braking train returns energy to its power '
+      + 'section; an accelerating train there in the same minute absorbs it. '
+      + 'Coordinating the timing (within slack) captures regen that misaligned '
+      + 'timing would waste.';
+    rgEl.style.display = 'block';
+  } else {
+    rgEl.style.display = 'none';
+  }
+
   let activeTxt = snap.anomalies.length
     ? 'Active anomalies: ' + snap.anomalies.join('  •  ')
     : 'No active anomalies.';
@@ -2006,6 +2030,7 @@ refreshState();
 // "System boundaries" "system-boundaries" "SYSTEM_BOUNDARIES.md" "deliberately simplifies"
 // "delay-cascade" "Delay blast radius" "delay_cascade"
 // "eco-driving" "Eco-driving" "cruise–coast–brake" "eco_driving"
+// "regen-sync" "Regen sync" "regen_sync"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"

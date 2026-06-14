@@ -25,6 +25,7 @@ from engine.maintenance import flagged_segments, segment_load
 from engine.baseline_compare import compare_dispatch
 from engine.cascade import delay_cascade
 from engine.eco_driving import VMAX_KMPH, eco_profile
+from engine.regen_sync import brake_regen_units, coordinate_regen
 from engine import pricing
 from engine.decision_log import (
     build_decision_log,
@@ -397,6 +398,39 @@ class AppState:
             "method": eco_profile(1, 1)["method"],
         }
 
+    def _regen_sync(self):
+        """Phase I: regenerative-braking synchronization. Each train's origin
+        departure is an accel DEMAND and its destination arrival a braking regen
+        SUPPLY, on the power section of that station (= the station). Energy
+        transfers only when a supply and demand share the same minute on a
+        section; coordination shifts a departure up to 3 min (within slack) to
+        align. Pure arithmetic over the current actions; no recompute."""
+        trains = {t.id: t for t in self._all_trains()}
+        supplies, demands = [], []
+        for tid in self.result.actions:
+            a = self.result.actions[tid]
+            t = trains.get(tid)
+            if not a.path or not a.arrivals or t is None:
+                continue
+            dist = pricing.route_distance(self.network, a.path)
+            journey = max(a.arrivals.values()) - a.depart_at
+            if dist <= 0 or journey <= 0:
+                continue
+            v = dist / (journey / 60.0)
+            demands.append({"section": t.origin, "time": a.depart_at,
+                            "energy": round(v ** 2)})
+            supplies.append({"section": t.destination,
+                             "time": a.arrivals[t.destination],
+                             "energy": brake_regen_units(v)})
+        if not supplies or not demands:
+            return {"applicable": False}
+        # same-minute transfer (window 0), coordinate within 3 min of schedule slack
+        res = coordinate_regen(supplies, demands, window=0, max_shift=3)
+        res["applicable"] = True
+        res["sections"] = sorted({p["section"] for p in res["pairs"]})
+        res["pair_count"] = len(res["pairs"])
+        return res
+
     def snapshot(self):
         """Everything the admin view shows. All numbers from the engine."""
         trains = []
@@ -434,6 +468,7 @@ class AppState:
             "dispatch_comparison": getattr(self, "comparison", {"applicable": False}),
             "delay_cascade": getattr(self, "cascade", {"applicable": False}),
             "eco_driving": self._eco_driving(),
+            "regen_sync": self._regen_sync(),
         }
 
     def passenger(self, train_id):
