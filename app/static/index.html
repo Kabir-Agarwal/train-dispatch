@@ -131,7 +131,7 @@
   .seg-label { font-size:10px; fill:#5a6779; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .station-circle { stroke:#fff; stroke-width:1.6; }
   .station-ring { stroke:#fff; stroke-width:1.4; }    /* transit-stop station symbol */
-  .train-car rect { stroke-linejoin:round; }          /* small train-car glyph */
+  .train-rake rect, .train-rake path { stroke-linejoin:round; }   /* metro-rake train glyph */
   .graticule { stroke:#dde4ec; stroke-width:1; fill:none; vector-effect:non-scaling-stroke; }
   .graticule-label { font-size:8.5px; fill:#b3bdc9; font-family:system-ui,Segoe UI,Arial,sans-serif; }
   .leader { stroke:#aab6c2; stroke-width:1; fill:none; }
@@ -234,12 +234,12 @@
       predicted reroute
     </span>
     <span class="legend-item">
-      <svg width="26" height="14"><circle cx="6" cy="7" r="5.5" fill="#1f3a5f" stroke="#fff" stroke-width="1.4"/><rect x="2.4" y="6" width="7.2" height="2.2" rx="1.1" fill="#fff"/><circle cx="19" cy="7" r="3.6" fill="#5a6f86" stroke="#fff" stroke-width="1.2"/><rect x="16.6" y="6.2" width="4.8" height="1.6" rx="0.8" fill="#fff"/></svg>
-      station (major / minor)
+      <svg width="30" height="16" viewBox="0 0 30 16"><g transform="translate(11,9)"><rect x="-7" y="3.5" width="14" height="2.4" rx="1.2" fill="#2b3f57"/><path d="M-5.5 1.5 q5.5 -5.5 11 0" fill="none" stroke="#2b3f57" stroke-width="1.8"/><circle cx="0" cy="-2.5" r="2.4" fill="#e8632b" stroke="#fff" stroke-width="0.8"/></g></svg>
+      station (platform + shelter)
     </span>
     <span class="legend-item">
-      <svg width="22" height="14"><rect x="3" y="4" width="16" height="6.5" rx="2.2" fill="#2563eb" stroke="#fff" stroke-width="1.2"/><rect x="15.5" y="5.4" width="2.4" height="3.7" rx="0.6" fill="#fff" opacity="0.8"/></svg>
-      train (glides along its track)
+      <svg width="34" height="14"><g transform="translate(1,7) scale(0.42)"><rect x="0" y="-4" width="10" height="8" rx="2.5" fill="#2563eb" stroke="#fff" stroke-width="0.9"/><rect x="11" y="-4" width="10" height="8" rx="2.5" fill="#2563eb" stroke="#fff" stroke-width="0.9"/><path d="M22,-4 L30,-4 Q35,-4 35,0 Q35,4 30,4 L22,4 Z" fill="#2563eb" stroke="#fff" stroke-width="0.9"/></g></svg>
+      train (engine + 2 coaches, glides along the track)
     </span>
     <span class="legend-item">
       <svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#e0972a" stroke-width="8" stroke-linecap="round" opacity="0.5"/></svg>
@@ -679,6 +679,62 @@ function clearGroup(id) {
   while (g.firstChild) g.removeChild(g.firstChild);
 }
 
+// WB station tier -> scale param r (major / secondary / minor).
+function WB_STATION_SCALE(tier) {
+  return tier === 'primary' ? 5.5 : tier === 'secondary' ? 4 : 3.4;
+}
+
+// APPROVED WB station glyph: platform bar + curved shelter roof + two supports +
+// an orange stop-marker dot above, centred at (x, y), scaled by r. Fixed pixel
+// geometry (same look at every zoom level). Returns a <g>.
+function wbStationGlyph(x, y, r) {
+  const C = '#2b3f57';
+  const g = svgEl('g', { class: 'station-stop', transform: `translate(${x} ${y})` });
+  g.appendChild(svgEl('rect', {                       // platform bar
+    x: -(r * 2), y: (r + 2), width: (r * 4), height: 3, rx: 1.5, fill: C
+  }));
+  g.appendChild(svgEl('path', {                       // curved shelter roof
+    d: `M${-(r * 2 - 2)} ${r - 2} q${r * 2 - 2} ${-(r + 4)} ${r * 4 - 4} 0`,
+    fill: 'none', stroke: C, 'stroke-width': 2.4
+  }));
+  g.appendChild(svgEl('line', {                       // left support
+    x1: -(r * 2 - 5), y1: (r - 1), x2: -(r * 2 - 5), y2: (r + 2),
+    stroke: C, 'stroke-width': 2
+  }));
+  g.appendChild(svgEl('line', {                       // right support
+    x1: (r * 2 - 5), y1: (r - 1), x2: (r * 2 - 5), y2: (r + 2),
+    stroke: C, 'stroke-width': 2
+  }));
+  g.appendChild(svgEl('circle', {                     // orange stop-marker dot
+    cx: 0, cy: -(r + 1), r: 3.2, fill: '#e8632b', stroke: '#fff', 'stroke-width': 1
+  }));
+  return g;
+}
+
+// APPROVED train glyph: a metro rake (2 coaches + a streamlined engine), in the
+// train's colour, centred on its position (px, py) and rotated to the segment
+// heading so the ENGINE leads. Fixed pixel geometry (same at every zoom level).
+function trainRakeGlyph(px, py, angDeg, color) {
+  const outer = svgEl('g', {
+    class: 'train-rake', transform: `translate(${px} ${py}) rotate(${angDeg})`
+  });
+  const inner = svgEl('g', { transform: 'translate(-17.5 0)' });  // centre the 0..35 rake
+  const car = (tx) => {
+    const c = svgEl('g', { transform: `translate(${tx} 0)` });
+    c.appendChild(svgEl('rect', { x: 0, y: -4, width: 10, height: 8, rx: 2.5,
+      fill: color, stroke: '#fff', 'stroke-width': 0.9 }));
+    return c;
+  };
+  inner.appendChild(car(0));
+  inner.appendChild(car(11));
+  const eng = svgEl('g', { transform: 'translate(22 0)' });        // streamlined engine (front)
+  eng.appendChild(svgEl('path', { d: 'M0,-4 L8,-4 Q13,-4 13,0 Q13,4 8,4 L0,4 Z',
+    fill: color, stroke: '#fff', 'stroke-width': 0.9 }));
+  inner.appendChild(eng);
+  outer.appendChild(inner);
+  return outer;
+}
+
 // Place a train at simTime t along its station_times walk.
 // station_times: [[station, minute], ...] — adjacent, minute-ascending.
 // Returns { pos:[x,y], dir:[dx,dy]|null, moving:bool } or null.
@@ -869,35 +925,42 @@ function buildStaticMap(snap) {
       : WB_PRIMARY.has(id) ? 'primary'
       : WB_SECONDARY.has(id) ? 'secondary' : 'minor';
     const labeledByDefault = !mapWB || tier !== 'minor';
-    // Tier outer radius + fill. Minors stay clearly visible; modest gap to majors.
+    // Station marker, by map:
+    //  - West Bengal : the APPROVED platform+shelter glyph (sized by tier).
+    //  - real corridor: its existing transit-stop ring + white bar.
+    //  - 6-city      : coded round dot (drawn with the code below).
     let r, fill;
-    if (!mapWB)                    { r = dotR; fill = '#1f3a5f'; }   // real:6 / 6-city:14
-    else if (tier === 'primary')   { r = 6.5;  fill = '#1f3a5f'; }
-    else if (tier === 'secondary') { r = 5;    fill = '#3f5c7d'; }
-    else                           { r = 4;    fill = '#5a6f86'; }  // minor: clear, not washed
-    // Station SYMBOL: a transit-stop glyph — a filled colour ring with a white
-    // horizontal bar across it (reads as a station/platform marker, distinct
-    // from a plain dot). The 6-city geographic map keeps its coded round dots.
     let marker;
-    if (mapCompact) {
+    if (mapWB) {
+      r = WB_STATION_SCALE(tier);                 // 5.5 / 4 / 3.4
+      marker = wbStationGlyph(c[0], c[1], r);
+    } else if (mapCompact) {                       // real corridor: ring + bar
+      r = dotR; fill = '#1f3a5f';
       marker = svgEl('g', { class: 'station-stop' });
-      const ring = svgEl('circle', { cx: c[0], cy: c[1], r: r, fill: fill,
-        class: 'station-ring' });
-      if (tier === 'primary') ring.setAttribute('stroke-width', '2');
-      marker.appendChild(ring);
-      const barW = r * 1.3, barH = Math.max(1.4, r * 0.42);   // white platform bar
+      marker.appendChild(svgEl('circle', { cx: c[0], cy: c[1], r: r, fill: fill,
+        class: 'station-ring' }));
+      const barW = r * 1.3, barH = Math.max(1.4, r * 0.42);
       marker.appendChild(svgEl('rect', {
         x: c[0] - barW / 2, y: c[1] - barH / 2, width: barW, height: barH,
         rx: barH / 2, ry: barH / 2, fill: '#fff'
       }));
-    } else {
+    } else {                                        // 6-city geographic dots
+      r = dotR; fill = '#1f3a5f';
       marker = svgEl('circle', { cx: c[0], cy: c[1], r: r, fill: fill,
         class: 'station-circle' });
     }
     marker.appendChild(svgEl('title', {}, cityName));  // hover tooltip
     stG.appendChild(marker);
 
-    const showLabel = mapCompact && (labeledByDefault || (mapWB && viewK >= 2.6));
+    // Progressive labels on the dense WB map: the 6 primary hubs are always
+    // named (they fit cleanly at the zoomed-out default); secondary names appear
+    // once slightly zoomed, minor names when zoomed further. Real corridor labels
+    // primary+secondary as before.
+    const showLabel = mapWB
+      ? (tier === 'primary'
+         || (tier === 'secondary' && viewK >= 1.5)
+         || (tier === 'minor' && viewK >= 2.6))
+      : (mapCompact && labeledByDefault);
     if (mapWB) {
       // Defer: a single pass places every WB label clear of dots, lines and
       // other labels, with uniform short leaders (see placeWbLabels).
@@ -956,13 +1019,16 @@ function _segRect(s, r) {
 
 function placeWbLabels(labels, snap, stG, ldG) {
   const PAD = 3.0;
-  // Obstacles: every station glyph (so labels never sit on a station marker)...
+  const tierOf = id => WB_PRIMARY.has(id) ? 'primary'
+    : WB_SECONDARY.has(id) ? 'secondary' : 'minor';
+  // Obstacles: every station GLYPH's footprint (platform glyph is wider than it
+  // is tall: half-width ~ r*2, vertical extent ~ r+6 incl the orange dot/roof).
   const dotObs = [];
   for (const id in mapCoords) {
     const c = mapCoords[id];
-    const r = WB_PRIMARY.has(id) ? 6.5 : WB_SECONDARY.has(id) ? 5 : 4;
-    dotObs.push({ x0: c[0] - r - PAD, y0: c[1] - r - PAD,
-                  x1: c[0] + r + PAD, y1: c[1] + r + PAD });
+    const r = WB_STATION_SCALE(tierOf(id));
+    const hw = r * 2 + PAD, hh = r + 6 + PAD;
+    dotObs.push({ x0: c[0] - hw, y0: c[1] - hh, x1: c[0] + hw, y1: c[1] + hh });
   }
   // ...and every track line (so labels never sit on a line).
   const segObs = [];
@@ -970,16 +1036,20 @@ function placeWbLabels(labels, snap, stG, ldG) {
     const a = mapCoords[s.endpoints[0]], b = mapCoords[s.endpoints[1]];
     if (a && b) segObs.push({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
   }
-  // Candidate directions: horizontal first (cleanest), then diagonal, then
-  // vertical. [unitX, unitY, textAnchor].
+  // Candidate directions: 12 around the clock, each with a sensible text anchor
+  // (label sits on the outward side). More directions => more chance of a clear
+  // spot near crowded hubs.
   const DIRS = [
     [1, 0, 'start'], [-1, 0, 'end'],
-    [0.72, -0.69, 'start'], [0.72, 0.69, 'start'],
-    [-0.72, -0.69, 'end'], [-0.72, 0.69, 'end'],
+    [0.87, -0.5, 'start'], [0.87, 0.5, 'start'],
+    [-0.87, -0.5, 'end'], [-0.87, 0.5, 'end'],
+    [0.5, -0.87, 'start'], [0.5, 0.87, 'start'],
+    [-0.5, -0.87, 'end'], [-0.5, 0.87, 'end'],
     [0, -1, 'middle'], [0, 1, 'middle'],
   ];
   const rank = t => (t === 'primary' ? 0 : t === 'secondary' ? 1 : 2);
   labels.sort((p, q) => rank(p.tier) - rank(q.tier));   // hubs claim prime spots
+  const HALO = 2.4;
   const placed = [];
   for (const L of labels) {
     const fs = L.tier === 'primary' ? 11 : L.tier === 'secondary' ? 9.5 : 8.5;
@@ -991,8 +1061,10 @@ function placeWbLabels(labels, snap, stG, ldG) {
     stG.appendChild(t);
     const w = t.getComputedTextLength();
     const h = fs;
-    const STEPS = [L.r + 9, L.r + 22, L.r + 36, L.r + 54];  // uniform-ish leaders
-    let best = null;
+    const gw = L.r * 2;   // station-glyph half-width — leaders start just outside it
+    const STEPS = [gw + 6, gw + 16, gw + 28, gw + 42, gw + 58, gw + 78,
+                   gw + 100, gw + 126];
+    let best = null, fallback = null, fbScore = Infinity;
     for (const D of STEPS) {
       for (const [ux, uy, anchor] of DIRS) {
         const ax = L.c[0] + ux * D, ay = L.c[1] + uy * D;
@@ -1000,32 +1072,33 @@ function placeWbLabels(labels, snap, stG, ldG) {
         if (anchor === 'start') { x0 = ax; x1 = ax + w; }
         else if (anchor === 'end') { x0 = ax - w; x1 = ax; }
         else { x0 = ax - w / 2; x1 = ax + w / 2; }
-        const box = { x0: x0 - PAD, y0: ay - h * 0.82 - PAD,
-                      x1: x1 + PAD, y1: ay + h * 0.28 + PAD };
-        if (dotObs.some(o => _rectsOverlap(box, o))) continue;
-        if (placed.some(o => _rectsOverlap(box, o))) continue;
-        if (segObs.some(s => _segRect(s, box))) continue;
-        best = { ax, ay, anchor, box, D }; break;
+        // Inflate by PAD + the white halo so the collision box fully covers the
+        // RENDERED haloed text — no label clips a dot/line/label.
+        const box = { x0: x0 - PAD - HALO, y0: ay - h * 0.95 - PAD - HALO,
+                      x1: x1 + PAD + HALO, y1: ay + h * 0.34 + PAD + HALO };
+        const dHit = dotObs.some(o => _rectsOverlap(box, o));
+        const pHit = placed.some(o => _rectsOverlap(box, o));
+        const sHit = segObs.some(s => _segRect(s, box));
+        if (!dHit && !pHit && !sHit) { best = { ax, ay, anchor, box, D }; break; }
+        // remember the least-bad spot in case nothing is fully clear
+        const score = (dHit ? 1000 : 0) + (pHit ? 1000 : 0)
+          + (sHit ? 50 : 0) + D;   // avoid dots/labels first, then lines, then far
+        if (score < fbScore) { fbScore = score; fallback = { ax, ay, anchor, box, D }; }
       }
       if (best) break;
     }
-    if (!best) {  // last resort: farthest east, accept (rare)
-      const D = STEPS[STEPS.length - 1];
-      const ax = L.c[0] + D, ay = L.c[1];
-      best = { ax, ay, anchor: 'start', D,
-               box: { x0: ax, y0: ay - h, x1: ax + w, y1: ay } };
-    }
+    if (!best) best = fallback;   // least-overlapping spot (line crossing only, if any)
     t.setAttribute('x', best.ax);
     t.setAttribute('y', best.ay);
     t.style.textAnchor = best.anchor;
     placed.push(best.box);
-    // Leader only when the label is actually pushed away from its dot; adjacent
-    // labels sit beside the dot with no line (avoids fussy little stubs).
-    if (best.D - L.r > 12) {
+    // Leader only when the label is actually pushed past the glyph; adjacent
+    // labels sit beside it with no line (avoids fussy little stubs).
+    if (best.D - L.r * 2 > 9) {
       const dx = best.ax - L.c[0], dy = best.ay - L.c[1];
       const len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
       ldG.appendChild(svgEl('line', {
-        x1: L.c[0] + ux * (L.r + 1.5), y1: L.c[1] + uy * (L.r + 1.5),
+        x1: L.c[0] + ux * (L.r * 2 + 1.5), y1: L.c[1] + uy * (L.r * 2 + 1.5),
         x2: best.ax - ux * 3, y2: best.ay - uy * 3, class: 'leader'
       }));
     }
@@ -1047,38 +1120,16 @@ function drawTrains(trains, t, coords, colorMap) {
     const [px, py] = place.pos;          // always exactly on a track segment
 
     const color = colorMap[train.id] || '#888';
-    const tr = mapWB ? 5.5 : mapCompact ? 6 : 9;
 
-    // Train markers carry NO on-map text label (the side legend maps colour ->
-    // train), so they never collide with station names. The same little TRAIN-CAR
-    // glyph is used whether moving or parked (no shape swap -> no flicker); the
-    // rAF loop advances `t` continuously, so the car GLIDES along its segment and
-    // visibly travels station to station, then rests at its destination.
-    let marker;
-    if (mapCompact) {
-      // Orient along the current segment when moving; sit level when parked.
-      const ang = (place.moving && place.dir)
-        ? Math.atan2(place.dir[1], place.dir[0]) * 180 / Math.PI : 0;
-      const L = tr * 2.0, H = tr * 1.35;   // small train car (length x height)
-      marker = svgEl('g', {
-        class: 'train-car',
-        transform: `translate(${px} ${py}) rotate(${ang})`
-      });
-      marker.appendChild(svgEl('rect', {     // car body
-        x: -L / 2, y: -H / 2, width: L, height: H, rx: H * 0.34, ry: H * 0.34,
-        fill: color, stroke: '#fff', 'stroke-width': 1.3
-      }));
-      marker.appendChild(svgEl('rect', {     // cab window at the leading (+x) end
-        x: L / 2 - L * 0.24, y: -H / 2 + H * 0.24, width: L * 0.15, height: H * 0.52,
-        rx: 1, ry: 1, fill: '#ffffff', opacity: '0.8'
-      }));
-    } else {
-      marker = svgEl('circle', {
-        cx: px, cy: py, r: tr, fill: color, stroke: '#fff', 'stroke-width': 2,
-        class: 'train-dot'
-      });
-      marker.style.r = tr + 'px';   // beats the .train-dot { r:9 } stylesheet rule
-    }
+    // APPROVED metro-rake glyph on EVERY map. No on-map text label (the side
+    // legend maps colour -> train). The rake is centred on the train's position
+    // and rotated to the current segment heading so the engine leads; when parked
+    // (before departure / arrived) it sits level. The rAF loop advances `t`
+    // continuously, so the rake GLIDES along the segment and rests at the
+    // destination. (No shape swap moving<->parked -> no flicker.)
+    const ang = (place.moving && place.dir)
+      ? Math.atan2(place.dir[1], place.dir[0]) * 180 / Math.PI : 0;
+    const marker = trainRakeGlyph(px, py, ang, color);
     marker.appendChild(svgEl('title', {}, train.id));   // hover shows the id
     tG.appendChild(marker);
   }
@@ -1684,7 +1735,8 @@ refreshState();
 // "placeWbLabels" "leader-group" "maintenance_closure" "Predictive maintenance"
 // "Schedule maintenance" "maint-group" "cumulative-load heuristic"
 // "rule-based dynamic pricing" "pass-fare" "synthetic" "production would use real bookings"
-// "station-ring" "station-stop" "train-car" "zoom-btn" "Zoom in to see all station names"
+// "station-ring" "station-stop" "wbStationGlyph" "trainRakeGlyph" "train-rake"
+// "zoom-btn" "Zoom in to see all station names"
 </script>
 </body>
 </html>

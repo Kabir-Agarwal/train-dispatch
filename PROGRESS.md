@@ -1,6 +1,18 @@
 # PROGRESS.md
 
-## WB realism + off-map fix + station glyph: DONE, awaiting visual pass
+## Approved marker designs (platform station + metro-rake train): DONE, awaiting visual pass
+Built 2026-06-14. Display layer ONLY (`app/static/index.html` is the only changed file); engine/data/state untouched; master at cd37586. Suite: **217 passed** (unchanged). Used the EXACT approved SVG geometry (not invented). Verified by reasoning through coordinates + DOM measurement (screenshot tool down); no console errors.
+
+- **Station glyph (WB):** the approved **platform + curved shelter + two supports + orange stop-dot** glyph, centred on the station coords, scaled by tier (r = 5.5 major / 4 secondary / 3.4 minor), fixed-pixel so it looks the same at every zoom. `wbStationGlyph()`. Real corridor KEEPS its ring+bar station; 6-city keeps coded round dots (verified: real shows 27 ring+bar, 0 platform glyphs).
+- **Train glyph (all maps):** the approved **metro rake — 2 coaches + a streamlined engine** in the train's colour, centred on the train's on-segment position and rotated to the segment heading so the **engine leads**; level when parked. `trainRakeGlyph()`. Glides via the existing rAF loop; rests at destination. Verified: rake centre lies exactly on the segment (max cross-product 6e-12); engine at the +x/front end.
+- **Labels:** progressive on WB — only the 6 primary hubs are named at the zoomed-out default (they fit cleanly), secondary appear at viewK≥1.5, minor at ≥2.6. The auto-placer now inflates its collision box by the white halo, searches 12 directions × 8 distances, and falls back to the least-overlapping spot. Verified **0 label↔label, 0 label↔glyph, 0 label↔line** at the default AND at every zoom level.
+- Money-shot (close MYM-BWN → reroute), zoom/pan, side legend (updated swatches) all still work.
+
+### STOPPED — awaiting your visual pass.
+
+---
+
+## WB realism + off-map fix + station glyph: DONE, reviewed & approved
 Built 2026-06-14. Engine LOGIC untouched (no recompute/anomalies/scheduler/routes/collision/model change); master at cd37586. Suite: **217 passed** (215 + 2 new WB gates). One data change (WB trains) with gates added; the recompute golden was regenerated and **only the 4 wb/* scenarios changed — baseline & real entries are byte-identical, proving the engine is untouched.** Reasoned from the projection math (screenshot tool down); no console errors.
 
 1. **Train origins spread (data realism)** — redesigned the 12 WB services to start from **12 different stations across every corner**: north (NJP, Alipurduar), south/Kolkata (Howrah, Sealdah, Digha, Haldia), west (Asansol, Purulia, Kharagpur), east border (Bangaon, Lalgola), central (Barddhaman). Ids T1..T12 kept (LOAD_WEIGHTS still apply). T1 still runs the Howrah–Barddhaman MAIN so the default money-shot (close MYM-BWN) reroutes onto the chord. Maintenance inspection threshold re-tuned to 50 (loads now top out ~64; flags the 4 busiest corridors). New gates: origins-are-spread, and **baseline-is-collision-free** (the engine's deconfliction of the nominal timetable has 0 conflicts — verified).
