@@ -287,6 +287,34 @@
     <p>Trains follow a fixed schedule, moving between stations along track segments at known travel times. The admin can report a problem &mdash; such as a closed track, a speed restriction, or a delayed train &mdash; using the controls below. The system instantly recomputes a new safe plan so that no two trains can ever be on the same track at the same time. The dashed &ldquo;ghosts&rdquo; on the map show the predicted new plan before it is applied, so you can review the impact first. Every decision the system makes is explained step by step in the Decision log below.</p>
   </details>
 
+  <!-- System boundaries: honest, collapsible statement of deliberate simplifications -->
+  <details class="how-it-works" id="system-boundaries">
+    <summary>System boundaries &mdash; what this demo deliberately simplifies</summary>
+    <p>This is an honest demo, not a signalling-grade system. Each simplification
+    below is intentional; the full write-up with what production would require is in
+    <code>SYSTEM_BOUNDARIES.md</code>.</p>
+    <ul class="boundaries-list">
+      <li><b>Segment exclusivity, not real signalling.</b> Safety = one train per
+      track section at a time (conservative). Production would require fixed-block
+      or moving-block signalling with interlocking and braking curves.</li>
+      <li><b>Single-track assumption.</b> Every link is one shared track; opposing
+      trains are sequenced. Production would model double/multiple track, running
+      lines, loops and platform allocation.</li>
+      <li><b>No crew or rake scheduling.</b> Trains are abstract movers &mdash; no
+      driver duty hours, no physical rake links or turn-arounds. Production would
+      require crew rostering and rolling-stock links.</li>
+      <li><b>Deterministic, not stochastic.</b> Fixed travel times; identical
+      inputs give identical plans. Production would model delay distributions and
+      robust/simulation-based recovery.</li>
+      <li><b>Regional scale (~50 stations), not national.</b> Full path
+      enumeration is fine here. National scale would need indexed/heuristic
+      routing and partitioning.</li>
+      <li><b>Reroutes trains, not passengers.</b> Recovery acts on the train plan;
+      it does not rebook passengers or protect connections. The fare panel is
+      illustrative load visibility, not a booking system.</li>
+    </ul>
+  </details>
+
   <section>
     <h2>Report a problem</h2>
     <p class="report-intro">Each row is one action: choose the track or train it
@@ -1926,6 +1954,7 @@ refreshState();
 // "Network map" "time-slider" "Apply" "Cancel" "station_times" "Δ delay" "•"
 // "Reset to baseline" "Network — segment status" "Schedule board" "Decision log"
 // "Passenger view" "pass-eta" "How this works" "Report a problem"
+// "System boundaries" "system-boundaries" "SYSTEM_BOUNDARIES.md" "deliberately simplifies"
 // "Illustrative network inspired by Indian Railways" "india-outline" "plain-summary"
 // "display_names" "train_attrs" "loco_class" "driver_employee_no" "REAL_COORDS"
 // "train_restricted" "Restrict a train from a track" "Add a new train" "new_trains"

@@ -1,6 +1,23 @@
 # PROGRESS.md
 
-## Phase E — Honesty + factual fixes (display/docs only): DONE, awaiting review
+## Phase F — System Boundaries doc + UI section: DONE, awaiting review
+Built 2026-06-14. Master safe at cd37586. Suite: **263 passed** (was 260; +3 Phase F gates). Display/docs only — no engine change → recompute golden byte-identical. No console errors. **This completes the A–F set.**
+
+- **New `SYSTEM_BOUNDARIES.md`:** honest write-up of the six deliberate simplifications, each as *In this demo → Why it's acceptable here → Production would require*:
+  1. Segment exclusivity (one-train-per-section) vs real fixed-block / moving-block signalling.
+  2. Single-track assumption vs double/multiple track, loops, platform allocation.
+  3. No crew/rake scheduling vs crew rostering + rolling-stock links.
+  4. Deterministic vs stochastic (delay distributions, robust/simulation recovery).
+  5. Regional ~50-station scale vs national scale (indexed/heuristic routing).
+  6. Reroutes trains, not passengers (no rebooking / connection protection).
+- **UI:** new collapsible `<details id="system-boundaries">` "System boundaries — what this demo deliberately simplifies" (sibling of "How this works"), listing all six in one line each and pointing at `SYSTEM_BOUNDARIES.md`. Verified rendered (6 items, references doc, no console errors).
+- **Gate `tests/test_system_boundaries.py`** (3 value-asserting): the doc exists and covers all six boundaries (keyword checks per boundary); each boundary is paired with "production would require" (count ≥ 6, so nothing reads as a hidden gap); the served page carries the matching section with all six labels and the doc reference.
+
+### STOPPED at Phase F boundary — A–F COMPLETE, awaiting your review. Do NOT start WALL-B (G–L) until released.
+
+---
+
+## Phase E — Honesty + factual fixes (display/docs only): DONE, reviewed & approved
 Built 2026-06-14. Master safe at cd37586. Suite: **260 passed** (was 254; +6 Phase E gates). No engine logic change → recompute golden byte-identical. No console errors.
 
 **Terminology sweep (UI / README / PROGRESS / a docs-only docstring):**
