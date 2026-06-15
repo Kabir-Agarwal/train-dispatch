@@ -56,22 +56,17 @@ def test_wb_snapshot_has_50_stations_and_is_wb_mode(wb_url):
 
 
 def test_default_demo_anomaly_draws_a_reroute(wb_url):
-    """WB loads with the Memari–Barddhaman closure: at least one Howrah train
-    reroutes onto the Dankuni chord (its drawn path avoids MYM-BWN), which is
-    the path the map traces."""
+    """WB loads with the deck scenario: close Adra Jn–Bankura (ADRA-BQA) and
+    delay T1 by 35 min. At least one train reroutes, and every rerouted train's
+    drawn path avoids the closed line (this is the path the map traces)."""
     snap = json.loads(_get(wb_url, "/api/state"))
-    assert "track_closed(MYM-BWN)" in snap["anomalies"]
+    assert "track_closed(ADRA-BQA)" in snap["anomalies"]
+    assert "train_delayed(T1, 35 min)" in snap["anomalies"]
     rerouted = [t for t in snap["trains"] if t["action"] == "reroute"]
-    assert rerouted, "expected at least one rerouted train for the money-shot"
-    # the reroute the map draws: a train whose station_times trace a path that
-    # no longer uses the closed main segment but does use the chord (SKG-BWN).
-    drew_chord = False
+    assert rerouted, "expected at least one rerouted train for the default scenario"
     for t in rerouted:
         assert t["station_times"], "rerouted train must have a drawable path"
-        assert "MYM-BWN" not in (t["path"] or [])
-        if "SKG-BWN" in (t["path"] or []):
-            drew_chord = True
-    assert drew_chord, "no rerouted train took the Dankuni chord"
+        assert "ADRA-BQA" not in (t["path"] or [])
 
 
 def test_reroute_is_collision_free_and_consistent(wb_url):
@@ -86,14 +81,15 @@ def test_reroute_is_collision_free_and_consistent(wb_url):
 def test_reset_clears_default_anomaly_back_to_baseline():
     s = AppState(dataset="wb")
     snap0 = s.snapshot()
-    assert snap0["anomalies"] == ["track_closed(MYM-BWN)"]
-    seg0 = next(x for x in snap0["segments"] if x["id"] == "MYM-BWN")
+    # default deck scenario: close Adra Jn–Bankura + delay T1 by 35 min
+    assert snap0["anomalies"] == ["track_closed(ADRA-BQA)", "train_delayed(T1, 35 min)"]
+    seg0 = next(x for x in snap0["segments"] if x["id"] == "ADRA-BQA")
     assert seg0["status"] == "closed"                # default closure active
     s.reset()
     snap = s.snapshot()
-    assert snap["anomalies"] == []                   # default anomaly cleared
-    seg = next(x for x in snap["segments"] if x["id"] == "MYM-BWN")
-    assert seg["status"] == "open"                   # Memari–Barddhaman main reopened
+    assert snap["anomalies"] == []                   # default anomalies cleared
+    seg = next(x for x in snap["segments"] if x["id"] == "ADRA-BQA")
+    assert seg["status"] == "open"                   # Adra Jn–Bankura line reopened
 
 
 def test_wb_page_keeps_corridor_features(wb_url):

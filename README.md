@@ -50,7 +50,7 @@ When a track closes, a train is delayed, or a service is cancelled, a dispatcher
 Open the live demo (it loads the **West Bengal** network with the headline closure already active), or run locally with `python run_ui.py --wb`.
 
 1. **Press Play.** Trains glide along the West Bengal network; not-yet-departed / arrived trains show as dimmed hollow rakes, moving trains are solid.
-2. **Read the headline** at the top: *"vs naive dispatch: total delay reduced 46%"* — the reroute engine vs a naive hold-all (see Measurement).
+2. **Read the headline** at the top: *"vs naive hold-all dispatch: total delay reduced 20%"* — the reroute engine vs a naive hold-all (see Measurement).
 3. **Schedule Board:** each train shows Departs, Arrivals (origin → destination, with intermediate stops collapsed under "+N stops"), Δ delay, and a wrapped **Why**.
 4. **Decision Log:** the same actions in plain language, one line per changed train.
 5. **Close a track** (Report a problem → *Close a track*): a **ghost preview** of the new plan appears on the map; click **Apply** to commit. Affected trains reroute around the closure.
@@ -61,7 +61,7 @@ Open the live demo (it loads the **West Bengal** network with the headline closu
 10. **Reopen a closed track** (surgically, leaving other restrictions in place) or **Reset to baseline** (clears everything).
 11. **Passenger tab:** pick a train from the **numeric** dropdown (T1, T2, … T12), see its **journey in travel order** (origin → each stop → destination with arrival minutes), its ETA, and the fare — which displays **🔒 Fare frozen** whenever that train is disrupted.
 
-## Measurement: "total delay reduced 46%"
+## Measurement: "total delay reduced 20%"
 
 `engine/baseline_compare.py::compare_dispatch` compares two dispatch policies on the active closure, **both kept collision-free by the same engine** (so only reroute-vs-wait is measured — not a strawman):
 
@@ -69,7 +69,7 @@ Open the live demo (it loads the **West Bengal** network with the headline closu
 - **Reroute engine:** the real managed schedule under the closure.
 - **Metric:** total **passenger-delay-minutes** = Σ over trains of `max(0, lateness) × coaches`, where lateness is vs the nominal timetable and coach count is an **illustrative** load proxy (`LOAD_WEIGHTS`), not real bookings.
 
-For the default West Bengal closure (Memari–Barddhaman, `MYM-BWN`), the affected trains are T1 and T3, the reroute total is **11,640** vs the naive **21,512** → a **46% reduction** (and the reroute is never worse across a range of assumed clearance times).
+The default West Bengal demo scenario matches the submission deck: close the **Adra Jn–Bankura** line (`ADRA-BQA`) **and** delay the Howrah–NJP express (T1) by **35 min**. The train whose booked path uses the closed line is T10; the reroute total is **12,108** vs the naive **15,132** → a **20% reduction** (verified figures, computed live by the code on load — not hand-set). The T1 delay rides along in both policies (it is not a closure), so the reduction isolates reroute-vs-wait on the closure; on the map the same delay drives the downstream **cascade**.
 
 ## Fare model (the real formula)
 

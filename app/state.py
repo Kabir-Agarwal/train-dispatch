@@ -153,10 +153,14 @@ class AppState:
         self.phraser = phraser or get_phraser()
         self.reset()
         if dataset == "wb":
-            # Default demo anomaly (money-shot): closing the Memari–Barddhaman
-            # main forces the Howrah trains onto the Dankuni chord — a visible
-            # reroute across the mesh. "Reset to baseline" clears it.
-            self.inject([{"type": "track_closed", "segment": "MYM-BWN"}])
+            # Default demo scenario (matches the submission deck): close the
+            # Adra Jn–Bankura line (ADRA-BQA) AND delay the Howrah–NJP express
+            # (T1) by 35 min — affected trains reroute / re-slot across the mesh
+            # and T1's delay ripples downstream. "Reset to baseline" clears it.
+            self.inject([
+                {"type": "track_closed", "segment": "ADRA-BQA"},
+                {"type": "train_delayed", "train": "T1", "minutes": 35},
+            ])
 
     def reset(self):
         self.anomalies = []

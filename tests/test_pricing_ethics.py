@@ -21,17 +21,20 @@ def _nominal_fare(net, train, occ):
     return pricing.fare_estimate(dist, occ, train.departure)["fare"]
 
 
-def test_reroute_freezes_fare_to_nominal_no_surge():
-    """WB money-shot: T1 is rerouted by the MYM-BWN closure, but its fare is the
-    UNDISRUPTED fare (nominal route + departure), not a reroute-surged one."""
-    s = AppState(dataset="wb")                       # default closes MYM-BWN
-    assert s.result.actions["T1"].action == "reroute"
-    p = s.passenger("T1")
-    assert p["fare_frozen"] is True
-    assert "no surge" in p["fare_reason"]
-    orig = next(t for t in wb.build_trains() if t.id == "T1")
-    occ = pricing.synthetic_occupancy("T1")
-    assert p["fare"]["fare"] == _nominal_fare(s.network, orig, occ)
+def test_disruption_freezes_fare_to_nominal_no_surge():
+    """WB default scenario (close ADRA-BQA + delay T1 35 min): the delayed train
+    (T1, depart_delayed) and a rerouted train (T2) both keep their UNDISRUPTED
+    fare (nominal route + departure), not a disruption-surged one."""
+    s = AppState(dataset="wb")                       # default: ADRA-BQA + T1 delay
+    assert s.result.actions["T1"].action == "depart_delayed"
+    assert s.result.actions["T2"].action == "reroute"
+    for tid in ("T1", "T2"):
+        p = s.passenger(tid)
+        assert p["fare_frozen"] is True
+        assert "no surge" in p["fare_reason"]
+        orig = next(t for t in wb.build_trains() if t.id == tid)
+        occ = pricing.synthetic_occupancy(tid)
+        assert p["fare"]["fare"] == _nominal_fare(s.network, orig, occ)
 
 
 def test_admin_delay_does_not_surge_fare():

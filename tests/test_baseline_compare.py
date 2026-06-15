@@ -78,13 +78,16 @@ def test_closure_that_blocks_no_train_is_not_applicable():
     assert cmp == {"applicable": False}
 
 
-def test_snapshot_surfaces_the_comparison_for_the_default_wb_money_shot():
-    s = AppState(dataset="wb")                  # default closes MYM-BWN
+def test_snapshot_surfaces_the_comparison_for_the_default_wb_scenario():
+    # default WB scenario: close ADRA-BQA + delay T1 by 35 min (matches the deck)
+    s = AppState(dataset="wb")
     snap = s.snapshot()
     dc = snap["dispatch_comparison"]
     assert dc["applicable"] is True
-    assert dc["affected_ids"] == ["T1", "T3"]
-    assert dc["reduction_pct"] >= 25
+    # only the train whose BOOKED path uses the closed Adra Jn–Bankura line counts
+    assert dc["affected_ids"] == ["T10"]
+    # verified figures (computed live by the engine, matching the submission deck)
+    assert (dc["naive_delay"], dc["smart_delay"], dc["reduction_pct"]) == (15132, 12108, 20)
     # matches the pure engine computation (no drift between snapshot and engine)
     eng = compare_dispatch(s.network, s.trains, s.anomalies,
                            load_weights=s.load_weights)

@@ -68,13 +68,15 @@ def test_reopen_preserves_other_restrictions_and_added_trains():
     assert snap["added_train_ids"] == added_before     # added train kept
 
 
-def test_reopen_default_wb_money_shot_segment():
-    s = AppState(dataset="wb")                 # default closes MYM-BWN
-    assert "track_closed(MYM-BWN)" in s.snapshot()["anomalies"]
-    s.reopen("MYM-BWN")
+def test_reopen_default_wb_scenario_segment():
+    # default WB scenario closes ADRA-BQA and delays T1; reopening the line
+    # clears only the closure, leaving the (non-track) T1 delay in place.
+    s = AppState(dataset="wb")
+    assert "track_closed(ADRA-BQA)" in s.snapshot()["anomalies"]
+    s.reopen("ADRA-BQA")
     snap = s.snapshot()
-    assert _seg(snap, "MYM-BWN")["status"] == "open"
-    assert snap["anomalies"] == []
+    assert _seg(snap, "ADRA-BQA")["status"] == "open"
+    assert snap["anomalies"] == ["train_delayed(T1, 35 min)"]
 
 
 def test_reopen_segment_with_no_closure_is_rejected():
@@ -94,19 +96,20 @@ def test_reopen_unknown_segment_is_rejected():
 def test_reopen_http_endpoint_round_trip():
     server, url = serve_in_thread(AppState(dataset="wb"))
     try:
-        body = json.dumps({"segment": "MYM-BWN"}).encode()
+        body = json.dumps({"segment": "ADRA-BQA"}).encode()
         req = urllib.request.Request(
             url + "/api/reopen", data=body, method="POST",
             headers={"Content-Type": "application/json"},
         )
         with urllib.request.urlopen(req, timeout=5) as r:
             snap = json.loads(r.read().decode())
-        assert _seg(snap, "MYM-BWN")["status"] == "open"
-        assert snap["anomalies"] == []
+        assert _seg(snap, "ADRA-BQA")["status"] == "open"
+        # only the closure is cleared; the default T1 delay remains
+        assert snap["anomalies"] == ["train_delayed(T1, 35 min)"]
         # a bad request reopens nothing and returns 400, not a crash
         bad = urllib.request.Request(
             url + "/api/reopen",
-            data=json.dumps({"segment": "MYM-BWN"}).encode(), method="POST",
+            data=json.dumps({"segment": "ADRA-BQA"}).encode(), method="POST",
             headers={"Content-Type": "application/json"},
         )
         try:

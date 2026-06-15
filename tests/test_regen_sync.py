@@ -54,16 +54,16 @@ def test_brake_regen_units_is_quadratic_in_speed():
 
 
 def test_snapshot_recovers_regen_by_coordination_on_live_wb():
-    """Hand-verified live case: in the default WB schedule a departure and arrival
-    are 1 min apart at KGP (T10 dep 234 / T4 arr 233) and NJP (T3 dep 418 / T1 arr
-    417). Same-minute transfer wastes both; coordinating within 3 min recovers
-    them — 2 pairs * brake_regen_units(60)=3060 = 6120."""
+    """Live case on the default WB deck scenario (close ADRA-BQA + delay T1 by
+    35 min): a brake/accelerate supply–demand pair coincides at NJP (minute 542).
+    A same-minute transfer wastes the regen; coordinating within 3 min recovers
+    one pair * brake_regen_units(60)=3060 = 3060."""
     snap = AppState(dataset="wb").snapshot()
     rg = snap["regen_sync"]
     assert rg["applicable"] is True
-    assert rg["recovered_unsync"] == 0             # 1 min off -> wasted uncoordinated
-    assert rg["recovered_sync"] == 6120            # coordinated capture
-    assert rg["extra_recovered"] == 6120
-    assert rg["pair_count"] == 2
-    assert set(rg["sections"]) == {"KGP", "NJP"}
+    assert rg["recovered_unsync"] == 0             # coincident -> wasted uncoordinated
+    assert rg["recovered_sync"] == 3060            # coordinated capture
+    assert rg["extra_recovered"] == 3060
+    assert rg["pair_count"] == 1
+    assert set(rg["sections"]) == {"NJP"}
     assert "v²" in rg["method"]
